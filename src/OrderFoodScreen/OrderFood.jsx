@@ -1,124 +1,165 @@
 import React, { useState } from "react";
-import "./OrderFood.css"; // Tạo file CSS riêng để định dạng
+import { Row, Col, Input, Button, Tabs, Badge, Modal, List } from "antd";
+import { ShoppingCartOutlined } from "@ant-design/icons";
+import MenuData from "./Data/MenuData";
+import MenuList from "./Component/MenuList";
+import OrderList from "./Component/OrderList";
+import "./OrderFood.css";
 
-// Dữ liệu mẫu
-const sampleDishes = [
-  {
-    id: 1,
-    name: "Cơm thập cẩm",
-    note: "Món ăn thường được thêm nước sốt hoặc nước tương để tăng hương vị.",
-    price: 59400,
-    image: "https://via.placeholder.com/100", // Hình ảnh giả
-  },
-  // Thêm dữ liệu món ăn mẫu khác nếu cần
-];
+const { TabPane } = Tabs;
 
 const OrderFood = () => {
   const [orderList, setOrderList] = useState([]);
-  const maxItems = 6;
+  const [activeTab, setActiveTab] = useState("all");
+  const [isCartModalVisible, setCartModalVisible] = useState(false);
 
-  // Thêm món vào danh sách order
-  const addToOrder = (dish) => {
-    const existingDish = orderList.find((item) => item.id === dish.id);
-    if (existingDish) {
-      setOrderList(
-        orderList.map((item) =>
-          item.id === dish.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
+  const handleAddItem = (item) => {
+    const existingItem = orderList.find((order) => order.id === item.id);
+    if (existingItem) {
+      existingItem.quantity += 1;
+      setOrderList([...orderList]);
     } else {
-      setOrderList([...orderList, { ...dish, quantity: 1 }]);
+      setOrderList([...orderList, { ...item, quantity: 1 }]);
     }
   };
 
-  // Tăng số lượng món
-  const increaseQuantity = (id) => {
+  const handleRemoveItem = (id) => {
+    setOrderList(orderList.filter((order) => order.id !== id));
+  };
+
+  const handleIncreaseQuantity = (id) => {
     setOrderList(
-      orderList.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      orderList.map((order) =>
+        order.id === id ? { ...order, quantity: order.quantity + 1 } : order
       )
     );
   };
 
-  // Giảm số lượng món
-  const decreaseQuantity = (id) => {
+  const handleDecreaseQuantity = (id) => {
     setOrderList(
       orderList
-        .map((item) =>
-          item.id === id && item.quantity > 1
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
+        .map((order) =>
+          order.id === id ? { ...order, quantity: Math.max(order.quantity - 1, 1) } : order
         )
-        .filter((item) => item.quantity > 0)
+        .filter((order) => order.quantity > 0)
     );
   };
 
-  // Tính giá tổng
-  const calculatePrice = (price, quantity) => price * quantity;
-
-  // Xóa danh sách order
-  const clearOrder = () => {
-    setOrderList([]);
+  const getFilteredMenu = () => {
+    if (activeTab === "all") {
+      return MenuData.flatMap((category) => category.monAn);
+    }
+    const category = MenuData.find((cat) => cat.id.toString() === activeTab);
+    return category ? category.monAn : [];
   };
 
   return (
-    <div className="restaurant-app">
-      {/* Khu vực danh mục và món ăn */}
-      <div className="menu-section">
-        <h3>Khu vực: Tầng 1 - Bàn 3</h3>
-        <input type="text" placeholder="Tìm món ăn" className="search-input" />
-        <div className="categories">
-          <button className="category active">Tất cả</button>
-          <button className="category">Món nước</button>
-          <button className="category">Tráng miệng</button>
-          {/* Thêm danh mục khác nếu cần */}
-        </div>
-        <div className="dishes">
-          {sampleDishes.map((dish) => (
-            <div className="dish" key={dish.id}>
-              <img src={dish.image} alt={dish.name} />
-              <div className="dish-info">
-                <h4>{dish.name}</h4>
-                <p>{dish.note}</p>
-                <div className="dish-footer">
-                  <span>{dish.price.toLocaleString()}đ</span>
-                  <button onClick={() => addToOrder(dish)}>+</button>
-                </div>
-              </div>
+    <Row gutter={16} style={{ padding: "20px" }}>
+      {/* Danh sách món ăn */}
+      <Col xs={24} sm={24} md={14} style={{ marginBottom: "20px" }}>
+        <h3>Danh sách món ăn</h3>
+        <Row justify="space-between" align="middle" style={{ marginBottom: "20px" }}>
+          <Col flex="1">
+            <Input.Search placeholder="Tìm món ăn" allowClear />
+          </Col>
+          <Col style={{ marginLeft: "10px" }}>
+            <Badge count={orderList.length} offset={[5, 0]}>
+              <ShoppingCartOutlined
+                className="cart-icon"
+                style={{ fontSize: "24px", cursor: "pointer", color: "#1890ff" }}
+                onClick={() => setCartModalVisible(true)}
+              />
+            </Badge>
+          </Col>
+        </Row>
+        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)} type="card">
+          <TabPane tab="Tất cả" key="all">
+            <div className="menu-list-container">
+              <MenuList
+                data={getFilteredMenu()}
+                onAddItem={handleAddItem}
+                orderList={orderList}
+                onIncreaseQuantity={handleIncreaseQuantity}
+                onDecreaseQuantity={handleDecreaseQuantity}
+              />
             </div>
+          </TabPane>
+          {MenuData.map((category) => (
+            <TabPane tab={category.danhMuc} key={category.id.toString()}>
+              <div className="menu-list-container">
+                <MenuList data={category.monAn} onAddItem={handleAddItem} />
+              </div>
+            </TabPane>
           ))}
-        </div>
-      </div>
+        </Tabs>
+      </Col>
 
-      {/* Khu vực danh sách order */}
-      <div className="order-section">
+      {/* Danh sách order */}
+      <Col xs={24} sm={24} md={10} className="order-list-container">
         <h3>Danh sách order</h3>
-        <div className="order-list">
-          {orderList.slice(0, maxItems).map((item) => (
-            <div className="order-item" key={item.id}>
-              <span>{item.name}</span>
-              <div className="order-quantity">
-                <button onClick={() => decreaseQuantity(item.id)}>-</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => increaseQuantity(item.id)}>+</button>
-              </div>
-              <span>{calculatePrice(item.price, item.quantity).toLocaleString()}đ</span>
-            </div>
-          ))}
-          {orderList.length > maxItems && (
-            <div className="scroll-indicator">...</div>
-          )}
-        </div>
-        <div className="order-actions">
-          <button className="cancel-btn" onClick={clearOrder}>
+        <OrderList
+          orderList={orderList}
+          onRemoveItem={handleRemoveItem}
+          onIncreaseQuantity={handleIncreaseQuantity}
+          onDecreaseQuantity={handleDecreaseQuantity}
+        />
+        <Row justify="space-between" style={{ marginTop: "20px" }}>
+          <Button danger onClick={() => setOrderList([])}>
             Hủy thông tin
-          </button>
-          <button className="confirm-btn">Xác nhận gọi món</button>
-        </div>
-      </div>
-    </div>
+          </Button>
+          <Button type="primary">Xác nhận gọi món</Button>
+        </Row>
+      </Col>
+
+      {/* Modal giỏ hàng */}
+      <Modal
+        title="Giỏ hàng của bạn"
+        visible={isCartModalVisible}
+        onCancel={() => setCartModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setCartModalVisible(false)}>
+            Đóng
+          </Button>,
+          <Button key="confirm" type="primary">
+            Xác nhận gọi món
+          </Button>,
+        ]}
+      >
+        {orderList.length > 0 ? (
+          <List
+            dataSource={orderList}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  <Button
+                    size="small"
+                    onClick={() => handleIncreaseQuantity(item.id)}
+                  >
+                    +
+                  </Button>,
+                  <Button
+                    size="small"
+                    onClick={() => handleDecreaseQuantity(item.id)}
+                  >
+                    -
+                  </Button>,
+                  <Button size="small" danger onClick={() => handleRemoveItem(item.id)}>
+                    Xóa
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  title={item.name}
+                  description={`Số lượng: ${item.quantity} | Giá: ${(item.price * item.quantity).toLocaleString()}đ`}
+                />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <p>Giỏ hàng trống</p>
+        )}
+      </Modal>
+    </Row>
   );
 };
 

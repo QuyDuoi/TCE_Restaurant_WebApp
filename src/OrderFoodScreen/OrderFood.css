@@ -1,153 +1,137 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+/* Mặc định cho thẻ card */
+.card-content {
+  font-size: 2rem; /* Chữ mặc định */
+  text-align: center;
   
-  .restaurant-app {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
+}
+
+.card-content h4 {
+  width: 100%;
+  font-size: 1rem; /* Kích thước mặc định */
+}
+
+.card-content p {
+  font-size: 0.8rem; /* Kích thước mặc định */
+  width: 100%;
+}
+.card-content img {
+  width: 110px;
+  object-fit: cover;
+}
+/* Responsive cho các thiết bị */
+@media (max-width: 1200px) { /* PC */
+  .card-content {
+    font-size: 2rem; /* Chữ mặc định */
+    text-align: center;
+    word-break: break-word;
   }
-  
-  /* Phần danh mục và món ăn */
-  .menu-section {
-    flex: 1;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    overflow-y: auto;
+  .card-content h4 {
+    font-size: 1.4rem;
+    word-break: break-word;
   }
-  
-  h3 {
-    margin-bottom: 20px;
-  }
-  
-  .search-input {
+  .card-content p {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    font-size: 0.8rem;
+    word-break: break-word;
   }
-  
-  .categories {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  .card-content img {
+    width: 110px;
+    object-fit: cover; 
   }
-  
-  .category {
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    cursor: pointer;
+}
+
+@media (max-width: 992px) { /* Tablet */
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
   }
-  
-  .category.active {
-    background-color: #007bff;
-    color: #fff;
+  .card-content h4 {
+    font-size: 1.2rem;
+    word-break: break-word;
   }
-  
-  .dishes {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  .card-content p {
+    font-size: 0.7rem;
+    word-break: break-word;
   }
-  
-  .dish {
-    display: flex;
-    gap: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    align-items: center;
-  }
-  
-  .dish img {
-    width: 80px;
-    height: 80px;
-    border-radius: 5px;
+  .card-content img {
+    width: 100px;
     object-fit: cover;
   }
-  
-  .dish-info {
-    flex: 1;
+}
+
+@media (max-width: 888px) { /* Mini Tablet 1 */
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
   }
-  
-  .dish-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+  .card-content h4 {
+    padding-left: 20px;
+    font-size: 1.1rem;
   }
-  
-  .dish-footer button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+
+  .card-content p {
+    padding-left: 20px;
+    font-size: 0.7rem;
   }
-  
-  /* Phần danh sách order */
-  .order-section {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+  .card-content img {
+    width: 90px;
+    object-fit: cover;
   }
-  
-  .order-list {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    max-height: 300px;
-    overflow-y: auto;
+}
+
+@media (max-width: 767px) { /* Mini Tablet */
+  .order-list-container {
+    display: none; /* Ẩn bảng danh sách order */
   }
-  
-  .order-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
   }
-  
-  .order-quantity {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+
+  .card-content h4 {
+    font-size: 1.5rem;
   }
-  
-  .order-quantity button {
-    padding: 5px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    cursor: pointer;
+
+  .card-content p {
+    font-size: 1rem;
   }
-  
-  .order-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+  .card-content img {
+    width: 100px;
+    object-fit: cover;
   }
-  
-  .cancel-btn {
-    padding: 10px 15px;
-    background-color: #ff4d4f;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+}
+
+@media (max-width: 514px) { /* Phone */
+  .order-list-container {
+    display: none; /* Ẩn bảng danh sách order */
   }
-  
-  .confirm-btn {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+
+  .menu-list-container {
+    padding: 10px; /* Thêm padding cho container */
   }
-  
+
+  .card-content {
+    font-size: 0.8rem; /* Giảm font-size thêm */
+    text-align: center; /* Căn giữa nội dung */
+  }
+
+  .card-content h4 {
+    font-size: 1rem;
+    margin: 5px 0; /* Giảm khoảng cách */
+  }
+
+  .card-content p {
+    font-size: 0.7rem; /* Giảm font-size phần mô tả */
+    margin: 5px 0; /* Thêm margin để tạo khoảng cách */
+  }
+  .ant-card img {
+    width: 80px; /* Tăng kích thước hình ảnh một chút */
+    height: 80px; /* Tăng kích thước hình ảnh một chút */
+    object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+  }
+}
+.ant-card .ant-card-body {
+  padding: 0px;
+}
+

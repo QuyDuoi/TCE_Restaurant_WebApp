@@ -5,9 +5,18 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+#root {
+  height: auto; /* Đảm bảo chiều cao của root là 100% chiều cao của viewport */
+  overflow: hidden; /* Ngăn không cho root cuộn */
+}
+.menu-list-container {
+  max-height: 500px; /* Chiều cao tối đa cho danh sách món ăn */
+  overflow-y: auto; /* Cho phép cuộn theo chiều dọc trong danh sách món ăn */
 }
