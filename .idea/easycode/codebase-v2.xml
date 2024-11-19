@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="com.obiscr.chatgpt.settings.EasyCodeState">
+    <option name="projectFiles" value="$PROJECT_DIR$/public/index.html;G:/tce_web1811/TCE_Restaurant_WebApp/public/manifest.json;G:/tce_web1811/TCE_Restaurant_WebApp/src/App/App.css;G:/tce_web1811/TCE_Restaurant_WebApp/src/App/App.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/App/App.test.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/OrderFoodScreen/Component/MenuList.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/OrderFoodScreen/Component/OrderList.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/OrderFoodScreen/Data/MenuData.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/OrderFoodScreen/OrderFood.css;G:/tce_web1811/TCE_Restaurant_WebApp/src/OrderFoodScreen/OrderFood.jsx;G:/tce_web1811/TCE_Restaurant_WebApp/src/index.css;G:/tce_web1811/TCE_Restaurant_WebApp/src/index.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/reportWebVitals.js;G:/tce_web1811/TCE_Restaurant_WebApp/src/setupTests.js;G:/tce_web1811/TCE_Restaurant_WebApp/package-lock.json;G:/tce_web1811/TCE_Restaurant_WebApp/package.json;G:/tce_web1811/TCE_Restaurant_WebApp/README.md" />
+  </component>
+</project>
