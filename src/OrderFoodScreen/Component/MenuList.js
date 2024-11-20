@@ -12,15 +12,15 @@ const MenuList = ({ data, onAddItem }) => {
 };
 
 const MenuItem = ({ item, onAddItem }) => {
-    const [quantity, setQuantity] = useState(0); // Quản lý số lượng
+    const [soLuongMon, setsoLuongMon] = useState(0); // Quản lý số lượng
     const [totalPrice, setTotalPrice] = useState(0); // Quản lý tổng giá
 
-    const handleQuantityChange = (type) => {
-        let newQuantity = quantity;
-        if (type === "increase") newQuantity++;
-        if (type === "decrease" && quantity > 0) newQuantity--;
-        setQuantity(newQuantity);
-        setTotalPrice(newQuantity * item.price);
+    const handlesoLuongMonChange = (type) => {
+        let newsoLuongMon = soLuongMon;
+        if (type === "increase") newsoLuongMon++;
+        if (type === "decrease" && soLuongMon > 0) newsoLuongMon--;
+        setsoLuongMon(newsoLuongMon);
+        setTotalPrice(newsoLuongMon * item.price);
     };
 
     return (
@@ -30,7 +30,7 @@ const MenuItem = ({ item, onAddItem }) => {
                     {/* Cột 1: Hình ảnh */}
                     <Col span={6} style={{ textAlign: "center" }}>
                         <img
-                            src={item.image}
+                            src={item.anhMonAn}
                             alt={item.name}
                             style={{
                                 height: "auto",
@@ -50,13 +50,13 @@ const MenuItem = ({ item, onAddItem }) => {
                                 color: "orange",
                             }}
                         >
-                            {item.name}
+                            {item.tenMon}
                         </h4>
                         <p style={{ fontWeight: "bold", color: "blue" }}>
-                            {item.price.toLocaleString()}đ
+                            {item.giaMonAn}đ
                         </p>
                         <p style={{ width: "100%", wordBreak: "break-word" }}>
-                            lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+                            {item.moTa}
                         </p>
                     </Col>
                     {/* Cột 3: Nút bấm */}

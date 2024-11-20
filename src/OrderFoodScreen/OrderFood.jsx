@@ -1,56 +1,101 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Input, Button, Tabs, Badge, Modal, List } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import MenuData from "./Data/MenuData";
 import MenuList from "./Component/MenuList";
 import OrderList from "./Component/OrderList";
+import axios from "axios";
 import "./OrderFood.css";
 
 const { TabPane } = Tabs;
 
 const OrderFood = () => {
-  const [orderList, setOrderList] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
-  const [isCartModalVisible, setCartModalVisible] = useState(false);
+  const [orderList, setOrderList] = useState([]); // Danh sách món trong giỏ
+  const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
+  const [isCartModalVisible, setCartModalVisible] = useState(false); // Hiển thị giỏ hàng
+  const [listMonAn, setListMonAn] = useState([]); // Danh sách thực đơn từ API
+  const [filteredMonAn, setFilteredMonAn] = useState([]); // Danh sách thực đơn đã lọc
+  const [searchText, setSearchText] = useState(""); // Từ khóa tìm kiếm
 
+  // Lấy danh sách thực đơn từ API
+  useEffect(() => {
+    const layDanhSachThucDon = async () => {
+      try {
+        const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
+        const response = await axios.get(
+          "https://tce-restaurant-api.onrender.com/api/layDanhSachThucDon",
+          { params: { id_nhaHang } }
+        );
+        setListMonAn(response.data);
+        setFilteredMonAn(response.data); // Gán mặc định danh sách đã lọc
+      } catch (err) {
+        console.error("Lỗi khi gọi API:", err);
+      }
+    };
+    layDanhSachThucDon();
+  }, []);
+
+  // Tìm kiếm món ăn (Debounce 1 giây)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchText.trim() === "") {
+        setFilteredMonAn(listMonAn); // Nếu không có từ khóa thì trả lại toàn bộ
+      } else {
+        const filtered = listMonAn.map((category) => ({
+          ...category,
+          monAns: category.monAns.filter((item) =>
+            item.tenMon.toLowerCase().includes(searchText.toLowerCase())
+          ),
+        })).filter((category) => category.monAns.length > 0);
+        setFilteredMonAn(filtered);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId); // Clear timeout khi nhập mới
+  }, [searchText, listMonAn]);
+
+  // Thêm món vào giỏ hàng
   const handleAddItem = (item) => {
-    const existingItem = orderList.find((order) => order.id === item.id);
+    const existingItem = orderList.find((order) => order._id === item._id);
     if (existingItem) {
-      existingItem.quantity += 1;
+      existingItem.soLuongMon += 1;
       setOrderList([...orderList]);
     } else {
-      setOrderList([...orderList, { ...item, quantity: 1 }]);
+      setOrderList([...orderList, { ...item, soLuongMon: 1 }]);
     }
   };
 
+  // Xóa món khỏi giỏ hàng
   const handleRemoveItem = (id) => {
-    setOrderList(orderList.filter((order) => order.id !== id));
+    setOrderList(orderList.filter((order) => order._id !== id));
   };
 
-  const handleIncreaseQuantity = (id) => {
+  // Tăng số lượng món
+  const handleIncreasesoLuongMon = (id) => {
     setOrderList(
       orderList.map((order) =>
-        order.id === id ? { ...order, quantity: order.quantity + 1 } : order
+        order._id === id ? { ...order, soLuongMon: order.soLuongMon + 1 } : order
       )
     );
   };
 
-  const handleDecreaseQuantity = (id) => {
+  // Giảm số lượng món
+  const handleDecreasesoLuongMon = (id) => {
     setOrderList(
       orderList
         .map((order) =>
-          order.id === id ? { ...order, quantity: Math.max(order.quantity - 1, 1) } : order
+          order._id === id ? { ...order, soLuongMon: Math.max(order.soLuongMon - 1, 1) } : order
         )
-        .filter((order) => order.quantity > 0)
+        .filter((order) => order.soLuongMon > 0)
     );
   };
 
+  // Lọc danh sách món theo tab hiện tại
   const getFilteredMenu = () => {
     if (activeTab === "all") {
-      return MenuData.flatMap((category) => category.monAn);
+      return filteredMonAn.flatMap((category) => category.monAns);
     }
-    const category = MenuData.find((cat) => cat.id.toString() === activeTab);
-    return category ? category.monAn : [];
+    const category = filteredMonAn.find((cat) => cat._id === activeTab);
+    return category ? category.monAns : [];
   };
 
   return (
@@ -60,7 +105,12 @@ const OrderFood = () => {
         <h3>Danh sách món ăn</h3>
         <Row justify="space-between" align="middle" style={{ marginBottom: "20px" }}>
           <Col flex="1">
-            <Input.Search placeholder="Tìm món ăn" allowClear />
+            <Input.Search
+              placeholder="Tìm món ăn"
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
           </Col>
           <Col style={{ marginLeft: "10px" }}>
             <Badge count={orderList.length} offset={[5, 0]}>
@@ -75,19 +125,13 @@ const OrderFood = () => {
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)} type="card">
           <TabPane tab="Tất cả" key="all">
             <div className="menu-list-container">
-              <MenuList
-                data={getFilteredMenu()}
-                onAddItem={handleAddItem}
-                orderList={orderList}
-                onIncreaseQuantity={handleIncreaseQuantity}
-                onDecreaseQuantity={handleDecreaseQuantity}
-              />
+              <MenuList data={getFilteredMenu()} onAddItem={handleAddItem} />
             </div>
           </TabPane>
-          {MenuData.map((category) => (
-            <TabPane tab={category.danhMuc} key={category.id.toString()}>
+          {filteredMonAn.map((category) => (
+            <TabPane tab={category.tenDanhMuc} key={category._id}>
               <div className="menu-list-container">
-                <MenuList data={category.monAn} onAddItem={handleAddItem} />
+                <MenuList data={category.monAns} onAddItem={handleAddItem} />
               </div>
             </TabPane>
           ))}
@@ -100,8 +144,8 @@ const OrderFood = () => {
         <OrderList
           orderList={orderList}
           onRemoveItem={handleRemoveItem}
-          onIncreaseQuantity={handleIncreaseQuantity}
-          onDecreaseQuantity={handleDecreaseQuantity}
+          onIncreasesoLuongMon={handleIncreasesoLuongMon}
+          onDecreasesoLuongMon={handleDecreasesoLuongMon}
         />
         <Row justify="space-between" style={{ marginTop: "20px" }}>
           <Button danger onClick={() => setOrderList([])}>
@@ -133,24 +177,24 @@ const OrderFood = () => {
                 actions={[
                   <Button
                     size="small"
-                    onClick={() => handleIncreaseQuantity(item.id)}
+                    onClick={() => handleIncreasesoLuongMon(item._id)}
                   >
                     +
                   </Button>,
                   <Button
                     size="small"
-                    onClick={() => handleDecreaseQuantity(item.id)}
+                    onClick={() => handleDecreasesoLuongMon(item._id)}
                   >
                     -
                   </Button>,
-                  <Button size="small" danger onClick={() => handleRemoveItem(item.id)}>
+                  <Button size="small" danger onClick={() => handleRemoveItem(item._id)}>
                     Xóa
                   </Button>,
                 ]}
               >
                 <List.Item.Meta
-                  title={item.name}
-                  description={`Số lượng: ${item.quantity} | Giá: ${(item.price * item.quantity).toLocaleString()}đ`}
+                  title={item.tenMon}
+                  description={`Số lượng: ${item.soLuongMon} | Giá: ${(item.giaMonAn * item.soLuongMon)}đ`}
                 />
               </List.Item>
             )}
