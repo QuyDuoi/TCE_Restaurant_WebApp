@@ -5,6 +5,7 @@ import MenuList from "./Component/MenuList";
 import OrderList from "./Component/OrderList";
 import axios from "axios";
 import "./OrderFood.css";
+import {ipAddress} from "../services/api.ts"
 
 const { TabPane } = Tabs;
 
@@ -22,7 +23,7 @@ const OrderFood = () => {
       try {
         const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
         const response = await axios.get(
-          "https://tce-restaurant-api.onrender.com/api/layDanhSachThucDon",
+          `${ipAddress}layDanhSachThucDon`,
           { params: { id_nhaHang } }
         );
         setListMonAn(response.data);
