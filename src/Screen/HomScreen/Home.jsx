@@ -8,15 +8,6 @@ import {Outlet} from "react-router-dom";
 
 const { Sider, Content } = Layout;
 
-const employees = [
-    { name: 'Nguyễn Tiến Triển', role: 'Chủ quán', isActive: true },
-    { name: 'Trần Thu Anh', role: 'Thu ngân', isActive: true },
-    { name: 'Nguyễn Sỹ Quý', role: 'Chủ quán', isActive: false },
-    { name: 'Ngô Đức Lâm', role: 'Chủ quán', isActive: true },
-    { name: 'Thanh Hưng', role: 'Quản lý', isActive: true },
-    { name: 'Lê Minh Đức', role: 'Chủ quán', isActive: false },
-];
-
 const Home = () => {
     return (
         <Layout style={{ height: '100vh' }}>
