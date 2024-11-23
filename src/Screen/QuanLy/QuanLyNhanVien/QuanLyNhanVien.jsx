@@ -172,6 +172,13 @@ const QuanLyNhanVien = () => {
             employee={selectedEmployee}
             />
 
+            <EditEmployeeModal
+            visible={isEditModalVisible}
+            onClose={()=> setEditModalVisible(false)}
+            employee={selectedEmployee}
+            onSave={()=>handleEdit()}
+            />
+            
         </Layout>
     );
 };
