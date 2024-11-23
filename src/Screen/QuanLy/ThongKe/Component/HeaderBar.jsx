@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input, Button, Row, Col } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Input, Button, Row, Col,DatePicker } from 'antd';
+import { PlusOutlined, FilterOutlined} from '@ant-design/icons';
 
 const HeaderBar = () => {
     return (
@@ -14,7 +14,22 @@ const HeaderBar = () => {
         >
             <Row justify="space-between" align="middle">
                 <Col>
-                    <h2 style={{ margin: 0 }}>Thống kê</h2>
+                    <h2 style={{ margin: 0 }}>Quản lý thống kê</h2>
+                </Col>
+                <Col>
+                    <Row gutter={8}>
+                        {/* Nút chọn ngày */}
+                        <Col>
+                            <DatePicker placeholder="Chọn ngày" />
+                        </Col>
+
+                        {/* Nút lọc */}
+                        <Col>
+                            <Button type="primary" icon={<FilterOutlined />}>
+                                Lọc
+                            </Button>
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
         </div>
