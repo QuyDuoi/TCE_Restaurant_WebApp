@@ -51,6 +51,7 @@ const QuanLyNhanVien = () => {
 
     const handleMenuClick = (key, employee) => {
         setSelectedEmployee(employee);
+
         if (key === '1') {
             setDetailModalVisible(true);
         } else if (key === '2') {
@@ -59,19 +60,18 @@ const QuanLyNhanVien = () => {
             setDeleteModalVisible(true);
         }
     };
-    console.log('Selected Employee:', selectedEmployee);
 
     const handleDelete = async () => {
         if (!selectedEmployee) {
             console.error('Không có nhân viên nào được chọn để xóa');
             return;
         }
-        
+
         try {
             await axios.delete(`https://tce-restaurant-api.onrender.com/api/xoaNhanVien/${selectedEmployee._id}`);
             fetchEmployees(); // Refresh danh sách nhân viên
             setDeleteModalVisible(false);
-            
+
             // Hiển thị thông báo xóa thành công
             setNotificationMessage('Xóa nhân viên thành công!');
             setNotificationVisible(true);
@@ -79,12 +79,12 @@ const QuanLyNhanVien = () => {
             console.error('Không thể xóa nhân viên:', error);
         }
     };
-    const handleEdit = ()=>{
+    const handleEdit = () => {
         try {
             fetchEmployees();
             setEditModalVisible(false)
             setNotificationMessage('Sửa nhân viên thành công!');
-            setNotificationVisible(true);  
+            setNotificationVisible(true);
         } catch (error) {
             console.error('Không thể sửa nhân viên:', error);
         }
@@ -167,16 +167,16 @@ const QuanLyNhanVien = () => {
             </Content>
 
             <DetailEmployeeModal
-            visible={isDetailModalVisible}
-            onClose={()=> setDetailModalVisible(false)}
-            employee={selectedEmployee}
+                visible={isDetailModalVisible}
+                onClose={() => setDetailModalVisible(false)}
+                employee={selectedEmployee}
             />
 
             <EditEmployeeModal
-            visible={isEditModalVisible}
-            onClose={()=> setEditModalVisible(false)}
-            employee={selectedEmployee}
-            onSave={()=>handleEdit()}
+                visible={isEditModalVisible}
+                onClose={() => setEditModalVisible(false)} // Giữ selectedEmployee không thay đổi
+                employee={selectedEmployee} // Đảm bảo truyền selectedEmployee vào
+                onSave={() => handleEdit()}
             />
             <DeleteEmployeeModal
                 visible={isDeleteModalVisible}
@@ -186,8 +186,8 @@ const QuanLyNhanVien = () => {
             <NotificationModal
                 notificationMessage={notificationMessage}
                 notificationVisible={notificationVisible}
-                setNotificationVisible={()=> setNotificationVisible()}
-                
+                setNotificationVisible={() => setNotificationVisible()}
+
             />
         </Layout>
     );

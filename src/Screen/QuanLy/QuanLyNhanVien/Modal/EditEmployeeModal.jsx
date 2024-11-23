@@ -6,7 +6,7 @@ const { Option } = Select;
 
 const EditModal = ({ visible, onClose, employee, onSave }) => {
     const [form] = Form.useForm();
-
+    
     const handleFinish = async (values) => {
         try {
             // Gửi PUT request để cập nhật thông tin nhân viên
@@ -25,6 +25,8 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
                 ...employee,
                 trangThai: employee?.trangThai || false, // Đảm bảo trạng thái có giá trị mặc định
             });
+            console.log(employee);
+            
         }
     }, [employee, form]);
 
@@ -34,7 +36,6 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
             width={350}
             visible={visible}
             onCancel={() => {
-                form.resetFields(); // Đặt lại form khi đóng modal
                 onClose();
             }}
             footer={null}
@@ -73,9 +74,11 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
                         unCheckedChildren="Ngừng hoạt động" 
                     />
                 </Form.Item>
-                <Form.Item>
+               <div style={{display:'flex',justifyContent:'center'}}>
+               <Form.Item>
                     <Button type="primary" htmlType="submit">Lưu</Button>
                 </Form.Item>
+               </div>
             </Form>
         </Modal>
     );
