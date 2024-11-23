@@ -183,7 +183,12 @@ const QuanLyNhanVien = () => {
                 onClose={() => setDeleteModalVisible(false)}
                 onDelete={handleDelete}
             />
-           
+            <NotificationModal
+                notificationMessage={notificationMessage}
+                notificationVisible={notificationVisible}
+                setNotificationVisible={()=> setNotificationVisible()}
+                
+            />
         </Layout>
     );
 };
