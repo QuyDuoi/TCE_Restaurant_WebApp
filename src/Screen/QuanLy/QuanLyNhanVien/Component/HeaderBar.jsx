@@ -1,8 +1,36 @@
-import React from 'react';
-import { Input, Button, Row, Col } from 'antd';
+import React, { useState } from 'react';
+import { Input, Button, Row, Col, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import AddEmployeeModal from '../Modal/AddEmployeeModel'; // Import modal
+import axios from 'axios';
 
-const HeaderBar = ({ onSearch }) => {
+const HeaderBar = ({ onSearch,onRefresh }) => {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleAddEmployee = async (formData) => {
+        try {
+            const response = await axios.post(
+                'https://tce-restaurant-api.onrender.com/api/themNhanVien',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data', // Đặt header đúng để gửi file
+                    },
+                }
+            );
+    
+            if (response.status === 201) {
+                message.success('Nhân viên được thêm thành công!');
+                onRefresh();
+            } else {
+                message.error('Đã xảy ra lỗi khi thêm nhân viên!');
+            }
+        } catch (error) {
+            console.error('Error adding employee:', error);
+            message.error('Không thể thêm nhân viên, vui lòng thử lại!');
+        }
+    };
+
     return (
         <div
             style={{
@@ -24,11 +52,21 @@ const HeaderBar = ({ onSearch }) => {
                         style={{ width: '60%', marginRight: '16px' }}
                         onChange={(e) => onSearch(e.target.value)}
                     />
-                    <Button type="primary" icon={<PlusOutlined />} style={{ width: "30%", fontSize: '1vw' }}>
+                    <Button 
+                        type="primary" 
+                        icon={<PlusOutlined />} 
+                        style={{ width: "30%", fontSize: '1vw' }} 
+                        onClick={() => setIsModalVisible(true)}
+                    > 
                         Thêm nhân viên mới
                     </Button>
                 </Col>
             </Row>
+            <AddEmployeeModal 
+                visible={isModalVisible} 
+                onClose={() => setIsModalVisible(false)} 
+                onAddEmployee={handleAddEmployee} 
+            />
         </div>
     );
 };
