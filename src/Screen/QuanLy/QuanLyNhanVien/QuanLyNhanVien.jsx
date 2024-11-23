@@ -178,7 +178,12 @@ const QuanLyNhanVien = () => {
             employee={selectedEmployee}
             onSave={()=>handleEdit()}
             />
-            
+            <DeleteEmployeeModal
+                visible={isDeleteModalVisible}
+                onClose={() => setDeleteModalVisible(false)}
+                onDelete={handleDelete}
+            />
+           
         </Layout>
     );
 };
