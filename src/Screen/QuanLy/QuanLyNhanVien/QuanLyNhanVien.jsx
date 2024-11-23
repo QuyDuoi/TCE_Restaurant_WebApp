@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Row, Col, Card, Dropdown, Menu, Button } from 'antd';
+import { Layout, Row, Col, Card, Dropdown, Menu, Button, Spin } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import HeaderBar from './Component/HeaderBar';
 import EmployeeCard from './Component/EmployeeCard';
 import EmployeeFilter from './Component/EmployeeFilter';
+import DeleteEmployeeModal from './Modal/DeleteEmployeeModal'
+import DetailEmployeeModal from './Modal/DetailEmployeeModal'
+import EditEmployeeModal from './Modal/EditEmployeeModal'
+import NotificationModal from './Modal/NotificationModal'
 const { Content } = Layout;
 
 const QuanLyNhanVien = () => {
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [nhanVien, setNhanVien] = useState([]);
     const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-
+    const [selectedEmployee, setSelectedEmployee] = useState({});
+    const [isDetailModalVisible, setDetailModalVisible] = useState(false);
+    const [isEditModalVisible, setEditModalVisible] = useState(false);
+    const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [notificationVisible, setNotificationVisible] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
     const fetchEmployees = async () => {
         try {
             const response = await axios.get('https://tce-restaurant-api.onrender.com/api/layDsNhanVien');
-            console.log(response);
-            
             setNhanVien(response.data);
             setFilteredEmployees(response.data); // Khởi tạo danh sách nhân viên đã lọc
         } catch (error) {
@@ -42,8 +49,48 @@ const QuanLyNhanVien = () => {
         }
     };
 
-    const menu = (
-        <Menu>
+    const handleMenuClick = (key, employee) => {
+        setSelectedEmployee(employee);
+        if (key === '1') {
+            setDetailModalVisible(true);
+        } else if (key === '2') {
+            setEditModalVisible(true);
+        } else if (key === '3') {
+            setDeleteModalVisible(true);
+        }
+    };
+    console.log('Selected Employee:', selectedEmployee);
+
+    const handleDelete = async () => {
+        if (!selectedEmployee) {
+            console.error('Không có nhân viên nào được chọn để xóa');
+            return;
+        }
+        
+        try {
+            await axios.delete(`https://tce-restaurant-api.onrender.com/api/xoaNhanVien/${selectedEmployee._id}`);
+            fetchEmployees(); // Refresh danh sách nhân viên
+            setDeleteModalVisible(false);
+            
+            // Hiển thị thông báo xóa thành công
+            setNotificationMessage('Xóa nhân viên thành công!');
+            setNotificationVisible(true);
+        } catch (error) {
+            console.error('Không thể xóa nhân viên:', error);
+        }
+    };
+    const handleEdit = ()=>{
+        try {
+            fetchEmployees();
+            setEditModalVisible(false)
+            setNotificationMessage('Sửa nhân viên thành công!');
+            setNotificationVisible(true);  
+        } catch (error) {
+            console.error('Không thể sửa nhân viên:', error);
+        }
+    }
+    const menu = (employee) => (
+        <Menu onClick={({ key }) => handleMenuClick(key, employee)}>
             <Menu.Item key="1">Chi tiết</Menu.Item>
             <Menu.Item key="2">Chỉnh sửa</Menu.Item>
             <Menu.Item key="3">Xóa</Menu.Item>
@@ -52,7 +99,12 @@ const QuanLyNhanVien = () => {
 
     // Hiển thị trạng thái đang tải
     if (loading) {
-        return <div>Đang tải dữ liệu...</div>;
+        return (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+                <Spin size="large" />
+                <div>Đang tải dữ liệu...</div>
+            </div>
+        );
     }
 
     return (
@@ -95,7 +147,7 @@ const QuanLyNhanVien = () => {
                                         trangThai={nv.trangThai}
                                         hinhAnh={nv.hinhAnh}
                                     />
-                                    <Dropdown overlay={menu} trigger={['click']}>
+                                    <Dropdown overlay={menu(nv)} trigger={['click']}>
                                         <Button
                                             icon={<SettingOutlined />}
                                             style={{
@@ -113,6 +165,13 @@ const QuanLyNhanVien = () => {
                     </Row>
                 </div>
             </Content>
+
+            <DetailEmployeeModal
+            visible={isDetailModalVisible}
+            onClose={()=> setDetailModalVisible(false)}
+            employee={selectedEmployee}
+            />
+
         </Layout>
     );
 };
