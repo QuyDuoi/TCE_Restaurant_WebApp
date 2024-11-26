@@ -10,6 +10,8 @@ import {
 import BookingForm from "./BookingForm";
 import InvoiceForm from "./InvoiceForm";
 import InvoiceDetails from "./InvoiceDetails";
+import BookedTableDetails from "./BookedTableDetails";
+import CancelBookingForm from "./CancelBookingForm";
 
 const TableModal = ({ table, isVisible, onClose, onUpdateStatus, hoaDonData, chiTietHoaDonData }) => {
   const [activeOption, setActiveOption] = useState("Đặt bàn"); // Lựa chọn hiện tại
@@ -54,8 +56,18 @@ const TableModal = ({ table, isVisible, onClose, onUpdateStatus, hoaDonData, chi
             onClose={onClose}
           />
         );
+    } else if (activeOption === "Xem thông tin bàn đặt") {
+        return <BookedTableDetails table={table} onClose={onClose} />;
+      }
+      else if (activeOption === "Hủy đặt bàn") {
+        return (
+          <CancelBookingForm
+            table={table}
+            onCancel={onClose}
+            onUpdateStatus={onUpdateStatus}
+          />
+        );
     }
-    
     return null;
   };
 
