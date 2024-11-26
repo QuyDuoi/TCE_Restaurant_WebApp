@@ -1,101 +1,116 @@
-export const ThongKeData = [
-    {
+import { tinhPhanTram, tinhPhanTramChoTop5 } from "../CacHamTinhToan.ts";
+import {
+  thongKeDoanhThu,
+  thongKeHinhThucThanhToan,
+  thongKeNguonDoanhThu,
+  thongKeTop5,
+} from "../CallApiThongKe.ts";
+
+export const fetchData = async (type, date) => {
+  try {
+    const startDate = null;
+    const endDate = null;
+    const choiseDay = date;
+
+    // Gọi các API với type và thời gian
+    console.log(`Fetching data for type: ${type}, date: ${date}`);
+    const doanhThu = await thongKeDoanhThu(type, startDate, endDate, choiseDay);
+    const hinhThucTT = await thongKeHinhThucThanhToan(
+      type,
+      startDate,
+      endDate,
+      choiseDay
+    );
+    const nguonDoanhThu = await thongKeNguonDoanhThu(
+      type,
+      startDate,
+      endDate,
+      choiseDay
+    );
+    const top5 = await thongKeTop5(type, startDate, endDate, choiseDay);
+
+    const doanhThuPt = tinhPhanTram(
+      doanhThu.tongKhuyenMai,
+      doanhThu.tongDoanhThu
+    );
+    const hinhThucTtPt = tinhPhanTram(
+      hinhThucTT.tongTienMat,
+      hinhThucTT.tongChuyenKhoan
+    );
+    const nguonDoanhThuPt = tinhPhanTram(
+      nguonDoanhThu.banMangDi,
+      nguonDoanhThu.banTaiCho
+    );
+    const top5Pt = tinhPhanTramChoTop5(top5);
+
+    const createThongKeItem = (label, percentage, value, color) => ({
+      label,
+      percentage,
+      value,
+      color,
+    });
+    
+    const ThongKeData = [
+      {
         title: "Thống kê doanh thu",
         items: [
-            {
-                label: "Khuyến mại",
-                percentage: 25,
-                value: "1.592.000 VND",
-                color: "#FFA07A",
-            },
-            {
-                label: "Doanh thu",
-                percentage: 75,
-                value: "9.592.000 VND",
-                color: "#4CAF50",
-            },
+          createThongKeItem("Khuyến mại", doanhThuPt.phanTramA, doanhThu.tongKhuyenMai, "#FFA07A"),
+          createThongKeItem("Doanh thu", doanhThuPt.phanTramB, doanhThu.tongDoanhThu, "#4CAF50"),
         ],
-    },
-    {
+      },
+      {
         title: "Nguồn doanh thu",
         items: [
-            {
-                label: "Bán mang đi",
-                percentage: 25,
-                value: "500.000đ",
-                color: "#FFD700",
-            },
-            {
-                label: "Tại nhà hàng",
-                percentage: 75,
-                value: "1.500.000đ",
-                color: "#FF8C00",
-            },
+          createThongKeItem("Bán mang đi", nguonDoanhThuPt.phanTramA, nguonDoanhThu.banMangDi, "#FFD700"),
+          createThongKeItem("Tại nhà hàng", nguonDoanhThuPt.phanTramB, nguonDoanhThu.banTaiCho, "#FF8C00"),
         ],
-    },
-    {
+      },
+      {
         title: "Phương thức thanh toán",
         items: [
-            {
-                label: "Tiền mặt",
-                percentage: 85,
-                value: "9.500.000đ",
-                color: "#4CAF50",
-            },
-            {
-                label: "Chuyển khoản",
-                percentage: 15,
-                value: "1.500.000đ",
-                color: "#1E90FF",
-            },
+          createThongKeItem("Tiền mặt", hinhThucTtPt.phanTramA, hinhThucTT.tongTienMat, "#4CAF50"),
+          createThongKeItem("Chuyển khoản", hinhThucTtPt.phanTramB, hinhThucTT.tongChuyenKhoan, "#1E90FF"),
         ],
-    },
-];
-export const DataTop5 = [
-    {
-      title: "Top 5 sản phẩm",
-      items: [
-        {
-          rank: 1,
-          label: "Pizza hải sản",
-          quantity: 28,
-          percentage: 30,
-          color: "#FF6347",
-          image: "https://via.placeholder.com/80?text=Pizza", // URL ảnh
-        },
-        {
-          rank: 2,
-          label: "Mì Ý sốt bò",
-          quantity: 24,
-          percentage: 25,
-          color: "#FFA07A",
-          image: "https://via.placeholder.com/80?text=M%C3%AC+%C3%9D", // URL ảnh
-        },
-        {
-          rank: 3,
-          label: "Cơm chiên Dương Châu",
-          quantity: 18,
-          percentage: 20,
-          color: "#FFD700",
-          image: "https://via.placeholder.com/80?text=C%C6%A1m+chi%C3%AAn", // URL ảnh
-        },
-        {
-          rank: 4,
-          label: "Trà sữa trân châu",
-          quantity: 15,
-          percentage: 15,
-          color: "#1E90FF",
-          image: "https://via.placeholder.com/80?text=Tr%C3%A0+s%E1%BB%AFa", // URL ảnh
-        },
-        {
-          rank: 5,
-          label: "Sushi cá hồi",
-          quantity: 10,
-          percentage: 10,
-          color: "#32CD32",
-          image: "https://via.placeholder.com/80?text=Sushi", // URL ảnh
-        },
-      ],
-    },
-];
-  
+      },
+    ];
+
+    const DataTop5 = [
+      {
+        title: "Top 5 sản phẩm",
+        items: Array(5)
+          .fill(null)
+          .map((_, index) => {
+            if (index < top5Pt.length) {
+              const item = top5Pt[index];
+              return {
+                rank: index + 1,
+                label: item.tenMon,
+                quantity: item.soLuongMon,
+                percentage: item.phanTram,
+                color: ["#FF6347", "#FFA07A", "#FFD700", "#1E90FF", "#32CD32"][
+                  index
+                ],
+                image: item.anhMonAn, // URL ảnh
+              };
+            } else {
+              // Trường hợp thiếu dữ liệu, thêm mục trống
+              return {
+                rank: index + 1,
+                label: "Chưa có dữ liệu",
+                quantity: 0,
+                percentage: 0,
+                color: ["#FF6347", "#FFA07A", "#FFD700", "#1E90FF", "#32CD32"][
+                  index
+                ],
+                image: null, // Không có ảnh
+              };
+            }
+          }),
+      },
+    ];
+
+    return { ThongKeData, DataTop5 };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
