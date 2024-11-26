@@ -20,7 +20,7 @@ const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
     container: {
       display: "flex", // Dùng flexbox để ảnh nằm bên trái
       alignItems: "center", // Canh giữa ảnh và nội dung theo chiều dọc
-      width: "300px",
+      width: "100%",
       border: "1px solid #ddd",
       borderRadius: "8px",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -53,11 +53,12 @@ const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
     },
     status: (status) => ({
       display: "inline-block", // Giữ trạng thái bên cạnh tên bàn
-      textAlign: "left",
+      textAlign: "center",
       padding: "5px 10px",
       color: "#fff",
       borderRadius: "4px",
       fontSize: "12px",
+      width:100,
       marginLeft: "auto", // Đẩy trạng thái sang bên phải
       textTransform: "capitalize",
       backgroundColor:
