@@ -13,7 +13,6 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
     // Filter employees based on selected filters
     const filterEmployees = () => {
         let filtered = [...employees];
-
         // Filter by status
         if (selectedStatus.length > 0 && !selectedStatus.includes("all")) {
             filtered = filtered.filter(emp =>

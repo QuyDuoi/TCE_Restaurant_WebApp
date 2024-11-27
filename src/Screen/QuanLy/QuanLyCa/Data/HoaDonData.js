@@ -1,0 +1,43 @@
+const HoaDonData = [
+    {
+        id : "6724670072ed7744c2ae478a",
+        tongGiaTri : 1170000,
+        trangThai : "Đã Thanh Toán",
+        tienGiamGia: 50000,
+        ghiChu: "Kiểm thử phương thức thanh toán",
+        hinhThucThanhToan: true,
+        id_nhanVien: "67060f3497bc70ba1d9222ac",
+        id_ban: "66fac3c415346b2bd7e56b65",
+        id_caLamViec: "670901be79a40dc753e861fb",
+        thoiGianRa: "2024-11-18T04:26:00.000+00:00",
+        thoiGianVao: "2024-11-18T03:58:00.000+00:00",
+    },
+    {
+        id : "6721bd5394d39e271b3f9025",
+        tongGiaTri : 1850000,
+        trangThai : "Đã Thanh Toán",
+        tienGiamGia: 50000,
+        ghiChu: "saaaa",
+        hinhThucThanhToan: false,
+        id_nhanVien: "67060f3497bc70ba1d9222ac",
+        id_ban: "66fac40915346b2bd7e56b68",
+        id_caLamViec: "670648ee6c494efe609e2f8a",
+        thoiGianRa: null,
+        thoiGianVao: null,
+    },
+    {
+        id : "6721bd9494d39e271b3f9027",
+        tongGiaTri : 100000,
+        trangThai : "Đã Thanh Toán",
+        tienGiamGia: 50000,
+        ghiChu: "saaaa",
+        hinhThucThanhToan: true,
+        id_nhanVien: "67060f3497bc70ba1d9222ac",
+        id_ban: "66fac3c415346b2bd7e56b65",
+        id_caLamViec: "670648ee6c494efe609e2f8a",
+        thoiGianRa: null,
+        thoiGianVao: null,
+    },
+]
+
+export default HoaDonData;

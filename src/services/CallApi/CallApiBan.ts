@@ -70,3 +70,19 @@ export const layDsBan = async (idKhuVuc: string) => {
       return [];
     }
   };
+export const getBanTheoId = async (id_Ban: String) => {
+  let response: Response | null = null; // Khai báo biến response
+  try {
+    response = await fetch(`${ipAddress}ban/${id_Ban}`);
+    if (!response.ok) {
+      throw new Error('Lỗi khi lấy Bàn');
+    }
+    console.log('Lấy Bàn thành công');
+    const data = await response.json();
+    // console.log(data);
+    return data;
+  } catch (error) {
+    console.log('Lỗi khi lấy Bàn: ', error);
+    return [];
+  }
+};

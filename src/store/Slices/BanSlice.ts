@@ -1,7 +1,7 @@
 import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {layDsBan, themBan, capNhatBan, layThongTinBan} from '../../services/CallApi/CallApiBan';
+import {layDsBan, themBan, capNhatBan, layThongTinBan, getBanTheoId} from '../../services/CallApi/CallApiBan.ts';
+import {KhuVuc} from "./KhuVucSlice.ts";
 const idNhaHang = '66fab50fa28ec489c7137537';
-import { KhuVuc } from './KhuVucSlice';
 // Định nghĩa interface cho Ban
 export interface Ban {
   _id?: string;
@@ -54,6 +54,7 @@ export const updateBanThunk = createAsyncThunk(
     }
   },
 );
+
 // Thunk để fetch món ăn
 export const fetchBanTheoId = createAsyncThunk(
   'bans/fetchBanTheoId',
@@ -67,9 +68,11 @@ export const fetchBanTheoId = createAsyncThunk(
 const banSlice = createSlice({
   name: 'bans',
   initialState,
-  reducers: {
-    // Các reducers tùy chỉnh (nếu cần)
-  },
+    reducers: {
+        setBans: (state, action: PayloadAction<Ban[]>) => {
+            state.bans = action.payload;
+        },
+    },
   extraReducers: builder => {
     builder
       // .addCase(fetchBans.pending, state => {
@@ -126,4 +129,5 @@ const banSlice = createSlice({
 });
 
 // Export reducer để sử dụng trong store
+export const {setBans} = banSlice.actions;
 export default banSlice.reducer;

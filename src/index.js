@@ -13,23 +13,27 @@ import QuanLyKhuVuc from "./Screen/QuanLy/QuanLyKhuVuc/QuanLyKhuVuc";
 import QuanLyLenMon from "./Screen/QuanLy/QuanLyLenMon/QuanLyLenMon";
 import ThongKe from "./Screen/QuanLy/ThongKe/ThongKe";
 import QuanLyThucDon from "./Screen/QuanLy/QuanLyThucDon/QuanLyThucDon";
+import {Provider} from "react-redux";
+import {store} from "./store/store.ts";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <Router>
-        <Routes>
-            <Route path="/" element={<Home />}>
-                <Route path="quanLyNhanVien" element={<QuanLyNhanVien />} />
-                <Route path="quanLyThucDon" element={<QuanLyThucDon />} />
-                <Route path="quanLyCa" element={<QuanLyCa />} />
-                <Route path="quanLyKhuVuc" element={<QuanLyKhuVuc />} />
-                <Route path="quanLyLenMon" element={<QuanLyLenMon />} />
-                <Route path="quanLyHoaDon" element={<QuanLyHoaDon />} />
-                <Route path="thongKe" element={<ThongKe />} />
-            </Route>
-        </Routes>
-    </Router>
+    <Provider store={store}>
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home />}>
+                    <Route path="quanLyNhanVien" element={<QuanLyNhanVien />} />
+                    <Route path="quanLyThucDon" element={<QuanLyThucDon />} />
+                    <Route path="quanLyCa" element={<QuanLyCa />} />
+                    <Route path="quanLyKhuVuc" element={<QuanLyKhuVuc />} />
+                    <Route path="quanLyLenMon" element={<QuanLyLenMon />} />
+                    <Route path="quanLyHoaDon" element={<QuanLyHoaDon />} />
+                    <Route path="thongKe" element={<ThongKe />} />
+                </Route>
+            </Routes>
+        </Router>
+    </Provider>
 );
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
