@@ -142,7 +142,7 @@ export const getListDanhMuc = async (
     formData: FormData,
   ): Promise<MonAn> => {
     try {
-      const response = await fetch(`${ipAddress}capNhatMonAn/${id}`, {
+      const response = await fetch(`${ipAddress}updateMonAn/${id}`, {
         method: 'PUT',
         body: formData,
       });

@@ -30,19 +30,28 @@ const QuanLyThucDon = () => {
         fetchDanhMucs();
     }, [id_nhaHang]); // Khi id_nhaHang thay đổi, useEffect sẽ chạy lại
 
+    const removeDiacritics = (str) => {
+        return str
+            .normalize('NFD') // Chuyển đổi các ký tự có dấu thành tổ hợp ký tự.
+            .replace(/[\u0300-\u036f]/g, '') // Loại bỏ các ký tự tổ hợp (dấu).
+            .toLowerCase(); // Chuyển về chữ thường.
+    };
+
     useEffect(() => {
         // Lọc món ăn khi từ khóa tìm kiếm thay đổi
         const allDishes = danhMucs.flatMap((danhMuc) => danhMuc.monAns || []);
-        if (searchTerm.trim() === '') {
+        const normalizedSearchTerm = removeDiacritics(searchTerm.trim());
+        if (normalizedSearchTerm === '') {
             setFilteredDishes(allDishes); // Hiển thị tất cả nếu không có từ khóa tìm kiếm
         } else {
             setFilteredDishes(
                 allDishes.filter((monAn) =>
-                    monAn.tenMon.toLowerCase().includes(searchTerm.toLowerCase())
+                    removeDiacritics(monAn.tenMon).includes(normalizedSearchTerm)
                 )
             );
         }
     }, [searchTerm, danhMucs]); // Lọc khi từ khóa tìm kiếm hoặc danh sách món ăn thay đổi
+    
 
     return (
         <Layout>
