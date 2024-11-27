@@ -12,7 +12,7 @@ const StatisticsCard = ({ title, items }) => {
           <CircleWrapper>
             <CircularProgressbar
               value={item.percentage}
-              text={`${item.percentage}%`}
+              text={`${item.percentage ?? 0}%`}
               styles={buildStyles({
                 textColor: item.color,
                 pathColor: item.color,
@@ -22,7 +22,7 @@ const StatisticsCard = ({ title, items }) => {
           </CircleWrapper>
           <Details>
             <Label>{item.label}</Label>
-            <Value>{item.value}</Value>
+            <Value>{item.value} đ</Value>
           </Details>
         </Item>
       ))}
