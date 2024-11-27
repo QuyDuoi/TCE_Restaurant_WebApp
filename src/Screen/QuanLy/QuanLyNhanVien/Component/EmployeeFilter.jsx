@@ -6,50 +6,47 @@ const { Option } = Select;
 
 const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+
+    // State for filters in modal
+    const [modalSelectedStatus, setModalSelectedStatus] = useState([]);
+    const [modalSelectedPosition, setModalSelectedPosition] = useState([]);
+
+    // State for external filters
     const [selectedStatus, setSelectedStatus] = useState([]);
     const [selectedPosition, setSelectedPosition] = useState([]);
-    const [localEmployees, setLocalEmployees] = useState(employees);  // State lưu trữ nhân viên đã lọc
 
-    // Filter employees based on selected filters
-    const filterEmployees = () => {
+    // Filter employees based on external filters
+    useEffect(() => {
         let filtered = [...employees];
 
-        // Filter by status
         if (selectedStatus.length > 0 && !selectedStatus.includes("all")) {
             filtered = filtered.filter(emp =>
                 selectedStatus.includes(emp.trangThai ? 'active' : 'inactive')
             );
         }
 
-        // Filter by position
         if (selectedPosition.length > 0 && !selectedPosition.includes("all")) {
             filtered = filtered.filter(emp =>
                 selectedPosition.includes(emp.vaiTro)
             );
         }
 
-        // Set filtered employees to the parent component
         setFilteredEmployees(filtered);
-        setLocalEmployees(filtered);  // Update local filtered employees
+    }, [selectedStatus, selectedPosition, employees]);
+
+    // Apply filters from modal
+    const handleApplyFilters = () => {
+        setSelectedStatus(modalSelectedStatus);
+        setSelectedPosition(modalSelectedPosition);
         setIsModalVisible(false);
     };
 
-    // Update the filtered list immediately when status or position changes
-    useEffect(() => {
-
-    }, [selectedStatus, selectedPosition]);
-
-    // Filter employees only when the user applies the filter
-    const handleApplyFilters = () => {
-        filterEmployees(); // Apply the filters
-        setIsModalVisible(false); // Close the modal
-    };
-    // Open Modal
     const showModal = () => {
+        setModalSelectedStatus(selectedStatus); // Sync modal state with external state
+        setModalSelectedPosition(selectedPosition);
         setIsModalVisible(true);
     };
 
-    // Close Modal
     const handleCancel = () => {
         setIsModalVisible(false);
     };
@@ -66,18 +63,12 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
                 Lọc
             </Button>
 
-            {/* Status Filter Select */}
             <Select
-                value={selectedStatus.length > 0 ? selectedStatus[0] : 'all'}  // Kiểm tra giá trị hiện tại
+                value={selectedStatus.length > 0 ? selectedStatus[0] : 'all'}
                 size="small"
                 style={{ width: 120 }}
                 onChange={(value) => {
-                    // Lọc nhân viên khi chọn trạng thái
-                    if (value === 'all') {
-                        setSelectedStatus([]); // Nếu chọn "Tất cả", reset trạng thái
-                    } else {
-                        setSelectedStatus([value]); // Lọc theo trạng thái
-                    }
+                    setSelectedStatus(value === 'all' ? [] : [value]);
                 }}
             >
                 <Option value="all">Tất cả</Option>
@@ -85,27 +76,21 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
                 <Option value="inactive">Ngưng hoạt động</Option>
             </Select>
 
-            {/* Position Filter Select */}
             <Select
-                value={selectedPosition.length > 0 ? selectedPosition[0] : 'all'}  // Kiểm tra giá trị hiện tại
+                value={selectedPosition.length > 0 ? selectedPosition[0] : 'all'}
                 size="small"
                 style={{ width: 120 }}
                 onChange={(value) => {
-                    // Lọc nhân viên khi chọn vị trí
-                    if (value === 'all') {
-                        setSelectedPosition([]); // Nếu chọn "Tất cả", reset vị trí
-                    } else {
-                        setSelectedPosition([value]); // Lọc theo vị trí
-                    }
+                    setSelectedPosition(value === 'all' ? [] : [value]);
                 }}
             >
                 <Option value="all">Tất cả</Option>
                 <Option value="Nhân viên phục vụ">Nhân viên phục vụ</Option>
-                <Option value="Thu ngân">Thu ngân</Option>
+                <Option value="Nhân viên thu ngân">Nhân viên thu ngân</Option>
                 <Option value="Chủ quán">Chủ quán</Option>
+                <Option value="Quản lý">Quản lý</Option>
             </Select>
 
-            {/* Modal for Advanced Filters */}
             <Modal
                 title="Lọc nhân viên"
                 visible={isModalVisible}
@@ -123,8 +108,8 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
                     <strong>Trạng thái</strong>
                     <Checkbox.Group
                         style={{ display: 'flex', flexDirection: 'column', marginTop: '8px' }}
-                        onChange={(checkedValues) => setSelectedStatus(checkedValues)}
-                        value={selectedStatus}
+                        onChange={(checkedValues) => setModalSelectedStatus(checkedValues)}
+                        value={modalSelectedStatus}
                     >
                         <Checkbox value="active">Đang hoạt động</Checkbox>
                         <Checkbox value="inactive">Ngưng hoạt động</Checkbox>
@@ -134,16 +119,16 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
                     <strong>Vị trí</strong>
                     <Checkbox.Group
                         style={{ display: 'flex', flexDirection: 'column', marginTop: '8px' }}
-                        onChange={(checkedValues) => setSelectedPosition(checkedValues)}
-                        value={selectedPosition}
+                        onChange={(checkedValues) => setModalSelectedPosition(checkedValues)}
+                        value={modalSelectedPosition}
                     >
                         <Checkbox value="Nhân viên phục vụ">Nhân viên phục vụ</Checkbox>
-                        <Checkbox value="Thu ngân">Thu ngân</Checkbox>
+                        <Checkbox value="Nhân viên thu ngân">Nhân viên thu ngân</Checkbox>
                         <Checkbox value="Chủ quán">Chủ quán</Checkbox>
+                        <Checkbox value="Quản lý">Quản lý</Checkbox>
                     </Checkbox.Group>
                 </div>
             </Modal>
-
         </div>
     );
 };
