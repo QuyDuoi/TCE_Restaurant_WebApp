@@ -36,9 +36,14 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
 
     // Update the filtered list immediately when status or position changes
     useEffect(() => {
-        filterEmployees();
+
     }, [selectedStatus, selectedPosition]);
 
+    // Filter employees only when the user applies the filter
+    const handleApplyFilters = () => {
+        filterEmployees(); // Apply the filters
+        setIsModalVisible(false); // Close the modal
+    };
     // Open Modal
     const showModal = () => {
         setIsModalVisible(true);
@@ -104,11 +109,15 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
             <Modal
                 title="Lọc nhân viên"
                 visible={isModalVisible}
-                onOk={filterEmployees}
                 onCancel={handleCancel}
-                // okText="Áp dụng"
-                // cancelText="Hủy"
-                footer={null}
+                footer={[
+                    <Button key="cancel" onClick={handleCancel}>
+                        Hủy
+                    </Button>,
+                    <Button key="apply" type="primary" onClick={handleApplyFilters}>
+                        Áp dụng
+                    </Button>,
+                ]}
             >
                 <div style={{ marginBottom: '16px' }}>
                     <strong>Trạng thái</strong>
@@ -134,6 +143,7 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
                     </Checkbox.Group>
                 </div>
             </Modal>
+
         </div>
     );
 };
