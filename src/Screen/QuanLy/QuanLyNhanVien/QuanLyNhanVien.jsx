@@ -37,18 +37,28 @@ const QuanLyNhanVien = () => {
         fetchEmployees();
     }, []);
 
+    //hàm xử lý bỏ dấu 
+    const removeDiacritics = (str) => {
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
+            .replace(/đ/g, "d") // Thay thế chữ "đ" thành "d"
+            .replace(/Đ/g, "D"); // Thay thế chữ "Đ" thành "D"
+    };
+    
+    //hàm search nhân viên không dấu
     const handleSearch = (value) => {
-        const normalizedSearch = value.trim().toLowerCase();
+        const normalizedSearch = removeDiacritics(value.trim().toLowerCase());
         if (normalizedSearch) {
             const filtered = nhanVien.filter((nv) =>
-                nv.hoTen.toLowerCase().includes(normalizedSearch)
+                removeDiacritics(nv.hoTen.toLowerCase()).includes(normalizedSearch)
             );
             setFilteredEmployees(filtered);
         } else {
             setFilteredEmployees(nhanVien);
         }
     };
-
+    
     const handleMenuClick = (key, employee) => {
         setSelectedEmployee(employee);
 

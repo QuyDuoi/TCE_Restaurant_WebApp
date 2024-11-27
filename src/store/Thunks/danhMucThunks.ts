@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { DanhMuc } from "../Slices/DanhMucSlice";
-import { capNhatDanhMuc, themDanhMuc, xoaDanhMuc } from "../../screens/QuanLyThucDon/CallApiThucDon";
-import { setMonAns } from '../Slices/MonAnSlice'; // Action để lưu món ăn vào MonAnSlice
+import { capNhatDanhMuc, themDanhMuc, xoaDanhMuc } from "../../services/CallApi/CallApiThucDon.ts";
+import { setMonAns } from '../Slices/MonAnSlice.ts'; // Action để lưu món ăn vào MonAnSlice
 import { ipAddress } from '../../services/api';
 
 export const fetchDanhMucVaMonAn = createAsyncThunk(

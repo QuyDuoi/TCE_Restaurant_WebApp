@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import { capNhatDanhMucThunk, deleteDanhMucThunk, fetchDanhMucVaMonAn, themDanhMucThunk } from '../Thunks/danhMucThunks';
+import { capNhatDanhMucThunk, deleteDanhMucThunk, fetchDanhMucVaMonAn, themDanhMucThunk } from '../Thunks/danhMucThunks.ts';
 
 export interface DanhMuc {
   _id?: string;

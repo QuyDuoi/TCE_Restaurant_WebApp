@@ -3,7 +3,8 @@ import { Input, Button, Row, Col } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import OptionsModal from "../Modal/OptionsModal";
 
-const HeaderBar = () => {
+
+const HeaderBar = ({onSearch}) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     return (
         <div
@@ -24,7 +25,7 @@ const HeaderBar = () => {
                     <Input
                         placeholder="Tìm kiếm món ăn"
                         style={{ width: '60%', marginRight: '16px' }}
-
+                        onChange={(e) => onSearch(e.target.value)} 
                     />
                     <Button
                         type="primary"
