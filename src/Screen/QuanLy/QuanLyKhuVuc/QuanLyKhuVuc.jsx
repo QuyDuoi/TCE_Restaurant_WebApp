@@ -1,28 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Row, Col } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchKhuVucVaBan } from '../../../store/Thunks/khuVucThunks.ts';
 import HeaderBar from "./Component/HeaderBar";
 import NavigationTab from "./Component/NavigationTab";
 import ItemTable from "./Component/ItemTable"; // Import component bàn
 import TableModal from "./Modal/TableModal"; // Import modal
-import tableData from "./Data/tableData"; // Import dữ liệu bàn
-import hoaDon from "./Data/hoaDon"; 
+import hoaDon from "./Data/hoaDon";
 import chiTietHoaDon from "./Data/chiTietHoaDon";
+
 const { Content } = Layout;
 
 const QuanLyKhuVuc = () => {
-  const [filteredTables, setFilteredTables] = useState(tableData); // Dữ liệu lọc
+  const dispatch = useDispatch();
+  const { khuVucs, status } = useSelector((state) => state.khuVuc); // Sửa đổi ở đây
+
+  const [filteredTables, setFilteredTables] = useState([]); // Dữ liệu lọc
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [selectedTable, setSelectedTable] = useState(null); // Bàn được chọn
   const [isModalVisible, setIsModalVisible] = useState(false); // Hiển thị modal
+
+  const id_nhaHang = '66fab50fa28ec489c7137537';
+
+  useEffect(() => {
+    dispatch(fetchKhuVucVaBan(id_nhaHang));
+  }, [dispatch]);
+  
+
+  useEffect(() => {
+    if (status === 'succeeded' && khuVucs) { // Kiểm tra xem khuVuc có tồn tại
+      const allTables = khuVucs.flatMap(khuVuc => khuVuc.bans || []
+      );
+      console.log(allTables);
+      
+      setFilteredTables(allTables);
+    }
+  }, [khuVucs, status]);
+
 
   // Xử lý khi chọn tab (lọc dữ liệu theo trạng thái)
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === "all") {
-      setFilteredTables(tableData);
+      setFilteredTables(khuVucs.flatMap(khuVuc => khuVuc.bans || []));
     } else {
       setFilteredTables(
-        tableData.filter((table) => table.trangThai === tab)
+        khuVucs.flatMap(khuVuc => khuVuc.bans || []).filter(ban => ban.trangThai === tab)
       );
     }
   };
@@ -87,9 +110,9 @@ const QuanLyKhuVuc = () => {
               }}
             >
               <ItemTable
-                tenBan={table.tenBan}
+                ban={table}
                 id_khuVuc={table.id_khuVuc}
-                trangThai={table.trangThai}
+                khuVucs = {khuVucs}
                 onClick={() => {
                   setSelectedTable(table);
                   setIsModalVisible(true);

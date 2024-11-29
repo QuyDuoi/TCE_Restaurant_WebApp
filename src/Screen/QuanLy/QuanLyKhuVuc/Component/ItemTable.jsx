@@ -1,20 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 
-const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
-  // Hàm chọn hình ảnh theo trạng thái bàn
-  const getImageByStatus = (status) => {
-    switch (status) {
-      case "available":
-        return "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg";
-      case "booked":
-        return "https://images2.thanhnien.vn/528068263637045248/2023/6/7/3-16861139393332007433858.jpg";
-      case "in-use":
-        return "https://danviet.mediacdn.vn/296231569849192448/2022/12/24/321338844-470754818575480-2795201442804892371-n-2988-1671917695001-16719176953271524834439.jpeg";
-      default:
-        return "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg"; // Ảnh mặc định nếu trạng thái không hợp lệ
-    }
-  };
+const ItemTable = ({ ban, id_khuVuc, khuVucs, onClick }) => {
 
+const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg"; // Ảnh mặc định nếu trạng thái không hợp lệ
+
+  const khuVuc = khuVucs.filter((item) => item._id === id_khuVuc);
+
+  console.log(khuVuc[0].tenKhuVuc);
+  
+  
+  
   // Style nội tuyến
   const styles = {
     container: {
@@ -62,9 +57,9 @@ const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
       marginLeft: "auto", // Đẩy trạng thái sang bên phải
       textTransform: "capitalize",
       backgroundColor:
-        status === "available"
+        status === "Trống"
           ? "green"
-          : status === "booked"
+          : status === "Đã đặt"
           ? "orange"
           : "red",
     }),
@@ -85,14 +80,14 @@ const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
     >
       <div style={styles.imageContainer}>
         <img
-          src={getImageByStatus(trangThai)} // Hình ảnh tương ứng trạng thái
-          alt={`Hình ảnh của ${tenBan}`}
+          src={ban.maQRCode == null ?  urlImgDefault : ban.maQRCode} // Hình ảnh tương ứng trạng thái
+          alt={`Hình ảnh của ${ban.tenBan}`}
           style={styles.image}
         />
       </div>
       <div style={styles.info}>
         <p style={styles.title}>
-          Khu vực: <strong>{id_khuVuc}</strong>
+          Khu vực: <strong>{khuVuc[0].tenKhuVuc}</strong>
         </p>
         <div
           style={{
@@ -102,11 +97,11 @@ const ItemTable = ({ tenBan, id_khuVuc, trangThai, onClick }) => {
             width: "100%",
           }}
         >
-          <p style={styles.title}>{tenBan}</p>
-          <span style={styles.status(trangThai)}>
-            {trangThai === "available"
+          <p style={styles.title}>Bàn: {ban.tenBan}</p>
+          <span style={styles.status(ban.trangThai)}>
+            {ban.trangThai === "Trống"
               ? "Bàn trống"
-              : trangThai === "booked"
+              : ban.trangThai === "Đã đặt"
               ? "Bàn đặt"
               : "Đang sử dụng"}
           </span>

@@ -3,9 +3,9 @@ import React from "react";
 const NavigationTab = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: "all", label: "Tất cả" },
-    { id: "available", label: "Bàn trống" },
-    { id: "booked", label: "Bàn đặt" },
-    { id: "in-use", label: "Bàn đang sử dụng" },
+    { id: "Trống", label: "Bàn trống" },
+    { id: "Đã đặt", label: "Bàn đặt" },
+    { id: "Đang sử dụng", label: "Bàn đang sử dụng" },
   ];
 
   return (

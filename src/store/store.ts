@@ -6,7 +6,7 @@ import chiTietHoaDonReducer from './Slices/ChiTietHoaDonSlice.ts';
 // import danhMucReducer from './Slices/DanhMucSlice.ts';
 // import monAnReducer from './Slices/MonAnSlice.ts';
 // import nhanVienReducer from './Slices/NhanVienSlice.ts';
-import khuVucReducer from './Slices/KhuVucSlice.ts';
+import khuVucReducer from './Slices/KhuVucSlice.ts'
 import banReducer from './Slices/BanSlice.ts';
 import caLamReducer from "./Slices/CaLamSlice.ts";
 
