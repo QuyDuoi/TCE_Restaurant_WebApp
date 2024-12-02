@@ -6,9 +6,6 @@ const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuo
 
   const khuVuc = khuVucs.filter((item) => item._id === id_khuVuc);
 
-  console.log(khuVuc[0].tenKhuVuc);
-  
-  
   
   // Style nội tuyến
   const styles = {

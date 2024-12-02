@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { getListHoaDonTheoCaLam } from '../../services/CallApi/CallApiHoaDon.ts';
-
+import { fetchHoaDonTheoNhaHang, themHoaDonMoi } from '../Thunks/hoaDonThunks.ts';
 // Interface định nghĩa cho HoaDon
 export interface HoaDon {
     _id?: string;
@@ -63,6 +63,34 @@ const hoaDonSlice = createSlice({
                 }
             )
             .addCase(fetchHoaDonTheoCaLam.rejected, (state, action) => {
+                state.status = 'failed';
+            })
+            .addCase(themHoaDonMoi.pending, state => {
+                state.status = 'loading';
+            })
+            .addCase(
+                themHoaDonMoi.fulfilled,
+                (state, action: PayloadAction<HoaDon>) => {
+                    state.status = 'succeeded';
+                    state.hoaDons.push(action.payload);
+                    console.log('hoadonslice',action.payload);
+                }
+            )
+            .addCase(themHoaDonMoi.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload; // Lưu lỗi
+            })
+            .addCase(fetchHoaDonTheoNhaHang.pending, state => {
+                state.status = 'loading';
+            })
+            .addCase(
+                fetchHoaDonTheoNhaHang.fulfilled,
+                (state, action: PayloadAction<HoaDon[]>) => {
+                    state.status = 'succeeded';
+                    state.hoaDons = action.payload;
+                }
+            )
+            .addCase(fetchHoaDonTheoNhaHang.rejected, (state, action) => {
                 state.status = 'failed';
             });
     },

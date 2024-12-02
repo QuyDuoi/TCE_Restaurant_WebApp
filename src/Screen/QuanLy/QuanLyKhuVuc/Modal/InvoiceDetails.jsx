@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table, Button } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchChiTietHoaDon } from "../../../../store/Slices/ChiTietHoaDonSlice.ts";
+import { fetchMonAnTheoId, fetchMonAnTheoNhaHang } from "../../../../store/Thunks/monAnThunks.ts";
 
-const InvoiceDetails = ({ table, hoaDonData = [], chiTietHoaDonData = [], onClose }) => {
-  const hoaDon = hoaDonData.find((hd) => hd.id_ban === table.id);
 
+const InvoiceDetails = ({ table,area, hoaDonData = [], onClose }) => {
+  const dispatch = useDispatch();
+  const hoaDon = hoaDonData.find((hd) => hd.id_ban === table._id);
+  const selectedArea = area.find((a) => a._id === table.id_khuVuc);
+  const {chiTietHoaDons, hoadonStatus} = useSelector((state)=> state.chiTietHoaDon);
+
+  useEffect(()=>{
+    dispatch(fetchChiTietHoaDon(hoaDon._id))
+  },[])
+
+  
   if (!hoaDon) {
     return (
       <div>
@@ -16,8 +28,10 @@ const InvoiceDetails = ({ table, hoaDonData = [], chiTietHoaDonData = [], onClos
   }
 
   // Lấy danh sách chi tiết hóa đơn liên kết với hóa đơn hiện tại
-  const chiTietHoaDon = chiTietHoaDonData.filter((cthd) => cthd.id_hoaDon === hoaDon._id);
+  const chiTietHoaDon = chiTietHoaDons.filter((cthd) => cthd.id_hoaDon === hoaDon._id);
 
+  
+  
   // Cấu hình cột cho bảng hiển thị món ăn
   const columns = [
     {
@@ -43,13 +57,10 @@ const InvoiceDetails = ({ table, hoaDonData = [], chiTietHoaDonData = [], onClos
   // Dữ liệu hiển thị bảng
   const dataSource = chiTietHoaDon.map((item) => ({
     ...item,
-    tenMon:
-      item.id_monAn === "mon1"
-        ? "Cơm thập cẩm"
-        : item.id_monAn === "mon2"
-        ? "Thịt nướng giòn"
-        : "Tôm hùm Alaska",
+    tenMon: item.id_monAn.tenMon
   }));
+
+  
 
   // Tính tổng bill
   const totalBill = chiTietHoaDon.reduce((sum, item) => sum + item.soLuongMon * item.giaTien, 0);
@@ -61,7 +72,7 @@ const InvoiceDetails = ({ table, hoaDonData = [], chiTietHoaDonData = [], onClos
       {/* Thông tin hóa đơn */}
       <div style={{ marginBottom: "16px" }}>
         <p>
-          <strong>Bàn:</strong> {table.tenBan} | Khu vực: {table.id_khuVuc}
+          <strong>Bàn:</strong> {table.tenBan} | Khu vực: {selectedArea.tenKhuVuc}
         </p>
         <p>
           <strong>Thời gian vào:</strong> {new Date(hoaDon.thoiGianVao).toLocaleString("vi-VN")}

@@ -1,4 +1,4 @@
-import { ChiTietHoaDon } from "./ChiTietHoaDonSlice.ts";
+import { ChiTietHoaDon } from "../../store/Slices/ChiTietHoaDonSlice.ts";
 import { ipAddress } from "../api.ts";
 
 // Lấy danh sách ChiTietHoaDon

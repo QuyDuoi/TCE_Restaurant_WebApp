@@ -13,7 +13,7 @@ const BookingForm = ({ table, onSave, onUpdateStatus }) => {
                 message.success("Đặt bàn thành công!");
 
                 // Cập nhật trạng thái bàn thành "Đã đặt"
-                onUpdateStatus(table.id, "booked");
+                onUpdateStatus(table.id, "Đã đặt");
 
                 // Đóng modal
                 onSave();

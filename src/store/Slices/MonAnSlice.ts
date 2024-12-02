@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { fetchMonAnTheoId, themMonAnMoi, updateMonAnThunk, updateStatusMonAnThunk } from '../Thunks/monAnThunks';
+import { fetchMonAnTheoId, fetchMonAnTheoNhaHang, themMonAnMoi, updateMonAnThunk, updateStatusMonAnThunk } from '../Thunks/monAnThunks.ts';
 
 // Định nghĩa interface cho MonAn
 export interface MonAn {
@@ -96,6 +96,16 @@ const monAnSlice = createSlice({
       .addCase(updateStatusMonAnThunk.rejected, (state, action) => {
         state.status = 'failed';
         state.error = (action.payload as string) || 'Error updating MonAn';
+      }).addCase(fetchMonAnTheoNhaHang.pending, state => {
+        state.status = 'loading';
+      })
+      .addCase(fetchMonAnTheoNhaHang.fulfilled, (state, action: PayloadAction<MonAn[]>) => {
+        state.status = 'succeeded';
+        state.monAns = action.payload; // action.payload là đối tượng món ăn
+      })
+      .addCase(fetchMonAnTheoNhaHang.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Could not fetch món ăn by id';
       })
   },
 });

@@ -6,15 +6,16 @@ import HeaderBar from "./Component/HeaderBar";
 import NavigationTab from "./Component/NavigationTab";
 import ItemTable from "./Component/ItemTable"; // Import component bàn
 import TableModal from "./Modal/TableModal"; // Import modal
-import hoaDon from "./Data/hoaDon";
 import chiTietHoaDon from "./Data/chiTietHoaDon";
+import { fetchHoaDonTheoNhaHang } from "../../../store/Thunks/hoaDonThunks.ts";
 
 const { Content } = Layout;
 
 const QuanLyKhuVuc = () => {
   const dispatch = useDispatch();
   const { khuVucs, status } = useSelector((state) => state.khuVuc); // Sửa đổi ở đây
-
+  const { hoaDons, statusHoaDon } = useSelector((state) => state.hoaDon); // Sửa đổi ở đây
+  
   const [filteredTables, setFilteredTables] = useState([]); // Dữ liệu lọc
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [selectedTable, setSelectedTable] = useState(null); // Bàn được chọn
@@ -24,6 +25,7 @@ const QuanLyKhuVuc = () => {
 
   useEffect(() => {
     dispatch(fetchKhuVucVaBan(id_nhaHang));
+    dispatch(fetchHoaDonTheoNhaHang(id_nhaHang))
   }, [dispatch]);
   
 
@@ -31,7 +33,6 @@ const QuanLyKhuVuc = () => {
     if (status === 'succeeded' && khuVucs) { // Kiểm tra xem khuVuc có tồn tại
       const allTables = khuVucs.flatMap(khuVuc => khuVuc.bans || []
       );
-      console.log(allTables);
       
       setFilteredTables(allTables);
     }
@@ -127,11 +128,11 @@ const QuanLyKhuVuc = () => {
       {/* Modal */}
       {selectedTable && (
         <TableModal
+          area={khuVucs}
           table={selectedTable}
           isVisible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
-          hoaDonData={hoaDon} // Dữ liệu hóa đơn
-          chiTietHoaDonData={chiTietHoaDon} // Dữ liệu chi tiết hóa đơn
+          hoaDonData={hoaDons} // Dữ liệu hóa đơn
           onUpdateStatus={handleUpdateStatus}
 
         />

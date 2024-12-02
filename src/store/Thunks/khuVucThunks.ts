@@ -12,7 +12,6 @@ export const fetchKhuVucVaBan = createAsyncThunk(
   
         
         const bansData = data.flatMap(item => item.bans);
-        console.log("Dữ liệu món ăn:", bansData);
         if (bansData.length > 0) {
           thunkAPI.dispatch(setBans(bansData));
         } else {

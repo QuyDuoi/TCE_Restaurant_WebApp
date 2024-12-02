@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getMonAnTheoId, themMonAn, updateMonAn } from '../../services/CallApi/CallApiThucDon.ts';
-import { ipAddress } from "../../services/api";
+import { getMonAn, getMonAnTheoId, themMonAn, updateMonAn } from '../../services/CallApi/CallApiThucDon.ts';
+import { ipAddress } from "../../services/api.ts";
 
 // Thunk để thêm món ăn mới
 export const themMonAnMoi = createAsyncThunk(
@@ -64,3 +64,13 @@ export const fetchMonAnTheoId = createAsyncThunk(
     return data; // Trả về dữ liệu
   }
 );
+
+export const fetchMonAnTheoNhaHang = createAsyncThunk(
+  'monAns/fetchMonAnTheoNhaHang',
+  async (id_nhaHang: string) => {
+    const data = await getMonAn(id_nhaHang);
+    return data; // Trả về dữ liệu
+  }
+);
+
+

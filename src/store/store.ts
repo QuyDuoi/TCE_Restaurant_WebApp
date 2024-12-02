@@ -4,7 +4,7 @@ import chiTietHoaDonReducer from './Slices/ChiTietHoaDonSlice.ts';
 // import toppingReducer from './Slices/ToppingSlice.ts';
 // import nhomToppingReducer from './Slices/NhomToppingSlice.ts';
 // import danhMucReducer from './Slices/DanhMucSlice.ts';
-// import monAnReducer from './Slices/MonAnSlice.ts';
+import monAnReducer from './Slices/MonAnSlice.ts';
 // import nhanVienReducer from './Slices/NhanVienSlice.ts';
 import khuVucReducer from './Slices/KhuVucSlice.ts'
 import banReducer from './Slices/BanSlice.ts';
@@ -17,7 +17,7 @@ export const store = configureStore({
     // nhomToppings: nhomToppingReducer,
     // toppings: toppingReducer,
     // danhMuc: danhMucReducer,
-    // monAn: monAnReducer,
+    monAn: monAnReducer,
     // nhanVien: nhanVienReducer,
     khuVuc: khuVucReducer,
     ban: banReducer,
