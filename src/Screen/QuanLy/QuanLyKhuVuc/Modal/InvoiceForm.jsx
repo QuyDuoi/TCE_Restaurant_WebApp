@@ -9,14 +9,7 @@ const InvoiceForm = ({ table, area, onSave, onUpdateStatus }) => {
   const dispatch = useDispatch();
   const { status, error} = useSelector(state => state.hoaDon);
   const [form] = Form.useForm(); // Sử dụng form của Ant Design
-  
-  console.log('value table',table);
-  
-  
   const selectedArea = area.filter((item)=> item._id === table.id_khuVuc)
-
-  console.log('value area',selectedArea);
-  
   // State cho ngày giờ hiện tại
   const [currentDate, setCurrentDate] = useState(moment()); // Ngày giờ hiện tại
 
@@ -34,28 +27,29 @@ const InvoiceForm = ({ table, area, onSave, onUpdateStatus }) => {
   const id_nhanVien = '6746d3045e16205c66496435'
   const id_nhaHang = '66fab50fa28ec489c7137537'
   const handleFinish = async (values) => {
-    // Xử lý khi nhấn Lưu
+    // Chuẩn bị dữ liệu gửi đi
     const dataToPost = {
-        thoiGianVao: moment(values.ngayDat.format("DD/MM/YYYY") + ' ' + values.gioDat.format("HH:mm")).toISOString(),
-        id_ban: table._id,
-        id_nhaHang: id_nhaHang,
-        id_nhanVien: id_nhanVien,
+      thoiGianVao: moment(values.ngayDat.format("DD/MM/YYYY") + ' ' + values.gioDat.format("HH:mm")).toISOString(),
+      id_ban: table._id,
+      id_nhaHang: id_nhaHang,
+      id_nhanVien: id_nhanVien,
     };
-
-
-    try {
-        await dispatch(themHoaDonMoi(dataToPost));
-        // Hiển thị thông báo thành công
-        message.success("Thêm hóa đơn thành công!");
-    } catch (error) {
-        console.log('Lỗi', error.message);
-        // Có thể hiển thị thông báo lỗi nếu cần
-        message.error("Có lỗi xảy ra, vui lòng thử lại.");
+  
+    // Gửi dữ liệu lên Redux
+    await dispatch(themHoaDonMoi(dataToPost));
+  
+    console.log(status);
+    
+    // Kiểm tra trạng thái và hiển thị thông báo
+    if (status === "succeeded") {
+      message.success("Thêm hóa đơn thành công!");
+      // Đóng modal sau khi thành công
+      onSave();
+    } else if (status === "failed") {
+      message.error(error || "Có lỗi xảy ra, vui lòng thử lại.");
     }
-
-    // Đóng modal
-    onSave();
-};
+  };
+  
 
   return (
     <div style={{ padding: "16px" }}>

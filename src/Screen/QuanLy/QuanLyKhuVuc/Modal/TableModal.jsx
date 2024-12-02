@@ -16,12 +16,19 @@ import CancelBookingForm from "./CancelBookingForm";
 const TableModal = ({ table,area, isVisible, onClose, onUpdateStatus, hoaDonData}) => {
   const [activeOption, setActiveOption] = useState("Đặt bàn"); // Lựa chọn hiện tại
 
-  // Reset trạng thái khi `table` thay đổi
-  useEffect(() => {
-    if (table) {
-      setActiveOption("Đặt bàn"); // Đặt lại lựa chọn mặc định
+  // Reset trạng thái khi `table` thay đổi hoặc khi modal được mở
+useEffect(() => {
+  if (table) {
+    if (table.trangThai === "Trống") {
+      setActiveOption("Đặt bàn");
+    } else if (table.trangThai === "Đã đặt") {
+      setActiveOption("Tạo hóa đơn");
+    } else if (table.trangThai === "Đang sử dụng") {
+      setActiveOption("Xem thông tin hóa đơn");
     }
-  }, [table]);
+  }
+}, [table, isVisible]);
+
 
   // Kiểm tra trạng thái bàn và vô hiệu hóa các nút
   const isButtonDisabled = (action) => {

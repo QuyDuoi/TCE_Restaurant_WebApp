@@ -1,26 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, Input, DatePicker, TimePicker, Button, message } from "antd";
 
 const BookingForm = ({ table, onSave, onUpdateStatus }) => {
     const [form] = Form.useForm();
-
+    
     const handleSave = () => {
         form.validateFields()
             .then((values) => {
                 console.log("Thông tin đặt bàn:", values);
-
+                form.resetFields();
                 // Hiển thị thông báo thành công
                 message.success("Đặt bàn thành công!");
-
-                // Cập nhật trạng thái bàn thành "Đã đặt"
-                onUpdateStatus(table.id, "Đã đặt");
-
+                    
                 // Đóng modal
                 onSave();
             })
             .catch((err) => console.error("Lỗi:", err));
     };
-
+    useEffect(() => {
+        if (table) {
+            form.setFieldsValue({
+                ...table,
+            }); 
+        }
+    }, [table, form]);
     const styles = {
         formWrapper: {
             display: "flex",

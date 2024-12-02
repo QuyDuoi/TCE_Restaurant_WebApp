@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Row, Col } from "antd";
+import { Layout, Row, Col, Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchKhuVucVaBan } from '../../../store/Thunks/khuVucThunks.ts';
 import HeaderBar from "./Component/HeaderBar";
@@ -15,25 +15,31 @@ const QuanLyKhuVuc = () => {
   const dispatch = useDispatch();
   const { khuVucs, status } = useSelector((state) => state.khuVuc); // Sửa đổi ở đây
   const { hoaDons, statusHoaDon } = useSelector((state) => state.hoaDon); // Sửa đổi ở đây
-  
+
   const [filteredTables, setFilteredTables] = useState([]); // Dữ liệu lọc
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [selectedTable, setSelectedTable] = useState(null); // Bàn được chọn
   const [isModalVisible, setIsModalVisible] = useState(false); // Hiển thị modal
+  const [loading, setLoading] = useState(true); // Trạng thái loading
 
   const id_nhaHang = '66fab50fa28ec489c7137537';
 
   useEffect(() => {
-    dispatch(fetchKhuVucVaBan(id_nhaHang));
-    dispatch(fetchHoaDonTheoNhaHang(id_nhaHang))
+    const fetchData = async () => {
+      setLoading(true); // Bắt đầu loading
+      await dispatch(fetchKhuVucVaBan(id_nhaHang));
+      await dispatch(fetchHoaDonTheoNhaHang(id_nhaHang));
+      setLoading(false); // Kết thúc loading
+    };
+    fetchData();
   }, [dispatch]);
-  
+
 
   useEffect(() => {
     if (status === 'succeeded' && khuVucs) { // Kiểm tra xem khuVuc có tồn tại
       const allTables = khuVucs.flatMap(khuVuc => khuVuc.bans || []
       );
-      
+
       setFilteredTables(allTables);
     }
   }, [khuVucs, status]);
@@ -57,6 +63,15 @@ const QuanLyKhuVuc = () => {
       )
     );
   };
+   // Hiển thị trạng thái đang tải
+   if (loading) {
+    return (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+            <Spin size="large" />
+            <div>Đang tải dữ liệu...</div>
+        </div>
+    );
+}
   // Xử lý khi nhấn vào bàn
   const handleItemClick = (table) => {
     setSelectedTable(table);
@@ -97,31 +112,32 @@ const QuanLyKhuVuc = () => {
           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        <Row gutter={[16, 16]} justify="start">
-          {filteredTables.map((table) => (
-            <Col
-              key={table.id}
-              xs={12} // Chiếm toàn bộ chiều ngang ở màn hình nhỏ
-              sm={24} // Chia đôi ở màn hình vừa
-              md={12}  // Chia ba ở màn hình lớn hơn
-              lg={8}  // Chia bốn ở màn hình lớn
-              style={{
-                display: "flex",
-                justifyContent: "center", // Căn giữa item
-              }}
-            >
-              <ItemTable
-                ban={table}
-                id_khuVuc={table.id_khuVuc}
-                khuVucs = {khuVucs}
-                onClick={() => {
-                  setSelectedTable(table);
-                  setIsModalVisible(true);
+       
+          <Row gutter={[16, 16]} justify="start">
+            {filteredTables.map((table) => (
+              <Col
+                key={table.id}
+                xs={12} // Chiếm toàn bộ chiều ngang ở màn hình nhỏ
+                sm={24} // Chia đôi ở màn hình vừa
+                md={12}  // Chia ba ở màn hình lớn hơn
+                lg={8}  // Chia bốn ở màn hình lớn
+                style={{
+                  display: "flex",
+                  justifyContent: "center", // Căn giữa item
                 }}
-              />
-            </Col>
-          ))}
-        </Row>
+              >
+                <ItemTable
+                  ban={table}
+                  id_khuVuc={table.id_khuVuc}
+                  khuVucs={khuVucs}
+                  onClick={() => {
+                    setSelectedTable(table);
+                    setIsModalVisible(true);
+                  }}
+                />
+              </Col>
+            ))}
+          </Row>
       </Content>
 
 

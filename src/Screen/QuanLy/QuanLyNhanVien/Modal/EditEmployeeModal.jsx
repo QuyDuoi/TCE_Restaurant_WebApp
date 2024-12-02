@@ -24,9 +24,7 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
             form.setFieldsValue({
                 ...employee,
                 trangThai: employee?.trangThai || false, // Đảm bảo trạng thái có giá trị mặc định
-            });
-            console.log(employee);
-            
+            });      
         }
     }, [employee, form]);
 
