@@ -1,8 +1,13 @@
 import React from "react";
 import { Descriptions, Button } from "antd";
 
-const BookedTableDetails = ({ table, onClose }) => {
-  if (!table || table.trangThai !== "booked") {
+const BookedTableDetails = ({ table, area, onClose }) => {
+  console.log('value table', table);
+
+
+  const selectedArea = area.find((item) => item._id === table.id_khuVuc);
+  console.log('value area', selectedArea);
+  if (!table || table.trangThai !== "Đã đặt") {
     return (
       <div>
         <p>Không có thông tin đặt bàn cho bàn này.</p>
@@ -17,8 +22,8 @@ const BookedTableDetails = ({ table, onClose }) => {
     <div style={{ padding: "16px" }}>
       <h2 style={{ textAlign: "center", marginBottom: "24px" }}>Thông tin bàn đặt</h2>
       <Descriptions bordered column={1}>
-        <Descriptions.Item label="Tên bàn">{table.tenBan}</Descriptions.Item>
-        <Descriptions.Item label="Khu vực">{table.id_khuVuc}</Descriptions.Item>
+        <Descriptions.Item label="Tên bàn">Bàn: {table.tenBan}</Descriptions.Item>
+        <Descriptions.Item label="Khu vực">{selectedArea.tenKhuVuc}</Descriptions.Item>
         <Descriptions.Item label="Sức chứa">{table.sucChua} người</Descriptions.Item>
         <Descriptions.Item label="Ngày đặt">
           {new Date(table.createdAt).toLocaleDateString("vi-VN")}

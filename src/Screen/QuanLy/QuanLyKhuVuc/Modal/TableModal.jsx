@@ -13,25 +13,32 @@ import InvoiceDetails from "./InvoiceDetails";
 import BookedTableDetails from "./BookedTableDetails";
 import CancelBookingForm from "./CancelBookingForm";
 
-const TableModal = ({ table, isVisible, onClose, onUpdateStatus, hoaDonData, chiTietHoaDonData }) => {
+const TableModal = ({ table,area, isVisible, onClose, onUpdateStatus, hoaDonData}) => {
   const [activeOption, setActiveOption] = useState("Đặt bàn"); // Lựa chọn hiện tại
 
-  // Reset trạng thái khi `table` thay đổi
-  useEffect(() => {
-    if (table) {
-      setActiveOption("Đặt bàn"); // Đặt lại lựa chọn mặc định
+  // Reset trạng thái khi `table` thay đổi hoặc khi modal được mở
+useEffect(() => {
+  if (table) {
+    if (table.trangThai === "Trống") {
+      setActiveOption("Đặt bàn");
+    } else if (table.trangThai === "Đã đặt") {
+      setActiveOption("Tạo hóa đơn");
+    } else if (table.trangThai === "Đang sử dụng") {
+      setActiveOption("Xem thông tin hóa đơn");
     }
-  }, [table]);
+  }
+}, [table, isVisible]);
+
 
   // Kiểm tra trạng thái bàn và vô hiệu hóa các nút
   const isButtonDisabled = (action) => {
-    if (table.trangThai === "available") {
+    if (table.trangThai === "Trống") {
       // Nếu bàn trống
       return ["Xem thông tin hóa đơn", "Xem thông tin bàn đặt", "Hủy đặt bàn"].includes(action);
-    } else if (table.trangThai === "booked") {
+    } else if (table.trangThai === "Đã đặt") {
       // Nếu bàn đã đặt
       return ["Đặt bàn", "Xem thông tin hóa đơn"].includes(action);
-    } else if (table.trangThai === "in-use") {
+    } else if (table.trangThai === "Đang sử dụng") {
       // Nếu bàn đang sử dụng
       return ["Đặt bàn", "Tạo hóa đơn", "Xem thông tin bàn đặt", "Hủy đặt bàn"].includes(action);
     }
@@ -39,25 +46,23 @@ const TableModal = ({ table, isVisible, onClose, onUpdateStatus, hoaDonData, chi
   };
 
   const renderContent = () => {
-    console.log("hoaDonData:", hoaDonData); // Log dữ liệu hóa đơn
-  console.log("chiTietHoaDonData:", chiTietHoaDonData); // Log dữ liệu chi tiết hóa đơn
 
     if (!table) return null; // Tránh lỗi nếu không có dữ liệu bàn
     if (activeOption === "Đặt bàn") {
         return <BookingForm table={table} onSave={onClose} onUpdateStatus={onUpdateStatus} />;
     } else if (activeOption === "Tạo hóa đơn") {
-        return <InvoiceForm table={table} onSave={onClose} onUpdateStatus={onUpdateStatus} />;
+        return <InvoiceForm table={table} area={area} onSave={onClose} onUpdateStatus={onUpdateStatus} />;
     } else if (activeOption === "Xem thông tin hóa đơn") {
         return (
             <InvoiceDetails
             table={table}
+            area={area}
             hoaDonData={hoaDonData}
-            chiTietHoaDonData={chiTietHoaDonData}
             onClose={onClose}
           />
         );
     } else if (activeOption === "Xem thông tin bàn đặt") {
-        return <BookedTableDetails table={table} onClose={onClose} />;
+        return <BookedTableDetails table={table} area={area} onClose={onClose} />;
       }
       else if (activeOption === "Hủy đặt bàn") {
         return (

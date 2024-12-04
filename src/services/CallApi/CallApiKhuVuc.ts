@@ -23,10 +23,14 @@ export const getListKhuVuc = async (idNhaHang: string): Promise<KhuVuc[]> => {
         const response = await fetch(
             `${ipAddress}layDsKhuVuc?id_nhaHang=${idNhaHang}`,
         );
+      
+        
+        
         if (!response.ok) {
             throw new Error('Lỗi khi lấy danh sách Khu Vực');
         }
         const data = await response.json();
+        
         return data;
     } catch (error) {
         console.log('Lỗi khi lấy danh sách khu vực: ', error);
