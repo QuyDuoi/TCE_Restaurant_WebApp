@@ -1,6 +1,6 @@
-import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {layDsBan, themBan, capNhatBan, layThongTinBan, getBanTheoId} from '../../services/CallApi/CallApiBan.ts';
-import {KhuVuc} from "./KhuVucSlice.ts";
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { layDsBan, themBan, capNhatBan, layThongTinBan, getBanTheoId } from '../../services/CallApi/CallApiBan.ts';
+import { KhuVuc } from "./KhuVucSlice.ts";
 const idNhaHang = '66fab50fa28ec489c7137537';
 // Định nghĩa interface cho Ban
 export interface Ban {
@@ -44,9 +44,10 @@ export const addNewBan = createAsyncThunk(
 // Async thunk để cập nhật Bàn
 export const updateBanThunk = createAsyncThunk(
   'bans/updateBans',
-  async ({id, formData}: {id: string; formData: Ban}, thunkAPI) => {
+  async ({ id, formData }: { id: string; formData: Ban }, thunkAPI) => {
     try {
       const data = await capNhatBan(id, formData);
+
       return data;
     } catch (error: any) {
       console.log('Lỗi cập nhật:', error);
@@ -68,11 +69,13 @@ export const fetchBanTheoId = createAsyncThunk(
 const banSlice = createSlice({
   name: 'bans',
   initialState,
-    reducers: {
-        setBans: (state, action: PayloadAction<Ban[]>) => {
-            state.bans = action.payload;
-        },
+  reducers: {
+    setBans: (state, action: PayloadAction<Ban[]>) => {
+      state.bans = action.payload;
+    },resetStatus: (state) => {
+      state.status = 'idle'; // Reset trạng thái về idle
     },
+  },
   extraReducers: builder => {
     builder
       // .addCase(fetchBans.pending, state => {
@@ -104,7 +107,7 @@ const banSlice = createSlice({
             ban => ban._id === action.payload._id,
           );
           if (index !== -1) {
-            state.bans[index] = {...state.bans[index], ...action.payload};
+            state.bans[index] = { ...state.bans[index], ...action.payload };
           }
           state.status = 'succeeded';
         },
@@ -129,5 +132,5 @@ const banSlice = createSlice({
 });
 
 // Export reducer để sử dụng trong store
-export const {setBans} = banSlice.actions;
+export const { setBans, resetStatus } = banSlice.actions;
 export default banSlice.reducer;

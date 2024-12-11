@@ -38,6 +38,8 @@ export const layDsBan = async (idKhuVuc: string) => {
   // Cập nhật Bàn
   export const capNhatBan = async (id: string, thongTinBan: Ban) => {
     try {
+      console.log('id',id);
+      
       const response = await fetch(`${ipAddress}capNhatBan/${id}`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},

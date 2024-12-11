@@ -13,7 +13,7 @@ import InvoiceDetails from "./InvoiceDetails";
 import BookedTableDetails from "./BookedTableDetails";
 import CancelBookingForm from "./CancelBookingForm";
 
-const TableModal = ({ table,area, isVisible, onClose, onUpdateStatus, hoaDonData}) => {
+const TableModal = ({ table,area, isVisible, onClose,onLoading, onUpdateStatus, hoaDonData}) => {
   const [activeOption, setActiveOption] = useState("Đặt bàn"); // Lựa chọn hiện tại
 
   // Reset trạng thái khi `table` thay đổi hoặc khi modal được mở
@@ -49,9 +49,9 @@ useEffect(() => {
 
     if (!table) return null; // Tránh lỗi nếu không có dữ liệu bàn
     if (activeOption === "Đặt bàn") {
-        return <BookingForm table={table} onSave={onClose} onUpdateStatus={onUpdateStatus} />;
+        return <BookingForm table={table} area={area} onSave={onClose} onLoading={onLoading} onUpdateStatus={onUpdateStatus} />;
     } else if (activeOption === "Tạo hóa đơn") {
-        return <InvoiceForm table={table} area={area} onSave={onClose} onUpdateStatus={onUpdateStatus} />;
+        return <InvoiceForm table={table} area={area} onSave={onClose} onLoading={onLoading} onUpdateStatus={onUpdateStatus} />;
     } else if (activeOption === "Xem thông tin hóa đơn") {
         return (
             <InvoiceDetails
@@ -68,6 +68,8 @@ useEffect(() => {
         return (
           <CancelBookingForm
             table={table}
+            area={area}
+            onLoading={onLoading}
             onCancel={onClose}
             onUpdateStatus={onUpdateStatus}
           />
