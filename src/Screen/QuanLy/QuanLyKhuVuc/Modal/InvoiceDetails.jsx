@@ -22,6 +22,8 @@ const InvoiceDetails = ({ table,area, hoaDonData = [], onClose }) => {
     }
   }, [hoaDon, dispatch]);
 
+  console.log(chiTietHoaDons);
+  
   
   if (!hoaDon) {
     return (
@@ -64,7 +66,7 @@ const InvoiceDetails = ({ table,area, hoaDonData = [], onClose }) => {
   // Dữ liệu hiển thị bảng
   const dataSource = chiTietHoaDon.map((item) => ({
     ...item,
-    tenMon: item.id_monAn.tenMon
+    tenMon: item.monAn.tenMon
   }));
 
   
