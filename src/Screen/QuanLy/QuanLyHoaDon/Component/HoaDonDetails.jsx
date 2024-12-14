@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import { Col, Row, Typography, Divider, Button, InputNumber, Table } from "antd";
+import React, {useEffect, useState} from "react";
+import {Col, Row, Typography, Divider, Button, InputNumber, Table, Spin} from "antd";
 import {fetchChiTietHoaDon} from "../../../../store/Slices/ChiTietHoaDonSlice.ts";
 import { useDispatch, useSelector } from "react-redux";
 import {RootState} from "@reduxjs/toolkit/query";
@@ -8,6 +8,8 @@ const { Title, Text } = Typography;
 
 const HoaDonDetails = ({ hoaDon = {} }) => {
     const dispatch = useDispatch();
+
+    const [selectedHoaDon, setSelectedHoaDon] = useState(null);
 
     const chiTietHoaDons = useSelector(
         (state: RootState) => state.chiTietHoaDon.chiTietHoaDons || []
@@ -20,60 +22,34 @@ const HoaDonDetails = ({ hoaDon = {} }) => {
         if (hoaDon && hoaDon._id) {
             dispatch(fetchChiTietHoaDon(hoaDon._id));
         }
-        console.log("abc ",chiTietHoaDons.monAn);
-    }, [hoaDon, dispatch]);
-    // Example data, replace with real props or state
-    // const exampleData = {
-    //     table: "Bàn 5 | Tầng 2",
-    //     time: "12:00 | 20/10/2024",
-    //     status: "Chưa thanh toán",
-    //     discount: 500000,
-    //     items: [
-    //         { key: 1, name: "Cơm thập cẩm", quantity: 4, price: 100000 },
-    //         { key: 2, name: "Thịt nướng giòn", quantity: 2, price: 120000 },
-    //         { key: 3, name: "Tôm hùm Alaska", quantity: 1, price: 680000 },
-    //         { key: 4, name: "Món phụ 1", quantity: 3, price: 50000 },
-    //         { key: 5, name: "Món phụ 2", quantity: 2, price: 40000 },
-    //         { key: 6, name: "Món phụ 3", quantity: 5, price: 60000 },
-    //         { key: 7, name: "Món phụ 4", quantity: 1, price: 30000 },
-    //         { key: 8, name: "Món phụ 5", quantity: 4, price: 70000 },
-    //         { key: 9, name: "Món phụ 6", quantity: 2, price: 80000 },
-    //         { key: 10, name: "Món phụ 7", quantity: 6, price: 90000 },
-    //     ],
-    // };
-    //
-    // const calculateTotal = (monAn) => {
-    //     return monAn.reduce((total, item) => total + item.quantity * item.price, 0);
-    // };
-    //
-    // const totalBill = calculateTotal(exampleData.items);
-    // const finalAmount = totalBill - exampleData.discount;
+            console.log(chiTietHoaDons);
+    }, [hoaDon._id, dispatch]);
 
     const columns = [
         {
             title: "Món",
-            dataIndex: "name",
-            key: "name",
+            dataIndex: "tenMon", // Sửa thành "tenMon"
+            key: "tenMon",
         },
         {
             title: "SL",
-            dataIndex: "quantity",
-            key: "quantity",
+            dataIndex: "soLuong", // Sửa thành "soLuong"
+            key: "soLuong",
             align: "center",
         },
         {
             title: "Giá",
-            dataIndex: "price",
-            key: "price",
+            dataIndex: "gia", // Sửa thành "gia"
+            key: "gia",
             align: "right",
-            render: (text) => `${text} đ`,
+            render: (text) => `${text.toLocaleString()} đ`,
         },
     ];
 
     const dataSource =
         chiTietHoaDons.map((mon, index) => ({
             key: index,
-            tenMon: mon.monAn?.tenMon || "Không xác định",
+            tenMon: mon.monAn.tenMon || "Không xác định",
             soLuong: mon.soLuongMon || 0,
             gia: mon.giaTien || 0,
         })) || [];
@@ -133,6 +109,7 @@ const HoaDonDetails = ({ hoaDon = {} }) => {
                         <span>Danh sách order</span>
                         <Button type="link" style={{ padding: 0, marginRight: 20 }}>Chỉnh sửa</Button>
                     </Title>
+                    <Spin spinning={statusChiTietHoaDon === "loading"} tip="Đang tải...">
                     <Table
                         dataSource={dataSource}
                         columns={columns}
@@ -140,6 +117,7 @@ const HoaDonDetails = ({ hoaDon = {} }) => {
                         bordered
                         style={{ paddingLeft: 20, paddingRight: 20 }}
                     />
+                    </Spin>
                 </div>
 
                 <Divider />

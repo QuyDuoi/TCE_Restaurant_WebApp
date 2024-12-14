@@ -1,6 +1,6 @@
 const HoaDonData = [
     {
-        id : "6724670072ed7744c2ae478a",
+        _id : "6752922d0284d6561ab0f055",
         tongGiaTri : 1170000,
         trangThai : "Đã Thanh Toán",
         tienGiamGia: 50000,
@@ -13,7 +13,7 @@ const HoaDonData = [
         thoiGianVao: "2024-11-18T03:58:00.000+00:00",
     },
     {
-        id : "6721bd5394d39e271b3f9025",
+        _id : "6752bc136f6294a3245f18bf",
         tongGiaTri : 1850000,
         trangThai : "Đã Thanh Toán",
         tienGiamGia: 50000,
@@ -26,7 +26,7 @@ const HoaDonData = [
         thoiGianVao: null,
     },
     {
-        id : "6721bd9494d39e271b3f9027",
+        _id : "6752c2d842b7ae32518ee149",
         tongGiaTri : 100000,
         trangThai : "Đã Thanh Toán",
         tienGiamGia: 50000,

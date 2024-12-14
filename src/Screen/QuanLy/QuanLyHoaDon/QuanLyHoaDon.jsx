@@ -15,8 +15,14 @@ const QuanLyHoaDon = () => {
 
     const [selectedHoaDon, setSelectedHoaDon] = useState(null); // Hóa đơn được chọn
     const handleHoaDonClick = (hoaDon) => {
+        console.log(hoaDon);
         setSelectedHoaDon(hoaDon);
     };
+    useEffect(() => {
+        if (HoaDonData.length > 0) {
+            setSelectedHoaDon(HoaDonData[0]);
+        }
+    }, [HoaDonData]);
 
     return (
         <Layout>
@@ -35,25 +41,12 @@ const QuanLyHoaDon = () => {
                     <List
                         itemLayout="vertical"
                         dataSource={HoaDonData} // Dữ liệu là danh sách hóa đơn
-                        renderItem={(hoaDon) => ( // Sử dụng hoaDon thay cho item
-                            <List
-                                key={hoaDon.id}
-                                onClick={() => handleHoaDonClick(hoaDon)}
-                                style={{
-                                    cursor: "pointer",
-                                    backgroundColor: selectedHoaDon?.id === hoaDon.id ? "#e6f7ff" : "transparent",
-                                    padding: "10px",
-                                    marginBottom: "8px",
-                                    borderRadius: "5px",
-                                    border: selectedHoaDon?.id === hoaDon.id ? "1px solid #1890ff" : "1px solid #f0f0f0",
-                                }}
-                            >
+                        renderItem={(item) => ( // Sử dụng hoaDon thay cho item
                                 <HoaDonItem
-                                    hoaDon={hoaDon} // Sử dụng hoaDon thay cho item
-                                    isSelected={selectedHoaDon ? hoaDon.id === selectedHoaDon.id : null} // Sử dụng hoaDon thay cho item
-                                    onClick={() => handleHoaDonClick(hoaDon)} // Sử dụng hoaDon thay cho item
+                                    hoaDon={item} // Sử dụng hoaDon thay cho item
+                                    isSelected={selectedHoaDon ? item._id === selectedHoaDon._id : null} // Sử dụng hoaDon thay cho item
+                                    onClick={() => handleHoaDonClick(item)} // Sử dụng hoaDon thay cho item
                                 />
-                            </List>
                         )}
                     />
                 </Sider>
