@@ -23,6 +23,8 @@ code {
   overflow: hidden; /* Ngăn không cho root cuộn */
 }
 .menu-list-container {
-  max-height: 500px; /* Chiều cao tối đa cho danh sách món ăn */
+  height: 100vh; /* Chiều cao full màn hình */
   overflow-y: auto; /* Cho phép cuộn theo chiều dọc trong danh sách món ăn */
+  display: flex;
+  flex-direction: column;
 }
