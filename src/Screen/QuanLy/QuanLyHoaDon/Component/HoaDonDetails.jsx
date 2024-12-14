@@ -49,7 +49,7 @@ const HoaDonDetails = ({ hoaDon = {} }) => {
     const dataSource =
         chiTietHoaDons.map((mon, index) => ({
             key: index,
-            tenMon: mon.monAn.tenMon || "Không xác định",
+            tenMon: mon.monAn?.tenMon || "Không xác định",
             soLuong: mon.soLuongMon || 0,
             gia: mon.giaTien || 0,
         })) || [];
