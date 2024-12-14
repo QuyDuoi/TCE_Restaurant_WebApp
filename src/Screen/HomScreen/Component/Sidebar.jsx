@@ -7,7 +7,6 @@ import {
     SettingOutlined,
     BarChartOutlined,
     PartitionOutlined,
-    BellOutlined,
     AlertOutlined,
     HddOutlined,
 } from '@ant-design/icons';

@@ -108,7 +108,7 @@
   }
 
   .menu-list-container {
-    padding: 10px; /* Thêm padding cho container */
+    padding: 2px; /* Thêm padding cho container */
   }
 
   .card-content {
@@ -118,17 +118,17 @@
 
   .card-content h4 {
     font-size: 1rem;
-    margin: 5px 0; /* Giảm khoảng cách */
+    margin: 2px 0; /* Giảm khoảng cách */
   }
 
   .card-content p {
     font-size: 0.7rem; /* Giảm font-size phần mô tả */
-    margin: 5px 0; /* Thêm margin để tạo khoảng cách */
+    margin: 2px 0; /* Thêm margin để tạo khoảng cách */
   }
   .ant-card img {
     width: 80px; /* Tăng kích thước hình ảnh một chút */
     height: 80px; /* Tăng kích thước hình ảnh một chút */
-    object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+    object-fit: cover; 
   }
 }
 .ant-card .ant-card-body {

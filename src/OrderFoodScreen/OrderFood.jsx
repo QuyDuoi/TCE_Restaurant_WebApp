@@ -6,10 +6,12 @@ import OrderList from "./Component/OrderList";
 import axios from "axios";
 import "./OrderFood.css";
 import {ipAddress} from "../services/api.ts"
+import { useParams } from "react-router-dom";
 
 const { TabPane } = Tabs;
 
 const OrderFood = () => {
+  const { idBan } = useParams();
   const [orderList, setOrderList] = useState([]); // Danh sách món trong giỏ
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [isCartModalVisible, setCartModalVisible] = useState(false); // Hiển thị giỏ hàng

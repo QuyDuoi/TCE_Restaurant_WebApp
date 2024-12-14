@@ -99,7 +99,7 @@ const DishItemComponent = ({ dish, onDelete }) => {
                 border: '1px solid #ddd',
                 borderRadius: '8px',
                 padding: '12px',
-                height: '100px',
+                height: '110px',
                 boxSizing: 'border-box',
             }}
         >
@@ -128,7 +128,7 @@ const DishItemComponent = ({ dish, onDelete }) => {
             {/* Phần giữa: Tên món và giá */}
             <div
                 style={{
-                    width: '50%',
+                    width: '55%',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
@@ -176,7 +176,7 @@ const DishItemComponent = ({ dish, onDelete }) => {
                         textAlign: 'center',
                     }}
                 >
-                    {status ? 'Còn hàng' : 'Hết hàng'}
+                    {status ? 'Sẵn sàng' : 'Ngưng phục vụ'}
                 </div>
                 <Dropdown overlay={menu} trigger={['click']}>
                     <Button
