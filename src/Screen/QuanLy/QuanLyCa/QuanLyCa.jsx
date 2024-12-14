@@ -10,13 +10,14 @@ import { fetchCaLam } from "../../../store/Slices/CaLamSlice.ts";
 const { Sider, Content } = Layout;
 
 const QuanLyCa = () => {
+    const id_nhaHang = "66fab50fa28ec489c7137537";
     const dispatch = useDispatch();
     const { caLams, status, error } = useSelector((state) => state.caLam);
     const [selectedCaLam, setSelectedCaLam] = useState(null);
     const [selectedDate, setSelectedDate] = useState("");
 
     useEffect(() => {
-        dispatch(fetchCaLam());
+        dispatch(fetchCaLam(id_nhaHang));
     }, [dispatch]);
 
     useEffect(() => {

@@ -19,10 +19,10 @@ import { CaLam } from "../../store/Slices/CaLamSlice.ts";
 // };
 
 // Lấy danh sách tất cả các ca làm mà không cần truyền id_nhanVien
-export const getListCaLam = async (): Promise<CaLam[]> => {
+export const getListCaLam = async (id_nhaHang: string): Promise<CaLam[]> => {
     try {
         const response = await fetch(
-            `${ipAddress}layDsCaLamViec`  // Giả sử API này trả về tất cả các ca làm
+            `${ipAddress}layDsCaLamViec?id_nhaHang=${id_nhaHang}`  // Giả sử API này trả về tất cả các ca làm
         );
         if (!response.ok) {
             throw new Error("Lỗi khi lấy danh sách Ca Làm");
@@ -34,6 +34,8 @@ export const getListCaLam = async (): Promise<CaLam[]> => {
         return [];
     }
 };
+
+
 
 // Lấy danh sách chi tiết hóa đơn theo ca làm
 export const getListChiTietHoaDonTheoCaLam = async (

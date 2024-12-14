@@ -39,19 +39,19 @@ const initialState: CaLamState = {
 };
 
 // Lấy danh sách các ca làm
-export const fetchCaLam = createAsyncThunk<
-    CaLam[],
-    void,
-    { rejectValue: string }
->("caLam/fetchCaLam", async (_, { rejectWithValue }) => {
+export const fetchCaLam = createAsyncThunk(
+    "caLam/fetchCaLam",
+    async (id_nhaHang: string) => {
     try {
         // Lấy danh sách tất cả các ca làm
-        const allCaLamResponse = await getListCaLam(); // Không truyền id_nhanVien
+        const allCaLamResponse = await getListCaLam(id_nhaHang); // Không truyền id_nhanVien
         return allCaLamResponse; // Trả về tất cả các ca làm
     } catch (error: any) {
-        return rejectWithValue(error.message || "Lỗi khi gọi API fetchCaLam");
+        console.log('Lỗi lấy danh sách ca làm:', error);
+        return [];
     }
 });
+
 
 // // Lấy danh sách các ca làm
 // export const fetchCaLam = createAsyncThunk<

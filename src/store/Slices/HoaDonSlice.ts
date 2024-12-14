@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { getListHoaDonTheoCaLam } from '../../services/CallApi/CallApiHoaDon.ts';
-import { fetchHoaDonTheoNhaHang, themHoaDonMoi } from '../Thunks/hoaDonThunks.ts';
+import {
+    getListHoaDonTheoCaLam,
+    getListHoaDonTheoNhaHang,
+    thanhToanHoaDon,
+} from '../../services/CallApi/CallApiHoaDon.ts';
+import { themHoaDonMoi } from '../Thunks/hoaDonThunks.ts';
 // Interface định nghĩa cho HoaDon
 export interface HoaDon {
     _id?: string;
@@ -43,17 +47,62 @@ export const fetchHoaDonTheoCaLam = createAsyncThunk(
     }
 );
 
+export const fetchHoaDonTheoNhaHang = createAsyncThunk<
+    HoaDon[],
+    void,
+    { rejectValue: string }>
+    ("hoaDon/fetchHoaDonTheoNhaHang",
+        async (id_nhaHang: string, { rejectWithValue }) => {
+    try {
+        const hoaDonsData = await getListHoaDonTheoNhaHang(id_nhaHang);
+        return hoaDonsData;
+    } catch (error: any) {
+        return rejectWithValue(error.message || "Lỗi khi gọi API fetchHoaDon");
+    }
+});
+
+// chua toi uu
+export const thanhToanHoaDonThunk = createAsyncThunk(
+    'hoaDon/thanhToanHoaDon',
+    async (
+        {
+            id_hoaDon,
+            tienGiamGia,
+            hinhThucThanhToan,
+            thoiGianRa,
+        }: {
+            id_hoaDon: string;
+            tienGiamGia: number;
+            hinhThucThanhToan: boolean;
+            thoiGianRa: Date;
+        },
+        thunkAPI,
+    ) => {
+        try {
+            const data = await thanhToanHoaDon(
+                id_hoaDon,
+                tienGiamGia,
+                hinhThucThanhToan,
+                thoiGianRa,
+            );
+            return data;
+        } catch (error: any) {
+            console.log('Lỗi thanh toán:', error);
+            return thunkAPI.rejectWithValue(error.message || 'Error thanh toán');
+        }
+    },
+);
+
 const hoaDonSlice = createSlice({
     name: 'hoaDon',
-    initialState:{
-        hoaDons: [], // đảm bảo giá trị khởi tạo là mảng rỗng
-        status: "idle", // hoặc trạng thái khác tùy theo logic của bạn
-    },
+    initialState,
     reducers: {},
-    extraReducers: builder => {
+    extraReducers: (builder) => {
         builder
-            .addCase(fetchHoaDonTheoCaLam.pending, state => {
+            // fetchHoaDonTheoCaLam
+            .addCase(fetchHoaDonTheoCaLam.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(
                 fetchHoaDonTheoCaLam.fulfilled,
@@ -64,24 +113,29 @@ const hoaDonSlice = createSlice({
             )
             .addCase(fetchHoaDonTheoCaLam.rejected, (state, action) => {
                 state.status = 'failed';
+                state.error = action.error?.message || 'Lỗi không xác định';
             })
-            .addCase(themHoaDonMoi.pending, state => {
+            // themHoaDonMoi
+            .addCase(themHoaDonMoi.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(
                 themHoaDonMoi.fulfilled,
                 (state, action: PayloadAction<HoaDon>) => {
                     state.status = 'succeeded';
                     state.hoaDons.push(action.payload);
-                    console.log('hoadonslice',action.payload);
+                    console.log('hoadonslice', action.payload);
                 }
             )
             .addCase(themHoaDonMoi.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload; // Lưu lỗi
+                state.error = action.error?.message || 'Lỗi không xác định';
             })
-            .addCase(fetchHoaDonTheoNhaHang.pending, state => {
+            // fetchHoaDonTheoNhaHang
+            .addCase(fetchHoaDonTheoNhaHang.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(
                 fetchHoaDonTheoNhaHang.fulfilled,
@@ -92,6 +146,29 @@ const hoaDonSlice = createSlice({
             )
             .addCase(fetchHoaDonTheoNhaHang.rejected, (state, action) => {
                 state.status = 'failed';
+                state.error = action.error?.message || 'Lỗi không xác định';
+            })
+            // thanhToanHoaDonThunk
+            .addCase(thanhToanHoaDonThunk.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(
+                thanhToanHoaDonThunk.fulfilled,
+                (state, action: PayloadAction<HoaDon>) => {
+                    state.status = 'succeeded';
+                    // Cập nhật hóa đơn đã thanh toán trong danh sách
+                    const index = state.hoaDons.findIndex(
+                        (hoaDon) => hoaDon._id === action.payload._id
+                    );
+                    if (index !== -1) {
+                        state.hoaDons[index] = action.payload;
+                    }
+                }
+            )
+            .addCase(thanhToanHoaDonThunk.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error?.message || 'Lỗi không xác định';
             });
     },
 });

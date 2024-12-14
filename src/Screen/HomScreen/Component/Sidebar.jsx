@@ -73,7 +73,7 @@ const Sidebar = () => {
                     {
                         key: '6',
                         icon: <HddOutlined />,
-                        label: <Link to="/quanLyLenMon">Quản lý hóa đơn</Link>,
+                        label: <Link to="/quanLyHoaDon">Quản lý hóa đơn</Link>,
                     },
                     {
                         key: '7',

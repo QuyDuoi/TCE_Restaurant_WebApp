@@ -20,6 +20,7 @@ const ChiTietHoaDonModal = ({ visible, onCancel, hoaDon }) => {
         if (hoaDon && hoaDon._id) {
             dispatch(fetchChiTietHoaDon(hoaDon._id));
         }
+        console.log("aaa", chiTietHoaDons);
     }, [hoaDon, dispatch]);
 
     const columns = [
@@ -44,7 +45,7 @@ const ChiTietHoaDonModal = ({ visible, onCancel, hoaDon }) => {
     const dataSource =
         chiTietHoaDons.map((mon, index) => ({
             key: index,
-            tenMon: mon.id_monAn?.tenMon || "Không xác định",
+            tenMon: mon.monAn?.tenMon || "Không xác định",
             soLuong: mon.soLuongMon || 0,
             gia: mon.giaTien || 0,
         })) || [];
