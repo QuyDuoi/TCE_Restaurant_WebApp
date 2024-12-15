@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Input, Button, Tabs, Badge, Modal, List } from "antd";
+import { Row, Col, Input, Button, Tabs, Badge, Modal, List, Spin } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import MenuList from "./Component/MenuList";
 import OrderList from "./Component/OrderList";
 import axios from "axios";
 import "./OrderFood.css";
-import {ipAddress} from "../services/api.ts"
+import {ipAddress, searchMonAn} from "../services/api.ts"
 import { useParams } from "react-router-dom";
 
 const { TabPane } = Tabs;
 
 const OrderFood = () => {
   const { idBan } = useParams();
+  const [loading, setLoading] = useState(true);
   const [orderList, setOrderList] = useState([]); // Danh sách món trong giỏ
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [isCartModalVisible, setCartModalVisible] = useState(false); // Hiển thị giỏ hàng
   const [listMonAn, setListMonAn] = useState([]); // Danh sách thực đơn từ API
   const [filteredMonAn, setFilteredMonAn] = useState([]); // Danh sách thực đơn đã lọc
   const [searchText, setSearchText] = useState(""); // Từ khóa tìm kiếm
-
+  const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
+  
   // Lấy danh sách thực đơn từ API
   useEffect(() => {
     const layDanhSachThucDon = async () => {
+      setLoading(true);
       try {
-        const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
         const response = await axios.get(
           `${ipAddress}layDanhSachThucDon`,
           { params: { id_nhaHang } }
@@ -32,6 +34,8 @@ const OrderFood = () => {
         setFilteredMonAn(response.data); // Gán mặc định danh sách đã lọc
       } catch (err) {
         console.error("Lỗi khi gọi API:", err);
+      } finally {
+        setLoading(false)
       }
     };
     layDanhSachThucDon();
@@ -39,17 +43,12 @@ const OrderFood = () => {
 
   // Tìm kiếm món ăn (Debounce 1 giây)
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout( async () => {
       if (searchText.trim() === "") {
         setFilteredMonAn(listMonAn); // Nếu không có từ khóa thì trả lại toàn bộ
       } else {
-        const filtered = listMonAn.map((category) => ({
-          ...category,
-          monAns: category.monAns.filter((item) =>
-            item.tenMon.toLowerCase().includes(searchText.toLowerCase())
-          ),
-        })).filter((category) => category.monAns.length > 0);
-        setFilteredMonAn(filtered);
+        const data = await searchMonAn(searchText, id_nhaHang);
+        setFilteredMonAn(data);
       }
     }, 1000);
 
@@ -101,8 +100,17 @@ const OrderFood = () => {
     return category ? category.monAns : [];
   };
 
+  if (loading) {
+    return (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+            <Spin size="large" />
+            <div>Đang lấy thông tin món ăn...</div>
+        </div>
+    );
+}
+
   return (
-    <Row gutter={16} style={{ padding: "10px", height: "calc(100vh - 20px)" }}>
+    <Row gutter={16} style={{ padding: "20px" , height: "calc(100vh - 10px)"}}>
       {/* Danh sách món ăn */}
       <Col xs={24} sm={24} md={14} style={{ marginBottom: "20px" }}>
         <h3>Danh sách món ăn</h3>

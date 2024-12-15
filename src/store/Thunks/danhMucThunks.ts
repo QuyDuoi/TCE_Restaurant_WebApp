@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { DanhMuc } from "../Slices/DanhMucSlice";
 import { capNhatDanhMuc, themDanhMuc, xoaDanhMuc } from "../../services/CallApi/CallApiThucDon.ts";
 import { setMonAns } from '../Slices/MonAnSlice.ts'; // Action để lưu món ăn vào MonAnSlice
-import { ipAddress } from '../../services/api';
+import { ipAddress } from '../../services/api.ts';
 
 export const fetchDanhMucVaMonAn = createAsyncThunk(
     'danhMucs/fetchDanhMucVaMonAn',

@@ -3,7 +3,7 @@ import hoaDonReducer from './Slices/HoaDonSlice.ts';
 import chiTietHoaDonReducer from './Slices/ChiTietHoaDonSlice.ts';
 // import toppingReducer from './Slices/ToppingSlice.ts';
 // import nhomToppingReducer from './Slices/NhomToppingSlice.ts';
-// import danhMucReducer from './Slices/DanhMucSlice.ts';
+import danhMucReducer from './Slices/DanhMucSlice.ts';
 import monAnReducer from './Slices/MonAnSlice.ts';
 // import nhanVienReducer from './Slices/NhanVienSlice.ts';
 import khuVucReducer from './Slices/KhuVucSlice.ts'
@@ -16,7 +16,7 @@ export const store = configureStore({
     chiTietHoaDon: chiTietHoaDonReducer,
     // nhomToppings: nhomToppingReducer,
     // toppings: toppingReducer,
-    // danhMuc: danhMucReducer,
+    danhMuc: danhMucReducer,
     monAn: monAnReducer,
     // nhanVien: nhanVienReducer,
     khuVuc: khuVucReducer,

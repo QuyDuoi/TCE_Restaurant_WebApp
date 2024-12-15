@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Tabs } from 'antd';
+import { Layout, Spin, Tabs } from 'antd';
 import HeaderBar from './Component/HeaderBar.jsx';
 import TabViewComponent from './Component/TabViewComponent.jsx';
-import { ipAddress } from '../../../services/api.ts';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDanhMucVaMonAn } from '../../../store/Thunks/danhMucThunks.ts';
 
 const { Content } = Layout;
 
@@ -13,13 +14,16 @@ const QuanLyThucDon = () => {
     const [filteredDishes, setFilteredDishes] = useState([]); // Trạng thái cho món ăn đã lọc
 
     const id_nhaHang = "66fab50fa28ec489c7137537"; // Ví dụ về id_nhaHang
+    const dispatch = useDispatch();
+    const dsDanhMuc = useSelector((state) => state.danhMuc.danhMucs);
+    const dsMonAn = useSelector((state) => state.monAn.monAns);
 
     useEffect(() => {
         const fetchDanhMucs = async () => {
             try {
-                const response = await fetch(`${ipAddress}layDanhSachThucDon?id_nhaHang=${id_nhaHang}`);
-                const data = await response.json(); // Chuyển dữ liệu JSON
-                setDanhMucs(data); // Cập nhật danh sách
+                await dispatch(fetchDanhMucVaMonAn(id_nhaHang));
+                setDanhMucs(dsDanhMuc); // Cập nhật danh sách
+                setFilteredDishes(dsMonAn);
             } catch (error) {
                 console.error('Error fetching danh muc:', error);
             } finally {
@@ -28,7 +32,7 @@ const QuanLyThucDon = () => {
         };
 
         fetchDanhMucs();
-    }, [id_nhaHang]); // Khi id_nhaHang thay đổi, useEffect sẽ chạy lại
+    }, []);
 
     const removeDiacritics = (str) => {
         return str
@@ -39,7 +43,7 @@ const QuanLyThucDon = () => {
 
     useEffect(() => {
         // Lọc món ăn khi từ khóa tìm kiếm thay đổi
-        const allDishes = danhMucs.flatMap((danhMuc) => danhMuc.monAns || []);
+        const allDishes = dsMonAn;
         const normalizedSearchTerm = removeDiacritics(searchTerm.trim());
         if (normalizedSearchTerm === '') {
             setFilteredDishes(allDishes); // Hiển thị tất cả nếu không có từ khóa tìm kiếm
@@ -52,6 +56,14 @@ const QuanLyThucDon = () => {
         }
     }, [searchTerm, danhMucs]); // Lọc khi từ khóa tìm kiếm hoặc danh sách món ăn thay đổi
     
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+                <Spin size="large" />
+                <div>Đang tải dữ liệu...</div>
+            </div>
+        );
+    }
 
     return (
         <Layout>
@@ -65,9 +77,6 @@ const QuanLyThucDon = () => {
                     overflowY: 'auto',
                 }}
             >
-                {loading ? (
-                    <div style={{ textAlign: 'center', marginTop: '20px' }}>Đang tải dữ liệu...</div>
-                ) : (
                     <Tabs
                         defaultActiveKey="all"
                         tabBarStyle={{
@@ -96,26 +105,32 @@ const QuanLyThucDon = () => {
                                 }}
                             />
                         </Tabs.TabPane>
-                        {danhMucs.map((danhMuc) => (
-                            <Tabs.TabPane
-                                tab={danhMuc.tenDanhMuc}
-                                key={danhMuc._id}
-                                style={{
-                                    borderRadius: '8px',
-                                }}
-                            >
-                                <TabViewComponent
-                                    data={danhMuc}
+                        {dsDanhMuc.map((danhMuc) => {
+                            // Lọc các món ăn thuộc danh mục
+                            const monAnsByDanhMuc = dsMonAn.filter(
+                                (monAn) => monAn.id_danhMuc === danhMuc._id // Giả sử `danhMucId` là trường tham chiếu đến danh mục
+                            );
+                            
+                            return (
+                                <Tabs.TabPane
+                                    tab={danhMuc.tenDanhMuc}
+                                    key={danhMuc._id}
                                     style={{
-                                        background: 'white',
                                         borderRadius: '8px',
-                                        padding: '16px',
                                     }}
-                                />
-                            </Tabs.TabPane>
-                        ))}
+                                >
+                                    <TabViewComponent
+                                        data={{ monAns: monAnsByDanhMuc }} // Truyền danh sách món ăn của danh mục vào đây
+                                        style={{
+                                            background: 'white',
+                                            borderRadius: '8px',
+                                            padding: '16px',
+                                        }}
+                                    />
+                                </Tabs.TabPane>
+                            );
+                        })}
                     </Tabs>
-                )}
             </Content>
         </Layout>
     );

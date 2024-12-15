@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { List, Card, Row, Col, Button } from "antd";
-import { PlusSquareOutlined } from "@ant-design/icons"; // Import biểu tượng dấu cộng
+import { List, Card, Row, Col, Button, Tag } from "antd";
+import { PlusSquareOutlined } from "@ant-design/icons";
 
 const MenuList = ({ data, onAddItem }) => {
   return (
     <List
       dataSource={data}
+      locale={{ emptyText: "Không có món ăn nào trong danh mục này" }}
       renderItem={(item) => <MenuItem item={item} onAddItem={onAddItem} />}
     />
   );
@@ -20,7 +21,7 @@ const MenuItem = ({ item, onAddItem }) => {
     if (type === "increase") newsoLuongMon++;
     if (type === "decrease" && soLuongMon > 0) newsoLuongMon--;
     setsoLuongMon(newsoLuongMon);
-    setTotalPrice(newsoLuongMon * item.price);
+    setTotalPrice(newsoLuongMon * item.giaMonAn);
   };
 
   return (
@@ -31,24 +32,20 @@ const MenuItem = ({ item, onAddItem }) => {
           <Col span={6} style={{ textAlign: "center" }}>
             <img
               src={item.anhMonAn}
-              alt={item.name}
+              alt={item.tenMon}
               style={{
                 objectFit: "cover",
                 display: "block",
                 padding: "6px",
-                borderRadius: "10px"
+                borderRadius: "10px",
               }}
             />
           </Col>
-          {/* Cột 2: Tên và giá */}
+          {/* Cột 2: Tên, giá, và trạng thái */}
           <Col span={15}>
             <h4
               style={{
                 margin: 0,
-                width: "100%",
-                maxWidth: "100%",
-                height: "auto",
-                objectFit: "cover",
                 color: "orange",
                 paddingLeft: "5px",
               }}
@@ -57,7 +54,6 @@ const MenuItem = ({ item, onAddItem }) => {
             </h4>
             <p
               style={{
-                width: "100%",
                 fontWeight: "bold",
                 color: "blue",
                 paddingLeft: "5px",
@@ -67,13 +63,18 @@ const MenuItem = ({ item, onAddItem }) => {
             </p>
             <p
               style={{
-                width: "100%",
                 wordBreak: "break-word",
                 paddingLeft: "5px",
               }}
             >
               {item.moTa}
             </p>
+            {/* Hiển thị trạng thái món ăn */}
+            {item.trangThai === false && (
+              <Tag color="red" style={{ marginLeft: "5px" }}>
+                Ngưng phục vụ
+              </Tag>
+            )}
           </Col>
           {/* Cột 3: Nút bấm */}
           <Col span={3} style={{ textAlign: "center" }}>
@@ -87,6 +88,7 @@ const MenuItem = ({ item, onAddItem }) => {
             >
               <Button
                 type="primary"
+                disabled={!item.trangThai} // Vô hiệu hóa nút nếu món không khả dụng
                 style={{
                   width: "30px",
                   height: "30px",
