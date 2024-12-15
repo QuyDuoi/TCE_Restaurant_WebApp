@@ -4,7 +4,7 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import OrderFood from "./OrderFoodScreen/OrderFood";
 import Home from "./Screen/HomScreen/Home";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import QuanLyNhanVien from "./Screen/QuanLy/QuanLyNhanVien/QuanLyNhanVien";
 import QuanLyCa from "./Screen/QuanLy/QuanLyCa/QuanLyCa";
 import QuanLyHoaDon from "./Screen/QuanLy/QuanLyHoaDon/QuanLyHoaDon";
