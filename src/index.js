@@ -27,7 +27,7 @@ root.render(
           <Route path="quanLyCa" element={<QuanLyCa />} />
           <Route path="quanLyKhuVuc" element={<QuanLyKhuVuc />} />
           <Route path="quanLyLenMon" element={<QuanLyLenMon />} />
-          <Route path="quanLyHoaDon" element={<QuanLyHoaDon />} />
+          <Route path="quetToanHoaDon" element={<QuanLyHoaDon />} />
           <Route path="thongKe" element={<ThongKe />} />
         </Route>
         <Route path="orderFood/:id" element={<OrderFood />} />

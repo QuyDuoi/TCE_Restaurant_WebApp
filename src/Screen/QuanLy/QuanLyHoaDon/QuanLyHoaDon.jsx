@@ -1,28 +1,56 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, List } from 'antd';
+import { Layout, List, Spin, Empty } from 'antd';
 import { useDispatch, useSelector } from "react-redux";
-import { fetchHoaDonTheoNhaHang } from "../../../store/Slices/HoaDonSlice.ts";
+import { fetchHoaDonTheoCaLam, fetchHoaDonTheoNhaHang } from "../../../store/Slices/HoaDonSlice.ts";
 import HeaderBar from './Component/HeaderBar';
-import HoaDonData from "./Data/HoaDonData";
-import CaLamItem from "../QuanLyCa/Component/CaLamItem";
 import HoaDonItem from "./Component/HoaDonItem";
-import CaLamDetails from "../QuanLyCa/Component/CaLamDetails";
 import HoaDonDetails from "./Component/HoaDonDetails";
+import { RootState } from "@reduxjs/toolkit/query";
 
 const { Sider, Content } = Layout;
 
 const QuanLyHoaDon = () => {
 
-    const [selectedHoaDon, setSelectedHoaDon] = useState(null); // Hóa đơn được chọn
+    const id_nhaHang = "66fab50fa28ec489c7137537";
+    const dispatch = useDispatch();
+
+    const hoaDons = useSelector((state: RootState) => state.hoaDon.hoaDons || []);
+    const status = useSelector((state: RootState) => state.hoaDon.status);
+
+    const [selectedHoaDon, setSelectedHoaDon] = useState(null);
+
+    useEffect(() => {
+        if (id_nhaHang) {
+            dispatch(fetchHoaDonTheoNhaHang(id_nhaHang));
+        }
+    }, [id_nhaHang, dispatch]);
+
+    useEffect(() => {
+        if (hoaDons.length > 0) {
+            setSelectedHoaDon(hoaDons[0]);
+        }
+    }, [hoaDons]);
+
     const handleHoaDonClick = (hoaDon) => {
-        console.log(hoaDon);
         setSelectedHoaDon(hoaDon);
     };
-    useEffect(() => {
-        if (HoaDonData.length > 0) {
-            setSelectedHoaDon(HoaDonData[0]);
-        }
-    }, [HoaDonData]);
+
+    if (status === "loading") {
+        return (
+            <div style={{ textAlign: "center", padding: "50px" }}>
+                <Spin size="large" />
+                <div>Đang tải dữ liệu...</div>
+            </div>
+        );
+    }
+
+    if (status === "failed") {
+        return (
+            <div style={{ textAlign: "center", padding: "50px" }}>
+                <p style={{ color: "red" }}>Đã xảy ra lỗi</p>
+            </div>
+        );
+    }
 
     return (
         <Layout>
@@ -38,17 +66,23 @@ const QuanLyHoaDon = () => {
                         maxHeight: "calc(100vh - 64px)",
                     }}
                 >
-                    <List
-                        itemLayout="vertical"
-                        dataSource={HoaDonData} // Dữ liệu là danh sách hóa đơn
-                        renderItem={(item) => ( // Sử dụng hoaDon thay cho item
+                    {hoaDons.length > 0 ? (
+                        <List
+                            itemLayout="vertical"
+                            dataSource={hoaDons}
+                            renderItem={(item) => (
                                 <HoaDonItem
-                                    hoaDon={item} // Sử dụng hoaDon thay cho item
-                                    isSelected={selectedHoaDon ? item._id === selectedHoaDon._id : null} // Sử dụng hoaDon thay cho item
-                                    onClick={() => handleHoaDonClick(item)} // Sử dụng hoaDon thay cho item
+                                    hoaDon={item}
+                                    isSelected={selectedHoaDon ? item._id === selectedHoaDon._id : null}
+                                    onClick={() => handleHoaDonClick(item)}
                                 />
-                        )}
-                    />
+                            )}
+                        />
+                    ) : (
+                        <Empty description="Không có hóa đơn nào trong ca làm hiện tại"
+
+                        />
+                    )}
                 </Sider>
                 <Content
                     style={{
@@ -58,7 +92,7 @@ const QuanLyHoaDon = () => {
                         overflow: "auto",
                     }}
                 >
-                    {selectedHoaDon && <HoaDonDetails hoaDon={selectedHoaDon} />}
+                    {selectedHoaDon ? <HoaDonDetails hoaDon={selectedHoaDon} /> : <Empty description="Chọn một hóa đơn để xem chi tiết" />}
                 </Content>
             </Layout>
         </Layout>

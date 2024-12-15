@@ -41,20 +41,14 @@ export const addHoaDonMoi = async (formData: HoaDon): Promise<HoaDon> => {
     }
 };
 
+
 export const getListHoaDonTheoNhaHang = async (
     id_nhaHang: string,
-): Promise<any[]> => {
+): Promise<HoaDon[]> => {
     try {
         const response = await fetch(
-            `${ipAddress}layDsHoaDon?id_nhaHang=${id_nhaHang}`,
-            {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            }
+            `${ipAddress}layDsHoaDonTheoNhaHang?id_nhaHang=${id_nhaHang}`,
         );
-        if (!response.ok) {
-            throw new Error("Lỗi khi lấy Hóa Đơn 1");
-        }
         const data = await response.json();
         return data;
     } catch (error) {
@@ -69,6 +63,7 @@ export const thanhToanHoaDon = async (
     tienGiamGia: number,
     hinhThucThanhToan: boolean,
     thoiGianRa: Date,
+    id_nhanVien: String
 ): Promise<any> => {
     try {
         const response = await fetch(`${ipAddress}thanhToanHoaDon`, {
@@ -79,6 +74,7 @@ export const thanhToanHoaDon = async (
                 tienGiamGia,
                 hinhThucThanhToan,
                 thoiGianRa,
+                id_nhanVien
             }),
         });
         if (!response.ok) {

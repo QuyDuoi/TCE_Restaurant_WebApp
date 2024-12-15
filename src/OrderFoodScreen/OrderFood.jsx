@@ -102,7 +102,7 @@ const OrderFood = () => {
   };
 
   return (
-    <Row gutter={16} style={{ padding: "20px" }}>
+    <Row gutter={16} style={{ padding: "10px", height: "calc(100vh - 20px)" }}>
       {/* Danh sách món ăn */}
       <Col xs={24} sm={24} md={14} style={{ marginBottom: "20px" }}>
         <h3>Danh sách món ăn</h3>
