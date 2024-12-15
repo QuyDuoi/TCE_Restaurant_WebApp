@@ -1,0 +1,16 @@
+.ant-card {
+    transition: all 0.3s ease-in-out;
+}
+
+.ant-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ant-layout-header {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-card-body {
+    padding: 16px;
+}

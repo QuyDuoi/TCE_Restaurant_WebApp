@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  background-color: #f0f2f5;
+}
+h2 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: bold;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+#root {
+  height: auto; /* Đảm bảo chiều cao của root là 100% chiều cao của viewport */
+  overflow: hidden; /* Ngăn không cho root cuộn */
+}
+.menu-list-container {
+  height: 100vh; /* Chiều cao full màn hình */
+  overflow-y: auto; /* Cho phép cuộn theo chiều dọc trong danh sách món ăn */
+  display: flex;
+  flex-direction: column;
+}

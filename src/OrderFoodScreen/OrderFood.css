@@ -1,0 +1,137 @@
+/* Mặc định cho thẻ card */
+.card-content {
+  font-size: 2rem; /* Chữ mặc định */
+  text-align: center;
+  
+}
+
+.card-content h4 {
+  width: 100%;
+  font-size: 1rem; /* Kích thước mặc định */
+}
+
+.card-content p {
+  font-size: 0.8rem; /* Kích thước mặc định */
+  width: 100%;
+}
+.card-content img {
+  width: 110px;
+  object-fit: cover;
+}
+/* Responsive cho các thiết bị */
+@media (max-width: 1200px) { /* PC */
+  .card-content {
+    font-size: 2rem; /* Chữ mặc định */
+    text-align: center;
+    word-break: break-word;
+  }
+  .card-content h4 {
+    font-size: 1.4rem;
+    word-break: break-word;
+  }
+  .card-content p {
+    width: 100%;
+    font-size: 0.8rem;
+    word-break: break-word;
+  }
+  .card-content img {
+    width: 110px;
+    object-fit: cover; 
+  }
+}
+
+@media (max-width: 992px) { /* Tablet */
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
+  }
+  .card-content h4 {
+    font-size: 1.2rem;
+    word-break: break-word;
+  }
+  .card-content p {
+    font-size: 0.7rem;
+    word-break: break-word;
+  }
+  .card-content img {
+    width: 100px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 888px) { /* Mini Tablet 1 */
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .card-content h4 {
+    padding-left: 20px;
+    font-size: 1.1rem;
+  }
+
+  .card-content p {
+    padding-left: 20px;
+    font-size: 0.7rem;
+  }
+  .card-content img {
+    width: 90px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 767px) { /* Mini Tablet */
+  .order-list-container {
+    display: none; /* Ẩn bảng danh sách order */
+  }
+  .card-content {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .card-content h4 {
+    font-size: 1.5rem;
+  }
+
+  .card-content p {
+    font-size: 1rem;
+  }
+  .card-content img {
+    width: 100px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 514px) { /* Phone */
+  .order-list-container {
+    display: none; /* Ẩn bảng danh sách order */
+  }
+
+  .menu-list-container {
+    padding: 2px; /* Thêm padding cho container */
+  }
+
+  .card-content {
+    font-size: 0.8rem; /* Giảm font-size thêm */
+    text-align: center; /* Căn giữa nội dung */
+  }
+
+  .card-content h4 {
+    font-size: 1rem;
+    margin: 2px 0; /* Giảm khoảng cách */
+  }
+
+  .card-content p {
+    font-size: 0.7rem; /* Giảm font-size phần mô tả */
+    margin: 2px 0; /* Thêm margin để tạo khoảng cách */
+  }
+  .ant-card img {
+    width: 80px; /* Tăng kích thước hình ảnh một chút */
+    height: 80px; /* Tăng kích thước hình ảnh một chút */
+    object-fit: cover; 
+  }
+}
+.ant-card .ant-card-body {
+  padding: 0px;
+}
+
