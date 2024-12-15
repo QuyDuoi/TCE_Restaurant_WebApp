@@ -15,8 +15,7 @@ const AddEmployeeModal = ({ visible, onClose, onAddEmployee }) => {
         formData.append("cccd", values.cccd);
         formData.append("vaiTro", values.vaiTro);
         formData.append("id_nhaHang", "66fab50fa28ec489c7137537"); // ID nhà hàng cố định
-
-        console.log(values.trangThai);
+        
 
         // Thêm file ảnh vào formData
         if (values.hinhAnh && values.hinhAnh.file) {

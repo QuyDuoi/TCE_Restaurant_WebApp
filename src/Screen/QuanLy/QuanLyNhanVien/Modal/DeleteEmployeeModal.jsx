@@ -1,8 +1,25 @@
 import React from 'react';
-import { Modal, Button } from 'antd';
+import { Modal, Button, Spin } from 'antd';
 
-const DeleteModal = ({ visible, onClose, onDelete }) => {
+const DeleteModal = ({ visible, onClose,onLoading, onDelete }) => {
     return (
+        <>
+        {onLoading && (
+        <div style={{
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: "9999",
+        }}>
+            <Spin size="large" style={{ color: 'white' }} />
+        </div>
+    )}
         <Modal
             title="Xóa nhân viên"
             visible={visible}
@@ -17,7 +34,7 @@ const DeleteModal = ({ visible, onClose, onDelete }) => {
             ]}
         >
             <p>Bạn có chắc chắn muốn xóa nhân viên này không?</p>
-        </Modal>
+        </Modal></>
     );
 };
 

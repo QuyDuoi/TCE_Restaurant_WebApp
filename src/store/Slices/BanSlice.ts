@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { layDsBan, themBan, capNhatBan, layThongTinBan, getBanTheoId } from '../../services/CallApi/CallApiBan.ts';
+import { layDsBan, themBan, capNhatBan, layThongTinBan, getBanTheoId, timKiemBan } from '../../services/CallApi/CallApiBan.ts';
 import { KhuVuc } from "./KhuVucSlice.ts";
 const idNhaHang = '66fab50fa28ec489c7137537';
 // Định nghĩa interface cho Ban
@@ -55,6 +55,20 @@ export const updateBanThunk = createAsyncThunk(
     }
   },
 );
+
+//Async thunk để tìm kiếm Bàn
+export const searchBanThunk = createAsyncThunk(
+  'bans/searchBans',
+  async (textSearch: string, thunkAPI) => {
+    try {
+      const data = await timKiemBan(textSearch);
+      return data;
+    } catch (error:any) {
+      console.log('Lỗi tìm kiếm:', error);
+      return thunkAPI.rejectWithValue(error.message || 'Error searching Bàn');
+    }
+  }
+)
 
 // Thunk để fetch món ăn
 export const fetchBanTheoId = createAsyncThunk(
@@ -123,11 +137,21 @@ const banSlice = createSlice({
         fetchBanTheoId.fulfilled,
         (state, action: PayloadAction<Ban>) => {
           // console.log("Dữ liệu trả về từ API:", action.payload);  // Kiểm tra lại dữ liệu
-          console.log('name: ' + action.payload.tenBan);
           state.status = 'succeeded';
           state.ban = action.payload; // action.payload là đối tượng món ăn
         },
-      );
+      )
+      .addCase(searchBanThunk.pending, state =>{
+ 
+      })
+      .addCase(searchBanThunk.fulfilled, (state, action: PayloadAction<Ban>)=>{
+      
+        state.ban = action.payload;
+        
+      })
+      .addCase(searchBanThunk.rejected, (state, action)=>{
+       
+      });
   },
 });
 

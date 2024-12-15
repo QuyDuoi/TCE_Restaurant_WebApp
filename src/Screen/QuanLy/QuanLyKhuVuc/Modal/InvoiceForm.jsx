@@ -27,7 +27,7 @@ const InvoiceForm = ({ table, area, onSave, onLoading, onUpdateStatus }) => {
   }, [table, form]);
 
   //id fix cung:
-  const id_nhanVien = '6746d3045e16205c66496435'
+  const id_nhanVien = '67060ef797bc70ba1d9222ab'
   const id_nhaHang = '66fab50fa28ec489c7137537'
   const handleFinish = async (values) => {
     setLoading(true);

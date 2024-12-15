@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Select, Switch } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, Button, Select, Switch, Spin } from 'antd';
 import axios from 'axios';
 
 const { Option } = Select;
 
 const EditModal = ({ visible, onClose, employee, onSave }) => {
     const [form] = Form.useForm();
-    
+    const [loading,setLoading] = useState(false);
     const handleFinish = async (values) => {
+        setLoading(true);
         try {
             // Gửi PUT request để cập nhật thông tin nhân viên
             await axios.put(`https://tce-restaurant-api.onrender.com/api/capNhatNhanVien/${employee._id}`, values);
@@ -15,6 +16,8 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
             form.resetFields(); // Đặt lại form
         } catch (error) {
             console.error('Không thể cập nhật nhân viên:', error);
+        }finally{
+            setLoading(false);
         }
     };
 
@@ -29,7 +32,24 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
     }, [employee, form]);
 
     return (
-        <Modal
+       <> {loading && (
+        <div style={{
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: "9999",
+        }}>
+            <Spin size="large" style={{ color: 'white' }} />
+        </div>
+    )}
+       
+       <Modal
             title="Chỉnh sửa nhân viên"
             width={350}
             visible={visible}
@@ -79,6 +99,7 @@ const EditModal = ({ visible, onClose, employee, onSave }) => {
                </div>
             </Form>
         </Modal>
+        </>
     );
 };
 
