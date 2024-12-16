@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import {
     Button,
     Input,
@@ -25,7 +25,7 @@ const LoginUI = () => {
     const [otp, setOtp] = useState("");
     const [user, setUser] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState("");
-    const navigate = useNavigate(); // Khởi tạo useNavigate
+    const navigate = useNavigate();
 
     const senOtp = async () => {
         try {
@@ -44,9 +44,9 @@ const LoginUI = () => {
 
     const verifyOtp = async () => {
         try {
-            await user.confirm(otp); // Xác thực OTP thành công
+            await user.confirm(otp);
             console.log("Login success");
-            navigate("/"); // Chuyển hướng đến trang Home
+            navigate("/");
         } catch (err) {
             console.error(err);
             toast.error("OTP không hợp lệ!");
@@ -79,7 +79,6 @@ const LoginUI = () => {
                         }}
                     >
                         <Row>
-                            {/* Phần Form */}
                             <Col
                                 span={16}
                                 style={{
@@ -117,18 +116,19 @@ const LoginUI = () => {
                                         }}
                                     />
                                 </div>
-                                <Title
-                                    level={2}
-                                    style={{
-                                        marginBottom: "16px",
-                                        fontSize: "24px",
-                                    }}
-                                >
-                                    Đăng nhập
-                                </Title>
+
                                 {user == null ? (
                                     <Form layout="vertical">
                                         <Form.Item>
+                                            <Title
+                                                level={2}
+                                                style={{
+                                                    marginBottom: "16px",
+                                                    fontSize: "24px",
+                                                }}
+                                            >
+                                                Đăng nhập
+                                            </Title>
                                             <div className="phone-content">
                                                 <PhoneInput
                                                     country={"vn"}
@@ -137,6 +137,17 @@ const LoginUI = () => {
                                                     onChange={(phoneNumber) =>
                                                         setPhoneNumber("+" + phoneNumber)
                                                     }
+                                                    inputStyle={{
+                                                        width: "100%",
+                                                        height: "48px",
+                                                        fontSize: "16px",
+                                                        borderRadius: "8px",
+                                                        border: "1px solid #d9d9d9",
+                                                    }}
+                                                    buttonStyle={{
+                                                        borderRadius: "8px 0 0 8px",
+                                                        border: "1px solid #d9d9d9",
+                                                    }}
                                                 />
                                             </div>
                                         </Form.Item>
@@ -146,13 +157,23 @@ const LoginUI = () => {
                                                 size="large"
                                                 block
                                                 style={{
-                                                    backgroundColor: "#7A7A7A",
+                                                    backgroundColor: "#009A49",
                                                     border: "none",
-                                                    height: "40px",
+                                                    height: "48px",
                                                     fontSize: "18px",
                                                     fontWeight: "bold",
                                                     borderRadius: "8px",
+                                                    color: "#fff",
+                                                    transition: "background-color 0.3s ease, transform 0.2s ease",
                                                 }}
+                                                onMouseEnter={(e) =>
+                                                    (e.currentTarget.style.backgroundColor = "#00793a")
+                                                }
+                                                onMouseLeave={(e) =>
+                                                    (e.currentTarget.style.backgroundColor = "#009A49")
+                                                }
+                                                onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
+                                                onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
                                                 onClick={senOtp}
                                             >
                                                 Gửi mã OTP
@@ -163,6 +184,15 @@ const LoginUI = () => {
                                 ) : (
                                     <Form layout="vertical">
                                         <Form.Item>
+                                            <Title
+                                                level={2}
+                                                style={{
+                                                    marginBottom: "16px",
+                                                    fontSize: "24px",
+                                                }}
+                                            >
+                                                Nhập mã OTP
+                                            </Title>
                                             <OTPInput
                                                 size="large"
                                                 value={otp}
@@ -171,10 +201,17 @@ const LoginUI = () => {
                                                 disable={false}
                                                 autoFocus
                                                 className={"opt-container"}
-                                                style={{
+                                                inputStyle={{
+                                                    width: "48px",
                                                     height: "48px",
                                                     fontSize: "18px",
                                                     borderRadius: "8px",
+                                                    border: "1px solid #d9d9d9",
+                                                    margin: "0 8px",
+                                                }}
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
                                                 }}
                                             />
                                         </Form.Item>
@@ -184,31 +221,63 @@ const LoginUI = () => {
                                                 size="large"
                                                 block
                                                 style={{
-                                                    backgroundColor: "#7A7A7A",
+                                                    backgroundColor: "#009A49",
                                                     border: "none",
-                                                    height: "40px",
+                                                    height: "48px",
                                                     fontSize: "18px",
                                                     fontWeight: "bold",
                                                     borderRadius: "8px",
+                                                    color: "#fff",
+                                                    transition: "background-color 0.3s ease, transform 0.2s ease",
                                                 }}
+                                                onMouseEnter={(e) =>
+                                                    (e.currentTarget.style.backgroundColor = "#00793a")
+                                                }
+                                                onMouseLeave={(e) =>
+                                                    (e.currentTarget.style.backgroundColor = "#009A49")
+                                                }
+                                                onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
+                                                onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
                                                 onClick={verifyOtp}
                                             >
                                                 Xác nhận OTP
                                             </Button>
+                                            <Button
+                                                type="default"
+                                                size="large"
+                                                block
+                                                style={{
+                                                    marginTop: "10px",
+                                                    height: "48px",
+                                                    fontSize: "18px",
+                                                    borderRadius: "8px",
+                                                    fontWeight: "bold",
+                                                }}
+                                                onClick={() => setUser(null)}
+                                            >
+                                                Quay lại
+                                            </Button>
                                         </Form.Item>
                                     </Form>
                                 )}
-                                <Text
-                                    type="secondary"
+                                <div
                                     style={{
-                                        fontSize: "14px",
+                                        position: "absolute",
+                                        bottom: "10px",
+                                        left: "10px",
                                     }}
                                 >
-                                    © 2024 TCE RESTAURANT. All Rights Reserved
-                                </Text>
+                                    <Text
+                                        type="secondary"
+                                        style={{
+                                            fontSize: "14px",
+                                        }}
+                                    >
+                                        © 2024 TCE RESTAURANT. All Rights Reserved
+                                    </Text>
+                                </div>
                             </Col>
 
-                            {/* Phần Hình ảnh */}
                             <Col
                                 span={8}
                                 style={{
