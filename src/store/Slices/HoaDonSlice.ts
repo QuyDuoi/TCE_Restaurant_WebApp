@@ -47,19 +47,19 @@ export const fetchHoaDonTheoCaLam = createAsyncThunk(
     }
 );
 
-export const fetchHoaDonTheoNhaHang = createAsyncThunk<
-    HoaDon[],
-    void,
-    { rejectValue: string }>
-    ("hoaDon/fetchHoaDonTheoNhaHang",
-        async (id_nhaHang: string, { rejectWithValue }) => {
-    try {
-        const hoaDonsData = await getListHoaDonTheoNhaHang(id_nhaHang);
-        return hoaDonsData;
-    } catch (error: any) {
-        return rejectWithValue(error.message || "Lỗi khi gọi API fetchHoaDon");
-    }
-});
+//chua toi uu
+export const fetchHoaDonTheoNhaHang = createAsyncThunk(
+    'hoaDon/fetchHoaDonTheoNhaHang',
+    async (id_nhaHang: string) => {
+        try {
+            const hoaDonsData = await getListHoaDonTheoNhaHang(id_nhaHang);
+            return hoaDonsData;
+        } catch (error) {
+            console.log('Lỗi lấy danh sách hoa đơn:', error);
+            return [];
+        }
+    },
+);
 
 // chua toi uu
 export const thanhToanHoaDonThunk = createAsyncThunk(

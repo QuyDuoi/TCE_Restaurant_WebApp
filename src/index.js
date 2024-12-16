@@ -14,26 +14,35 @@ import ThongKe from "./Screen/QuanLy/ThongKe/ThongKe";
 import QuanLyThucDon from "./Screen/QuanLy/QuanLyThucDon/QuanLyThucDon";
 import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
+import LoginScreen from "./Screen/Authentication/Login/LoginScreen";
+import LoginUI from "./Screen/Authentication/Login/LoginUI";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+// const root = ReactDOM.createRoot(document.getElementById("root"));
+// root.render(
+//   <Provider store={store}>
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<Home />}>
+//           <Route index element={<QuanLyNhanVien />} />
+//           <Route path="quanLyNhanVien" element={<QuanLyNhanVien />} />
+//           <Route path="quanLyThucDon" element={<QuanLyThucDon />} />
+//           <Route path="quanLyCa" element={<QuanLyCa />} />
+//           <Route path="quanLyKhuVuc" element={<QuanLyKhuVuc />} />
+//           <Route path="quanLyLenMon" element={<QuanLyLenMon />} />
+//           <Route path="quetToanHoaDon" element={<QuanLyHoaDon />} />
+//           <Route path="thongKe" element={<ThongKe />} />
+//         </Route>
+//         <Route path="orderFood/:id" element={<OrderFood />} />
+//       </Routes>
+//     </Router>
+//   </Provider>
+// );
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <Provider store={store}>
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />}>
-          <Route index element={<QuanLyNhanVien />} />
-          <Route path="quanLyNhanVien" element={<QuanLyNhanVien />} />
-          <Route path="quanLyThucDon" element={<QuanLyThucDon />} />
-          <Route path="quanLyCa" element={<QuanLyCa />} />
-          <Route path="quanLyKhuVuc" element={<QuanLyKhuVuc />} />
-          <Route path="quanLyLenMon" element={<QuanLyLenMon />} />
-          <Route path="quanLyHoaDon" element={<QuanLyHoaDon />} />
-          <Route path="thongKe" element={<ThongKe />} />
-        </Route>
-        <Route path="orderFood/:id" element={<OrderFood />} />
-      </Routes>
-    </Router>
-  </Provider>
+    <React.StrictMode>
+      {/*<LoginScreen />*/}
+        <LoginUI/>
+    </React.StrictMode>
 );
 
 reportWebVitals();

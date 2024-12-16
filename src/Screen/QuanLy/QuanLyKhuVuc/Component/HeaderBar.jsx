@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Row, Col } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import { useDispatch } from "react-redux";
+import { searchBanThunk } from "../../../../store/Slices/BanSlice.ts";
 
-const HeaderBar = ({ onSearch }) => {
+const HeaderBar = ({onSearch}) => {
+  const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      // Gọi callback sau khi người dùng dừng nhập
+      onSearch(searchValue);
+    }, 800); // 0.8 giây
+    return () => clearTimeout(delayDebounceFn); // Xóa timeout khi người dùng tiếp tục nhập
+  }, [searchValue, onSearch]);
   return (
     <div
       style={{
@@ -24,7 +35,7 @@ const HeaderBar = ({ onSearch }) => {
             placeholder="Tìm kiếm bàn..."
             prefix={<SearchOutlined />}
             style={{ width: 300 }}
-            onChange={(e) => onSearch(e.target.value)} // Kích hoạt tìm kiếm khi nhập
+            onChange={(e) => setSearchValue(e.target.value)} // Kích hoạt tìm kiếm khi nhập
           />
         </Col>
       </Row>

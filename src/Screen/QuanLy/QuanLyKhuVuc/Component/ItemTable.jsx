@@ -5,7 +5,6 @@ const ItemTable = ({ ban, id_khuVuc, khuVucs, onClick }) => {
 const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg"; // Ảnh mặc định nếu trạng thái không hợp lệ
 
   const khuVuc = khuVucs.filter((item) => item._id === id_khuVuc);
-
   
   // Style nội tuyến
   const styles = {

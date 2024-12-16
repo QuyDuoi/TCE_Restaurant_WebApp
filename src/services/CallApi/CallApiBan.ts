@@ -88,3 +88,23 @@ export const getBanTheoId = async (id_Ban: String) => {
     return [];
   }
 };
+
+export const timKiemBan = async (tenBan: String) => {
+  let response: Response | null = null; // Khai báo biến response
+  try {
+    response = await fetch(`${ipAddress}timKiemBan?textSearch=${tenBan}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+    });
+    if (!response.ok) {
+      throw new Error('Lỗi khi tìm kiếm Bàn');
+    }
+    console.log('Tìm kiếm bàn thành công');
+    const data = await response.json();
+    // console.log(data);
+    return data;
+  } catch (error) {
+    console.log('Lỗi khi tìm kiếm Bàn: ', error);
+    return [];
+  }
+}
