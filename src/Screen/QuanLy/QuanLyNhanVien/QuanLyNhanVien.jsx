@@ -21,9 +21,11 @@ const QuanLyNhanVien = () => {
     const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
     const [notificationVisible, setNotificationVisible] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
+    const id_nhaHang = "66fab50fa28ec489c7137537"; // Ví dụ về id_nhaHang
+
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('https://tce-restaurant-api.onrender.com/api/layDsNhanVien');
+            const response = await axios.get(`https://tce-restaurant-api.onrender.com/api/layDsNhanVien?id_nhaHang=${id_nhaHang}`);
             setNhanVien(response.data);
             setFilteredEmployees(response.data); // Khởi tạo danh sách nhân viên đã lọc
         } catch (error) {

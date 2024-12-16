@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Input, Button, Tabs, Badge, Modal, List, Spin } from "antd";
+import { Row, Col, Input, Button, Tabs, Badge, Modal, List, Spin, message } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import MenuList from "./Component/MenuList";
 import OrderList from "./Component/OrderList";
 import axios from "axios";
 import "./OrderFood.css";
 import {ipAddress, searchMonAn} from "../services/api.ts"
+import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
 const { TabPane } = Tabs;
 
 const OrderFood = () => {
-  const { idBan } = useParams();
+  const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [orderList, setOrderList] = useState([]); // Danh sách món trong giỏ
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
@@ -19,8 +20,13 @@ const OrderFood = () => {
   const [listMonAn, setListMonAn] = useState([]); // Danh sách thực đơn từ API
   const [filteredMonAn, setFilteredMonAn] = useState([]); // Danh sách thực đơn đã lọc
   const [searchText, setSearchText] = useState(""); // Từ khóa tìm kiếm
+  const [isPasswordModalVisible, setPasswordModalVisible] = useState(false); // Hiển thị modal mật khẩu
+  const [password, setPassword] = useState(""); // Lưu mật khẩu nhập vào
+  const [passwordResult, setPasswordResult] = useState(null); // Lưu kết quả backend
+  const socket = io("https://tce-restaurant-api.onrender.com");
+  const [isResultModalVisible, setResultModalVisible] = useState(false); // Hiển thị modal kết quả
   const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
-  
+
   // Lấy danh sách thực đơn từ API
   useEffect(() => {
     const layDanhSachThucDon = async () => {
@@ -39,6 +45,33 @@ const OrderFood = () => {
       }
     };
     layDanhSachThucDon();
+  }, []);
+
+  useEffect(() => {
+    // Kết nối và join vào room với id_ban
+    if (id) {
+      socket.emit("joinRoom", id);
+      console.log(`Joined room: ${id}`);
+    }
+  
+    // Cleanup: ngắt kết nối khi component unmount
+    return () => {
+      socket.disconnect();
+      console.log("Disconnected from socket server");
+    };
+  }, [id]);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện "huyDatMon" từ server
+    socket.on("huyDatMon", (data) => {
+      message.warning(`Order đã bị hủy bởi nhân viên: ${data.tenNhanVien}`);
+      setOrderList([]); // Xóa giỏ hàng khi có thông báo hủy món
+    });
+  
+    // Cleanup: hủy lắng nghe sự kiện khi component unmount
+    return () => {
+      socket.off("huyDatMon");
+    };
   }, []);
 
   // Tìm kiếm món ăn (Debounce 1 giây)
@@ -98,6 +131,79 @@ const OrderFood = () => {
     }
     const category = filteredMonAn.find((cat) => cat._id === activeTab);
     return category ? category.monAns : [];
+  };
+
+  const guiThongTinMonAn = async () => {
+    try {
+      const response = await axios.post(`${ipAddress}datMonAn`, { 
+        id: id,
+        danhSachMon: orderList,
+        id_nhaHang: id_nhaHang,
+      });
+
+      if (response.data) {
+        message.success(response.data.msg);
+      }
+
+    } catch (error) {
+      if (error.response) {
+        // Lỗi trả về từ server (status code không phải 2xx)
+        console.error("Lỗi từ backend:", error.response.data);
+        message.error(
+          error.response.data.message || "Gửi thông tin thất bại, vui lòng liên hệ nhân viên!"
+        );
+      } else if (error.request) {
+        // Lỗi khi không nhận được phản hồi từ server
+        console.error("Không có phản hồi từ server:", error.request);
+        message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
+      } else {
+        // Lỗi khác xảy ra
+        console.error("Lỗi hệ thống:", error.message);
+        message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+      }
+    }
+  }
+
+  // Xử lý xác nhận gọi món
+  const handleConfirmOrder = () => {
+    setPassword(""); // Reset mật khẩu
+    setPasswordModalVisible(true); // Hiển thị modal nhập mật khẩu
+  };
+
+  // Hàm kiểm tra mật khẩu và gửi thông tin
+  const handlePasswordSubmit = async () => {
+    try {
+      const response = await axios.post(`${ipAddress}kiemTraMatKhau`, { 
+        matKhau: password, 
+        id_ban: id 
+      });
+      
+      setPasswordModalVisible(false); // Đóng modal nhập mật khẩu
+        setPasswordResult(response.data); // Lưu kết quả backend
+        setResultModalVisible(true); // Hiển thị modal kết quả
+
+      if (passwordResult) {
+        guiThongTinMonAn();
+      }
+      
+    } catch (error) {
+      // Kiểm tra lỗi từ phản hồi backend
+    if (error.response) {
+      // Lỗi trả về từ server (status code không phải 2xx)
+      console.error("Lỗi từ backend:", error.response.data);
+      message.error(
+        error.response.data.msg || "Mật khẩu không chính xác, vui lòng thử lại!"
+      );
+    } else if (error.request) {
+      // Lỗi khi không nhận được phản hồi từ server
+      console.error("Không có phản hồi từ server:", error.request);
+      message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
+    } else {
+      // Lỗi khác xảy ra
+      console.error("Lỗi hệ thống:", error.message);
+      message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+    }
+    }
   };
 
   if (loading) {
@@ -175,7 +281,7 @@ const OrderFood = () => {
           <Button key="close" onClick={() => setCartModalVisible(false)}>
             Đóng
           </Button>,
-          <Button key="confirm" type="primary">
+          <Button key="confirm" type="primary" onClick={handleConfirmOrder}>
             Xác nhận gọi món
           </Button>,
         ]}
@@ -214,6 +320,56 @@ const OrderFood = () => {
           <p>Giỏ hàng trống</p>
         )}
       </Modal>
+      {/* Modal nhập mật khẩu */}
+      <Modal
+        title="Nhập mật khẩu bàn"
+        visible={isPasswordModalVisible}
+        onCancel={() => setPasswordModalVisible(false)}
+        style={{maxWidth: "80%"}}
+        footer={[
+          <Button key="cancel" onClick={() => setPasswordModalVisible(false)}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={handlePasswordSubmit}>
+            Xác nhận
+          </Button>,
+        ]}
+      >
+        <Input.Password
+          placeholder="Nhập mật khẩu 4 số"
+          maxLength={6}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onPressEnter={handlePasswordSubmit}
+        />
+      </Modal>
+      <Modal
+  title={passwordResult ? "Thành công!" : "Thất bại!"}
+  visible={isResultModalVisible}
+  onCancel={() => setResultModalVisible(false)}
+  style={{maxWidth: "70%"}}
+  footer={[
+    <Button
+      key="ok"
+      type="primary"
+      onClick={() => {
+        setResultModalVisible(false); 
+        if (passwordResult) {
+          setCartModalVisible(false)
+        } else {
+          // Quay lại màn order nếu mật khẩu sai
+          setPasswordModalVisible(true);
+        }
+      }}
+    >
+      OK
+    </Button>,
+  ]}
+>
+  {passwordResult ? (
+    <p>Mật khẩu chính xác. Đang gửi thông tin đặt món...</p>
+  ) : (<p>Mật khẩu không chính xác, vui lòng liên hệ nhân viên.</p>)}
+</Modal>
     </Row>
   );
 };
