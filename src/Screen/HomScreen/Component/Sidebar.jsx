@@ -79,6 +79,11 @@ const Sidebar = () => {
                         icon: <BarChartOutlined />,
                         label: <Link to="/thongKe">Thống kê</Link>,
                     },
+                    {
+                        key: '8',
+                        icon: <BarChartOutlined />,
+                        label: <Link to="/login">LoginTest</Link>,
+                    },
                 ]}
             />
         </div>

@@ -5,7 +5,7 @@ import {toast, Toaster} from "react-hot-toast";
 
 import OTPInput from "otp-input-react";
 import PhoneInput from "react-phone-input-2";
-import {signInWithPhoneNumber} from "firebase/auth";
+import {RecaptchaVerifier, signInWithPhoneNumber} from "firebase/auth";
 import {auth} from "../../../firebase.config";
 
 const { Title, Text } = Typography;
@@ -18,11 +18,49 @@ const LoginUI = () => {
     const [showOtp, setShowOtp] = useState(false);
     const [user, setUser] = useState(null);
 
+    const onCaptchaVerify = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(
+                'recaptcha-container',
+                {
+                    size: 'invisible',
+                    callback: (response) => {
+                        console.log('Recaptcha verified', response);
+                        onSignup(); // Tiến hành đăng ký sau khi xác minh recaptcha
+                    },
+                    'expired-callback': () => {
+                        console.log('Recaptcha expired');
+                    },
+                },
+                auth
+            );
+        }
+    }
+
     const onSignup = () => {
-        setShowOtp(true);
+        onCaptchaVerify();
+
+        const appVerifier = window.recaptchaVerifier;
+
+        const formatPh = ph;
+
+        signInWithPhoneNumber(auth, formatPh, appVerifier)
+            .then((confirmationResult) => {
+                window.confirmationResult = confirmationResult;
+                setShowOtp(true);
+                toast.success('Gửi OTP thành công ');
+            }).catch((error) => {
+            console.log(error);
+        });
     }
     const onOTPVerify = (params) => {
-        setShowOtp(false);
+        window.confirmationResult.confirm(otp).then(async(res)=>{
+            console.log(res)
+            setUser(res.user);
+
+        }).catch((err) => {
+            console.log(err);
+        });
     }
 
 
