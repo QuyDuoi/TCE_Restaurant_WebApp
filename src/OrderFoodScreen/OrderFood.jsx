@@ -65,6 +65,10 @@ const OrderFood = () => {
     // Lắng nghe sự kiện "huyDatMon" từ server
     socket.on("huyDatMon", (data) => {
       message.warning(`Order đã bị hủy bởi nhân viên: ${data.tenNhanVien}`);
+    });
+
+    socket.on("xacNhanOrder", (data) => {
+      message.success(data.msg);
       setOrderList([]); // Xóa giỏ hàng khi có thông báo hủy món
     });
   
@@ -150,7 +154,7 @@ const OrderFood = () => {
         // Lỗi trả về từ server (status code không phải 2xx)
         console.error("Lỗi từ backend:", error.response.data);
         message.error(
-          error.response.data.message || "Gửi thông tin thất bại, vui lòng liên hệ nhân viên!"
+          error.response.data.msg || "Gửi thông tin thất bại, vui lòng liên hệ nhân viên!"
         );
       } else if (error.request) {
         // Lỗi khi không nhận được phản hồi từ server
@@ -166,6 +170,10 @@ const OrderFood = () => {
 
   // Xử lý xác nhận gọi món
   const handleConfirmOrder = () => {
+    if (orderList.length === 0) {
+      message.error("Giỏ hàng đang trống, thêm món trước khi xác nhận!");
+      return; // Dừng xử lý nếu giỏ hàng trống
+    }
     setPassword(""); // Reset mật khẩu
     setPasswordModalVisible(true); // Hiển thị modal nhập mật khẩu
   };
@@ -178,14 +186,19 @@ const OrderFood = () => {
         id_ban: id 
       });
       
-      setPasswordModalVisible(false); // Đóng modal nhập mật khẩu
-        setPasswordResult(response.data); // Lưu kết quả backend
-        setResultModalVisible(true); // Hiển thị modal kết quả
+      const status = response.data;
 
-      if (passwordResult) {
+      if (status) {
+        setPasswordModalVisible(false); // Đóng modal nhập mật khẩu
+        setResultModalVisible(true); // Hiển thị modal kết quả
+        setPasswordResult(true);
         guiThongTinMonAn();
+        console.log("Đúng");
+      } else {
+        message.error("Sai mật khẩu! Vui lòng liên hệ nhân viên.")
+        setPasswordResult(false);
       }
-      
+
     } catch (error) {
       // Kiểm tra lỗi từ phản hồi backend
     if (error.response) {
@@ -337,7 +350,7 @@ const OrderFood = () => {
       >
         <Input.Password
           placeholder="Nhập mật khẩu 4 số"
-          maxLength={6}
+          maxLength={4}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onPressEnter={handlePasswordSubmit}
@@ -366,9 +379,7 @@ const OrderFood = () => {
     </Button>,
   ]}
 >
-  {passwordResult ? (
     <p>Mật khẩu chính xác. Đang gửi thông tin đặt món...</p>
-  ) : (<p>Mật khẩu không chính xác, vui lòng liên hệ nhân viên.</p>)}
 </Modal>
     </Row>
   );
