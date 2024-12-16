@@ -49,9 +49,7 @@ root.render(
           <Route
               path="orderFood/:id"
               element={
-                <PrivateRoute>
                   <OrderFood />
-                </PrivateRoute>
               }
           />
         </Routes>
