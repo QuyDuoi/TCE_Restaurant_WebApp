@@ -64,7 +64,9 @@ const OrderFood = () => {
   useEffect(() => {
     // Lắng nghe sự kiện "huyDatMon" từ server
     socket.on("huyDatMon", (data) => {
-      message.warning(`Order đã bị hủy bởi nhân viên: ${data.tenNhanVien}`);
+      if (data.id_ban === id) {
+        message.warning(data.msg);
+      }
     });
 
     socket.on("xacNhanOrder", (data) => {
