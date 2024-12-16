@@ -15,7 +15,7 @@ const AddEmployeeModal = ({ visible, onClose, onAddEmployee }) => {
         formData.append("cccd", values.cccd);
         formData.append("vaiTro", values.vaiTro);
         formData.append("id_nhaHang", "66fab50fa28ec489c7137537"); // ID nhà hàng cố định
-        
+
 
         // Thêm file ảnh vào formData
         if (values.hinhAnh && values.hinhAnh.file) {
@@ -98,11 +98,15 @@ const AddEmployeeModal = ({ visible, onClose, onAddEmployee }) => {
                     label="Số Điện Thoại"
                     rules={[
                         { required: true, message: "Vui lòng nhập số điện thoại!" },
-                        { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ (phải có 10 chữ số)!" },
+                        {
+                            pattern: /^(03|05|07|08|09)\d{8}$/,
+                            message: "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam)!",
+                        },
                     ]}
                 >
                     <Input placeholder="Nhập số điện thoại" />
                 </Form.Item>
+
                 <Form.Item
                     name="cccd"
                     label="Số CCCD"
@@ -113,7 +117,7 @@ const AddEmployeeModal = ({ visible, onClose, onAddEmployee }) => {
                 >
                     <Input placeholder="Nhập số CCCD" />
                 </Form.Item>
-                <div style={{display:'flex',justifyContent:'center'}}>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <Button type="primary" htmlType="submit">
                         Thêm Nhân Viên
                     </Button>
