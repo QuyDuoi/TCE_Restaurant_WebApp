@@ -1,3 +1,4 @@
+// ThongKe.js
 import React, { useEffect, useState } from "react";
 import { Layout, Spin } from "antd"; // Spin để hiển thị loading
 import HeaderBar from "./Component/HeaderBar";
@@ -8,7 +9,7 @@ import { fetchData } from "./Data/ThongKeData";
 const { Sider, Content } = Layout;
 
 const ThongKe = () => {
-  const [filterData, setFilterData] = useState({ date: null, type: "today" });
+  const [filterData, setFilterData] = useState({ type: "today", date: null, startDate: null, endDate: null });
   const [thongKeData, setThongKeData] = useState([]); // Dữ liệu thống kê
   const [dataTop5, setDataTop5] = useState([]); // Dữ liệu top 5 sản phẩm
   const [loading, setLoading] = useState(false); // Trạng thái loading
@@ -18,10 +19,7 @@ const ThongKe = () => {
     const fetchThongKeData = async () => {
       setLoading(true); // Bắt đầu loading
       try {
-        const { ThongKeData, DataTop5 } = await fetchData(
-          filterData.type,
-          filterData.date
-        );
+        const { ThongKeData, DataTop5 } = await fetchData(filterData);
         setThongKeData(ThongKeData); // Lưu thống kê vào state
         setDataTop5(DataTop5); // Lưu top 5 sản phẩm vào state
       } catch (error) {

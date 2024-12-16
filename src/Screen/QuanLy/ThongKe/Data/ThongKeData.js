@@ -1,3 +1,4 @@
+// Data/ThongKeData.js
 import { tinhPhanTram, tinhPhanTramChoTop5 } from "../CacHamTinhToan.ts";
 import {
   thongKeDoanhThu,
@@ -5,28 +6,25 @@ import {
   thongKeNguonDoanhThu,
   thongKeTop5,
 } from "../CallApiThongKe.ts";
+import moment from 'moment';
 
-export const fetchData = async (type, date) => {
+export const fetchData = async (filter) => {
   try {
-    const startDate = null;
-    const endDate = null;
-    const choiseDay = date;
+    const { type, date, startDate, endDate } = filter;
+    let choiseDay = null;
+
+    if (type === 'custom') {
+      choiseDay = null;
+      // Sử dụng startDate và endDate cho khoảng ngày tùy chỉnh
+    } else {
+      choiseDay = date;
+    }
 
     // Gọi các API với type và thời gian
-    console.log(`Fetching data for type: ${type}, date: ${date}`);
+    console.log(`Fetching data for type: ${type}, date: ${date}, startDate: ${startDate}, endDate: ${endDate}`);
     const doanhThu = await thongKeDoanhThu(type, startDate, endDate, choiseDay);
-    const hinhThucTT = await thongKeHinhThucThanhToan(
-      type,
-      startDate,
-      endDate,
-      choiseDay
-    );
-    const nguonDoanhThu = await thongKeNguonDoanhThu(
-      type,
-      startDate,
-      endDate,
-      choiseDay
-    );
+    const hinhThucTT = await thongKeHinhThucThanhToan(type, startDate, endDate, choiseDay);
+    const nguonDoanhThu = await thongKeNguonDoanhThu(type, startDate, endDate, choiseDay);
     const top5 = await thongKeTop5(type, startDate, endDate, choiseDay);
 
     const doanhThuPt = tinhPhanTram(
