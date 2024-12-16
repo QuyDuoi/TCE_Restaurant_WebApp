@@ -1,7 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-
-// Cấu hình Firebase của bạn
+import {getAuth} from "firebase/auth";
 const firebaseConfig = {
     apiKey: "AIzaSyCMSeAFaVT6hJStOwKevh72TEU5cbRwcMc",
     authDomain: "tce-restaurant-main.firebaseapp.com",
@@ -12,8 +10,5 @@ const firebaseConfig = {
     measurementId: "G-9WZPCDFF4S"
 };
 
-// Khởi tạo Firebase
 const app = initializeApp(firebaseConfig);
-
-// Lấy đối tượng Auth từ Firebase
 export const auth = getAuth(app);

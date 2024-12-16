@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu, Typography, Divider } from 'antd';
-import { Link } from 'react-router-dom'; // Đừng quên import Link
+import {Link, useNavigate} from 'react-router-dom'; // Đừng quên import Link
 import {
     UserOutlined,
     AppstoreOutlined,
@@ -11,7 +11,23 @@ import {
     HddOutlined,
 } from '@ant-design/icons';
 
+import {auth} from "../../../firebase.config";
+import {BiLogOut} from "react-icons/bi";
+
 const Sidebar = () => {
+    const navigate = useNavigate(); // Khởi tạo useNavigate
+
+    const handleLogout = async () => {
+        try {
+            await auth.signOut();
+            console.log("Đăng xuất thành công");
+            // Chuyển người dùng về màn hình đăng nhập
+            navigate("/login"); // Thay navigate bằng phương pháp điều hướng của bạn
+        } catch (err) {
+            console.error("Đăng xuất thất bại: ", err);
+        }
+    };
+
     return (
         <div>
             {/* Tiêu đề */}
@@ -81,8 +97,12 @@ const Sidebar = () => {
                     },
                     {
                         key: '8',
-                        icon: <BarChartOutlined />,
-                        label: <Link to="/login">LoginTest</Link>,
+                        icon: <BiLogOut />,
+                        label: (
+                            <span onClick={handleLogout} style={{ cursor: 'pointer' }}>
+                                Đăng xuất
+                            </span>
+                        ),
                     },
                 ]}
             />
