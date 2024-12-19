@@ -1,5 +1,6 @@
 export const ipAddress = `https://tce-restaurant-api.onrender.com/api/`;
 // export const ipAddress = `http://localhost:3000/api/`;
+export const ipIO = `https://tce-restaurant-api.onrender.com`;
 
 export const searchMonAn = async (textSearch: string, id_nhaHang: string) => {
     try {
@@ -18,5 +19,26 @@ export const searchMonAn = async (textSearch: string, id_nhaHang: string) => {
     } catch (error) {
       console.log('Lỗi khi tìm kiếm món ăn: ', error);
       return [];
+    }
+  };
+
+  export const checkLogin = async (idToken: string) => {
+    try {
+      const response = await fetch(`${ipAddress}auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`, // Thêm token vào header
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Đăng nhập thất bại');
+      }
+      
+      const data = await response.json();
+  
+      return data; // Trả về token và thông tin nhân viên
+    } catch (error: any) {
+      return error;
     }
   };

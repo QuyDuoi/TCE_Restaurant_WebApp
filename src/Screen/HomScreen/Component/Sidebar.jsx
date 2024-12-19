@@ -97,6 +97,11 @@ const Sidebar = () => {
                     },
                     {
                         key: '8',
+                        icon: <BarChartOutlined />,
+                        label: <Link to="/quanLyTinNhan">Chăm sóc khách hàng</Link>,
+                    },
+                    {
+                        key: '9',
                         icon: <BiLogOut />,
                         label: (
                             <span onClick={handleLogout} style={{ cursor: 'pointer' }}>

@@ -1,0 +1,95 @@
+/* Sidebar */
+.sider {
+  background: #fff;
+  padding: 20px 0;
+}
+
+/* Chat Container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Chat Header */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Messages Container */
+.messages-container {
+  flex: 1;
+  padding: 10px 20px;
+  overflow-y: auto;
+  background: #f5f5f5;
+}
+
+.message-content {
+  max-width: 60%;
+  padding: 8px 12px;
+  border-radius: 16px;
+  position: relative;
+}
+
+.message-received .message-content {
+  background: #e6f7ff;
+  color: #000;
+}
+
+.message-sent .message-content {
+  background: #1890ff;
+  color: #fff;
+}
+
+/* Timestamp */
+.message-timestamp {
+  font-size: 10px;
+  color: #888;
+  text-align: left;
+  /* Positioning inside the message bubble */
+  position: absolute;
+}
+
+/* Input Area */
+.input-area {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.input-area .emoji-picker {
+  position: relative;
+}
+
+.input-area .emoji-picker-wrapper {
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  z-index: 1000;
+}
+
+.ant-input-textarea {
+  margin-right: 10px;
+  border-radius: 20px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.send-button {
+  /* Tùy chỉnh thêm nếu cần */
+}
+
+.ant-btn:hover {
+  opacity: 0.8;
+}

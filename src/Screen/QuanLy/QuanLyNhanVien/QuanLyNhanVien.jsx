@@ -10,7 +10,6 @@ import DetailEmployeeModal from './Modal/DetailEmployeeModal'
 import EditEmployeeModal from './Modal/EditEmployeeModal'
 import NotificationModal from './Modal/NotificationModal'
 const { Content } = Layout;
-const id_nhaHang = '66fab50fa28ec489c7137537';
 const QuanLyNhanVien = () => {
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [nhanVien, setNhanVien] = useState([]);

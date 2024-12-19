@@ -1,8 +1,13 @@
+/* ChatBox.css */
+
+/* ---------------------------
+   1. Các Kiểu Dáng Cơ Bản
+   --------------------------- */
+
 /* Mặc định cho thẻ card */
 .card-content {
   font-size: 2rem; /* Chữ mặc định */
   text-align: center;
-  
 }
 
 .card-content h4 {
@@ -14,14 +19,86 @@
   font-size: 0.8rem; /* Kích thước mặc định */
   width: 100%;
 }
+
 .card-content img {
   width: 110px;
   object-fit: cover;
 }
-/* Responsive cho các thiết bị */
-@media (max-width: 1200px) { /* PC */
+
+/* ---------------------------
+   2. Chat Button (Icon Chat)
+   --------------------------- */
+
+.chat-button-container {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  z-index: 1000;
+  touch-action: none; /* Ngăn chặn sự kiện swipe mặc định */
+  cursor: grab; /* Hiển thị tay khi di chuột */
+}
+
+.chat-button-container:active {
+  cursor: grabbing; /* Thay đổi con trỏ khi kéo */
+}
+
+.chat-button-container button {
+  background-color: #1890ff;
+  color: white;
+}
+
+/* ---------------------------
+   3. Chat Modal
+   --------------------------- */
+
+.ant-modal-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-area {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.input-area .emoji-picker {
+  position: relative;
+}
+
+.input-area .emoji-picker-wrapper {
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  z-index: 1000;
+}
+
+.input-area .ant-input-textarea {
+  resize: none;
+  border-radius: 20px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.input-area .send-button {
+  margin-left: 8px;
+}
+
+/* PC */
+@media (max-width: 1200px) {
   .card-content {
-    font-size: 2rem; /* Chữ mặc định */
+    font-size: 2rem;
     text-align: center;
     word-break: break-word;
   }
@@ -40,7 +117,8 @@
   }
 }
 
-@media (max-width: 992px) { /* Tablet */
+/* Tablet */
+@media (max-width: 992px) {
   .card-content {
     font-size: 2rem;
     text-align: center;
@@ -59,7 +137,8 @@
   }
 }
 
-@media (max-width: 888px) { /* Mini Tablet 1 */
+/* Mini Tablet 1 */
+@media (max-width: 888px) {
   .card-content {
     font-size: 2rem;
     text-align: center;
@@ -80,7 +159,8 @@
   }
 }
 
-@media (max-width: 767px) { /* Mini Tablet */
+/* Mini Tablet */
+@media (max-width: 767px) {
   .order-list-container {
     display: none; /* Ẩn bảng danh sách order */
   }
@@ -100,38 +180,197 @@
     width: 100px;
     object-fit: cover;
   }
+
+  .ant-modal {
+    top: 90% !important;
+    left: 90% !important;
+    transform: translate(0%, 0%) !important;
+    width: 90% !important;
+    height: auto !important;
+    margin: 0;
+  }
+
+  .ant-modal-content {
+    height: auto;
+    border-radius: 8px; /* Làm mềm góc cạnh */
+  }
+
+  .messages-container {
+    max-height: 60vh; /* Điều chỉnh chiều cao vùng tin nhắn */
+    overflow-y: auto;
+  }
+
+  .ant-input-textarea {
+    font-size: 14px;
+    border-radius: 8px;
+  }
 }
 
-@media (max-width: 514px) { /* Phone */
+/* Mobile */
+@media (max-width: 514px) {
+  /* Ẩn bảng order */
   .order-list-container {
-    display: none; /* Ẩn bảng danh sách order */
+    display: none;
   }
 
+  /* Điều chỉnh danh sách menu */
   .menu-list-container {
-    padding: 2px; /* Thêm padding cho container */
+    padding: 5px; /* Tăng khoảng cách lề nhẹ */
   }
 
+  /* Thẻ card */
   .card-content {
-    font-size: 0.8rem; /* Giảm font-size thêm */
-    text-align: center; /* Căn giữa nội dung */
+    font-size: 0.9rem; /* Giảm nhẹ cỡ chữ */
+    text-align: center;
   }
 
   .card-content h4 {
     font-size: 1rem;
-    margin: 2px 0; /* Giảm khoảng cách */
+    margin: 5px 0; /* Giảm khoảng cách giữa tiêu đề */
   }
 
   .card-content p {
-    font-size: 0.7rem; /* Giảm font-size phần mô tả */
-    margin: 2px 0; /* Thêm margin để tạo khoảng cách */
+    font-size: 0.75rem; /* Chữ mô tả nhỏ hơn */
+    margin: 3px 0; /* Tạo khoảng cách */
   }
+
+  /* Hình ảnh trong card */
+  .card-content img,
   .ant-card img {
-    width: 80px; /* Tăng kích thước hình ảnh một chút */
-    height: 80px; /* Tăng kích thước hình ảnh một chút */
-    object-fit: cover; 
+    width: 70px; /* Giảm kích thước hình ảnh */
+    height: 70px;
+    object-fit: cover;
+    margin: 5px auto; /* Canh giữa hình ảnh */
   }
-}
-.ant-card .ant-card-body {
-  padding: 0px;
+
+  /* Điều chỉnh thẻ card body */
+  .ant-card .ant-card-body {
+    padding: 8px; /* Giảm padding cho phần nội dung card */
+  }
+
+  /* Chỉnh lại kích thước badge giỏ hàng */
+  .ant-badge {
+    font-size: 12px;
+  }
+
+  /* Nút giỏ hàng */
+  .cart-icon {
+    font-size: 20px; /* Thu nhỏ icon */
+  }
+
+  /* Giảm margin của phần tiêu đề */
+  h3 {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+
+  h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+
+  /* Input tìm kiếm */
+  .ant-input-search {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  /* Button xác nhận */
+  .ant-btn {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  .chat-button-container {
+    bottom: 10px; /* Đưa icon lên một chút */
+    right: 10px; /* Căn sát lề phải */
+  }
+
+  /* Modal mở full màn hình trên mobile */
+  .ant-modal {
+    top: 0 !important;
+    width: 90% !important;
+    left: 0% !important;
+    max-width: 100% !important;
+  }
+
+  .ant-modal-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  /* Khu vực tin nhắn */
+  .messages-container {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Input tin nhắn */
+  .input-container {
+    padding: 10px 0;
+  }
+
+  .ant-input-textarea {
+    font-size: 14px; /* Giảm kích thước chữ */
+  }
+
+  .ant-btn {
+    font-size: 14px; /* Điều chỉnh nút gửi */
+    padding: 8px 12px;
+  }
 }
 
+/* Thêm các lớp mới cho component */
+.emoji-picker-wrapper {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff; /* Đảm bảo nền trắng cho picker */
+}
+
+/* Tùy chỉnh các tin nhắn */
+.messages-container .ant-list-item {
+  display: flex;
+  justify-content: flex-start; /* Mặc định tin nhắn từ người nhận */
+}
+
+.messages-container .ant-list-item.ban {
+  justify-content: flex-end; /* Tin nhắn từ ban */
+}
+
+.messages-container .ant-list-item .message {
+  background-color: #f0f0f0;
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 20px;
+  max-width: 70%;
+  word-break: break-word;
+}
+
+.messages-container .ant-list-item.ban .message {
+  background-color: #1890ff;
+  color: #fff;
+}
+
+/* Thêm hiệu ứng hover cho nút */
+.ant-btn:hover {
+  opacity: 0.8;
+}
+
+.message-timestamp {
+  font-size: 10px;
+  color: #888;
+  text-align: left;
+  /* Positioning inside the message bubble */
+  position: absolute;
+}
+
+/* Optional: Adjust the message bubble to accommodate the timestamp */
+.messages-container .ant-list-item div {
+  position: relative; /* To position the timestamp absolutely within */
+}

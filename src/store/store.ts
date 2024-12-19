@@ -9,6 +9,7 @@ import monAnReducer from './Slices/MonAnSlice.ts';
 import khuVucReducer from './Slices/KhuVucSlice.ts'
 import banReducer from './Slices/BanSlice.ts';
 import caLamReducer from "./Slices/CaLamSlice.ts";
+import userReducer from './Slices/UserSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     khuVuc: khuVucReducer,
     ban: banReducer,
     caLam: caLamReducer,
+    user: userReducer,
   },
 });
 

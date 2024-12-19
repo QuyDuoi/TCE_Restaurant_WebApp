@@ -1,13 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Input, Button, Tabs, Badge, Modal, List, Spin, message } from "antd";
+import {
+  Row,
+  Col,
+  Input,
+  Button,
+  Tabs,
+  Badge,
+  Modal,
+  List,
+  Spin,
+  message,
+} from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import MenuList from "./Component/MenuList";
 import OrderList from "./Component/OrderList";
 import axios from "axios";
 import "./OrderFood.css";
-import {ipAddress, searchMonAn} from "../services/api.ts"
+import { ipAddress, searchMonAn } from "../services/api.ts";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
+import ChatBox from "./ChatBox.jsx";
+import ModalHoaDon from "./ModalHoaDon.jsx";
 
 const { TabPane } = Tabs;
 
@@ -32,16 +45,15 @@ const OrderFood = () => {
     const layDanhSachThucDon = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${ipAddress}layDanhSachThucDon`,
-          { params: { id_nhaHang } }
-        );
+        const response = await axios.get(`${ipAddress}layDanhSachThucDon`, {
+          params: { id_nhaHang },
+        });
         setListMonAn(response.data);
         setFilteredMonAn(response.data); // Gán mặc định danh sách đã lọc
       } catch (err) {
         console.error("Lỗi khi gọi API:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
     layDanhSachThucDon();
@@ -53,7 +65,7 @@ const OrderFood = () => {
       socket.emit("joinRoom", id);
       console.log(`Joined room: ${id}`);
     }
-  
+
     // Cleanup: ngắt kết nối khi component unmount
     return () => {
       socket.disconnect();
@@ -73,7 +85,7 @@ const OrderFood = () => {
       message.success(data.msg);
       setOrderList([]); // Xóa giỏ hàng khi có thông báo hủy món
     });
-  
+
     // Cleanup: hủy lắng nghe sự kiện khi component unmount
     return () => {
       socket.off("huyDatMon");
@@ -82,7 +94,7 @@ const OrderFood = () => {
 
   // Tìm kiếm món ăn (Debounce 1 giây)
   useEffect(() => {
-    const timeoutId = setTimeout( async () => {
+    const timeoutId = setTimeout(async () => {
       if (searchText.trim() === "") {
         setFilteredMonAn(listMonAn); // Nếu không có từ khóa thì trả lại toàn bộ
       } else {
@@ -114,7 +126,9 @@ const OrderFood = () => {
   const handleIncreasesoLuongMon = (id) => {
     setOrderList(
       orderList.map((order) =>
-        order._id === id ? { ...order, soLuongMon: order.soLuongMon + 1 } : order
+        order._id === id
+          ? { ...order, soLuongMon: order.soLuongMon + 1 }
+          : order
       )
     );
   };
@@ -124,7 +138,9 @@ const OrderFood = () => {
     setOrderList(
       orderList
         .map((order) =>
-          order._id === id ? { ...order, soLuongMon: Math.max(order.soLuongMon - 1, 1) } : order
+          order._id === id
+            ? { ...order, soLuongMon: Math.max(order.soLuongMon - 1, 1) }
+            : order
         )
         .filter((order) => order.soLuongMon > 0)
     );
@@ -141,7 +157,7 @@ const OrderFood = () => {
 
   const guiThongTinMonAn = async () => {
     try {
-      const response = await axios.post(`${ipAddress}datMonAn`, { 
+      const response = await axios.post(`${ipAddress}datMonAn`, {
         id: id,
         danhSachMon: orderList,
         id_nhaHang: id_nhaHang,
@@ -150,25 +166,27 @@ const OrderFood = () => {
       if (response.data) {
         message.success(response.data.msg);
       }
-
     } catch (error) {
       if (error.response) {
         // Lỗi trả về từ server (status code không phải 2xx)
         console.error("Lỗi từ backend:", error.response.data);
         message.error(
-          error.response.data.msg || "Gửi thông tin thất bại, vui lòng liên hệ nhân viên!"
+          error.response.data.msg ||
+            "Gửi thông tin thất bại, vui lòng liên hệ nhân viên!"
         );
       } else if (error.request) {
         // Lỗi khi không nhận được phản hồi từ server
         console.error("Không có phản hồi từ server:", error.request);
-        message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
+        message.error(
+          "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!"
+        );
       } else {
         // Lỗi khác xảy ra
         console.error("Lỗi hệ thống:", error.message);
         message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
       }
     }
-  }
+  };
 
   // Xử lý xác nhận gọi món
   const handleConfirmOrder = () => {
@@ -183,11 +201,11 @@ const OrderFood = () => {
   // Hàm kiểm tra mật khẩu và gửi thông tin
   const handlePasswordSubmit = async () => {
     try {
-      const response = await axios.post(`${ipAddress}kiemTraMatKhau`, { 
-        matKhau: password, 
-        id_ban: id 
+      const response = await axios.post(`${ipAddress}kiemTraMatKhau`, {
+        matKhau: password,
+        id_ban: id,
       });
-      
+
       const status = response.data;
 
       if (status) {
@@ -197,45 +215,56 @@ const OrderFood = () => {
         guiThongTinMonAn();
         console.log("Đúng");
       } else {
-        message.error("Sai mật khẩu! Vui lòng liên hệ nhân viên.")
+        message.error("Sai mật khẩu! Vui lòng liên hệ nhân viên.");
         setPasswordResult(false);
       }
-
     } catch (error) {
       // Kiểm tra lỗi từ phản hồi backend
-    if (error.response) {
-      // Lỗi trả về từ server (status code không phải 2xx)
-      console.error("Lỗi từ backend:", error.response.data);
-      message.error(
-        error.response.data.msg || "Mật khẩu không chính xác, vui lòng thử lại!"
-      );
-    } else if (error.request) {
-      // Lỗi khi không nhận được phản hồi từ server
-      console.error("Không có phản hồi từ server:", error.request);
-      message.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!");
-    } else {
-      // Lỗi khác xảy ra
-      console.error("Lỗi hệ thống:", error.message);
-      message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
-    }
+      if (error.response) {
+        // Lỗi trả về từ server (status code không phải 2xx)
+        console.error("Lỗi từ backend:", error.response.data);
+        message.error(
+          error.response.data.msg ||
+            "Mật khẩu không chính xác, vui lòng thử lại!"
+        );
+      } else if (error.request) {
+        // Lỗi khi không nhận được phản hồi từ server
+        console.error("Không có phản hồi từ server:", error.request);
+        message.error(
+          "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!"
+        );
+      } else {
+        // Lỗi khác xảy ra
+        console.error("Lỗi hệ thống:", error.message);
+        message.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+      }
     }
   };
 
   if (loading) {
     return (
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-            <Spin size="large" />
-            <div>Đang lấy thông tin món ăn...</div>
-        </div>
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <Spin size="large" />
+        <div>Đang lấy thông tin bàn...</div>
+      </div>
     );
-}
+  }
 
   return (
-    <Row gutter={16} style={{ padding: "20px" , height: "calc(100vh - 10px)"}}>
+    <Row gutter={16} style={{ padding: "10px", height: "calc(100vh - 10px)" }}>
       {/* Danh sách món ăn */}
-      <Col xs={24} sm={24} md={14} style={{ marginBottom: "20px" }}>
-        <h3>Danh sách món ăn</h3>
-        <Row justify="space-between" align="middle" style={{ marginBottom: "20px" }}>
+      <Col xs={24} sm={24} md={14} style={{ marginBottom: "10px" }}>
+        <h3>Danh sách thực đơn</h3>
+        <h4 style={{ display: "flex", alignItems: "center" }}>
+          <span style={{ marginRight: "10px" }}>Khu vực:</span>
+          <span style={{marginRight: "10px"}}>Bàn: </span>
+          <ModalHoaDon id_ban={id} />
+        </h4>
+        <Row
+          justify="space-between"
+          align="middle"
+          style={{ marginBottom: "10px" }}
+        >
           <Col flex="1">
             <Input.Search
               placeholder="Tìm món ăn"
@@ -248,13 +277,21 @@ const OrderFood = () => {
             <Badge count={orderList.length} offset={[5, 0]}>
               <ShoppingCartOutlined
                 className="cart-icon"
-                style={{ fontSize: "24px", cursor: "pointer", color: "#1890ff" }}
+                style={{
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#1890ff",
+                }}
                 onClick={() => setCartModalVisible(true)}
               />
             </Badge>
           </Col>
         </Row>
-        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)} type="card">
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => setActiveTab(key)}
+          type="card"
+        >
           <TabPane tab="Tất cả" key="all">
             <div className="menu-list-container">
               <MenuList data={getFilteredMenu()} onAddItem={handleAddItem} />
@@ -319,14 +356,20 @@ const OrderFood = () => {
                   >
                     -
                   </Button>,
-                  <Button size="small" danger onClick={() => handleRemoveItem(item._id)}>
+                  <Button
+                    size="small"
+                    danger
+                    onClick={() => handleRemoveItem(item._id)}
+                  >
                     Xóa
                   </Button>,
                 ]}
               >
                 <List.Item.Meta
                   title={item.tenMon}
-                  description={`Số lượng: ${item.soLuongMon} | Giá: ${(item.giaMonAn * item.soLuongMon)}đ`}
+                  description={`Số lượng: ${item.soLuongMon} | Giá: ${
+                    item.giaMonAn * item.soLuongMon
+                  }đ`}
                 />
               </List.Item>
             )}
@@ -340,7 +383,7 @@ const OrderFood = () => {
         title="Nhập mật khẩu bàn"
         visible={isPasswordModalVisible}
         onCancel={() => setPasswordModalVisible(false)}
-        style={{maxWidth: "80%"}}
+        style={{ maxWidth: "80%" }}
         footer={[
           <Button key="cancel" onClick={() => setPasswordModalVisible(false)}>
             Hủy
@@ -359,30 +402,31 @@ const OrderFood = () => {
         />
       </Modal>
       <Modal
-  title={passwordResult ? "Thành công!" : "Thất bại!"}
-  visible={isResultModalVisible}
-  onCancel={() => setResultModalVisible(false)}
-  style={{maxWidth: "70%"}}
-  footer={[
-    <Button
-      key="ok"
-      type="primary"
-      onClick={() => {
-        setResultModalVisible(false); 
-        if (passwordResult) {
-          setCartModalVisible(false)
-        } else {
-          // Quay lại màn order nếu mật khẩu sai
-          setPasswordModalVisible(true);
-        }
-      }}
-    >
-      OK
-    </Button>,
-  ]}
->
-    <p>Mật khẩu chính xác. Đang gửi thông tin đặt món...</p>
-</Modal>
+        title={passwordResult ? "Thành công!" : "Thất bại!"}
+        visible={isResultModalVisible}
+        onCancel={() => setResultModalVisible(false)}
+        style={{ maxWidth: "70%" }}
+        footer={[
+          <Button
+            key="ok"
+            type="primary"
+            onClick={() => {
+              setResultModalVisible(false);
+              if (passwordResult) {
+                setCartModalVisible(false);
+              } else {
+                // Quay lại màn order nếu mật khẩu sai
+                setPasswordModalVisible(true);
+              }
+            }}
+          >
+            OK
+          </Button>,
+        ]}
+      >
+        <p>Mật khẩu chính xác. Đang gửi thông tin đặt món...</p>
+      </Modal>
+      <ChatBox id_ban={id} />
     </Row>
   );
 };
