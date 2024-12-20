@@ -20,9 +20,9 @@ const { TextArea } = Input;
 
 const QuanLyTinNhan = () => {
   const [khuVucList, setKhuVucList] = useState([]);
+  const [thongTinBan, setThongTinBan] = useState({});
   const [selectedBan, setSelectedBan] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [visible, setVisible] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -36,15 +36,14 @@ const QuanLyTinNhan = () => {
   // const id_nhaHang = "66fab50fa28ec489c7137537";
 
   useEffect(() => {
-    console.log("co du lieu khong",user);
-
     const fetchKhuVuc = async () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `${ipAddress}layDsKhuVuc?id_nhaHang=${id_nhaHang}`
+          `${ipAddress}layDsKhuVucKemTinNhan?id_nhaHang=${id_nhaHang}`
         );
-        setKhuVucList(response.data);
+        setKhuVucList(response.data.khuVucVaBans);
+        setUnreadCounts(response.data.unreadCounts);
       } catch (error) {
         console.error("Error fetching KhuVuc:", error);
       } finally {
@@ -53,7 +52,18 @@ const QuanLyTinNhan = () => {
     };
 
     fetchKhuVuc();
-  }, []);
+  }, [id_nhaHang]);
+
+  // Hàm để cuộn xuống cuối cùng
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   // Initialize Socket.io
   useEffect(() => {
@@ -61,6 +71,12 @@ const QuanLyTinNhan = () => {
 
     // Join the room when the selected table changes
     if (selectedBan) {
+      setUnreadCounts((prev) => {
+        const newCounts = { ...prev };
+        delete newCounts[selectedBan._id];
+        return newCounts;
+      });
+
       socketRef.current.emit("NhanDien", {
         role: "NhanVien",
         id_ban: selectedBan._id,
@@ -72,16 +88,20 @@ const QuanLyTinNhan = () => {
       });
 
       socketRef.current.emit("joinRoom", selectedBan._id);
-      setVisible(true);
     }
 
     const fetchMessages = async () => {
+      if (!selectedBan) return; // Ensure selectedBan is available
       setLoadingMessages(true);
       try {
         const response = await axios.get(
           `${ipAddress}layDsTinNhan?id_ban=${selectedBan._id}`
         );
-        setMessages(response.data);
+        // Ensure messages are sorted by createdAt in ascending order
+        const sortedMessages = response.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        setMessages(sortedMessages);
       } catch (error) {
         console.error("Error fetching messages:", error);
       } finally {
@@ -97,7 +117,7 @@ const QuanLyTinNhan = () => {
         socketRef.current.disconnect();
       }
     };
-  }, [selectedBan]);
+  }, [selectedBan, user._id]);
 
   // Listen for incoming messages
   useEffect(() => {
@@ -105,6 +125,10 @@ const QuanLyTinNhan = () => {
       socketRef.current.on("tinNhanMoiCuaKhach", (messageData) => {
         if (selectedBan && messageData.id_ban === selectedBan._id) {
           setMessages((prev) => [...prev, messageData]);
+          socketRef.current.emit("docTinNhan", {
+            id_ban: selectedBan._id,
+            id_nhanVien: user._id,
+          });
         } else {
           // Increase unread count for the specific table
           setUnreadCounts((prev) => ({
@@ -113,6 +137,7 @@ const QuanLyTinNhan = () => {
               ? prev[messageData.id_ban] + 1
               : 1,
           }));
+          console.log(unreadCounts);
         }
       });
     }
@@ -196,11 +221,11 @@ const QuanLyTinNhan = () => {
       </Sider>
 
       {/* Content chứa giao diện chat */}
-      <Layout>
-        <Header style={{ background: "#fff", padding: 0 }}>
+      <Layout style={{ height: "100%" }}>
+        <Header style={{ background: "#fff", padding: 0, height: "auto" }}>
           <h2 style={{ marginLeft: "20px" }}>Chat với khách hàng</h2>
         </Header>
-        <Content style={{ margin: "20px" }}>
+        <Content style={{ margin: "10px", height: "100%" }}>
           {!selectedBan ? (
             <div style={{ textAlign: "center", marginTop: "100px" }}>
               <MessageOutlined style={{ fontSize: "50px", color: "#ccc" }} />
@@ -212,52 +237,77 @@ const QuanLyTinNhan = () => {
                 {/* Tiêu đề chat */}
                 <div className="chat-header">
                   <h3>Bàn {selectedBan.tenBan}</h3>
-                  <Button onClick={() => setVisible(false)}>Đóng</Button>
+                  <Button onClick={() => setSelectedBan(null)}>Đóng</Button>
                 </div>
 
                 {/* Danh sách tin nhắn */}
                 <div className="messages-container">
                   <List
                     dataSource={messages}
-                    renderItem={(item) => (
-                      <List.Item
-                        key={item._id}
-                        style={{
-                          justifyContent:
-                            item.nguoiGui === "nhanVien"
-                              ? "flex-end"
-                              : "flex-start",
-                          padding: "5px 0",
-                        }}
-                      >
-                        <div
+                    locale={{ emptyText: "Chưa có cuộc hội thoại nào" }}
+                    renderItem={(item, index) => {
+                      // Determine if the timestamp should be shown for this message
+                      const showTimestamp = () => {
+                        const thresholdMinutes = 5; // Define the time gap threshold
+                        const currentMessageTime = new Date(item.createdAt);
+                        const nextMessage = messages[index + 1];
+                        if (!nextMessage) {
+                          // If this is the last message, show timestamp
+                          return true;
+                        }
+                        const nextMessageTime = new Date(nextMessage.createdAt);
+                        const timeDiff =
+                          (nextMessageTime - currentMessageTime) / 1000 / 60; // Difference in minutes
+                        const differentSender =
+                          item.nguoiGui !== nextMessage.nguoiGui;
+                        return differentSender || timeDiff > thresholdMinutes;
+                      };
+
+                      return (
+                        <List.Item
+                          key={item._id}
                           style={{
-                            backgroundColor:
-                              item.nguoiGui === false ? "#DBEBFF" : "#f0f0f0",
-                            color: "#000",
-                            padding: "8px 12px",
-                            borderRadius: "10px",
-                            maxWidth: "70%",
-                            wordBreak: "break-word",
-                            position: "relative",
+                            justifyContent:
+                              item.nguoiGui === true
+                                ? "flex-start"
+                                : "flex-end",
+                            padding: "5px 0",
                           }}
                         >
-                          {item.noiDung}
-                          <div className="message-timestamp">
-                            {new Date(item.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                          <div
+                            style={{
+                              backgroundColor:
+                                item.nguoiGui === false ? "#DBEBFF" : "#f0f0f0",
+                              color: "#000",
+                              padding: "8px 12px",
+                              borderRadius: "10px",
+                              maxWidth: "70%",
+                              wordBreak: "break-word",
+                              position: "relative",
+                            }}
+                          >
+                            {item.noiDung}
+                            {showTimestamp() && (
+                              <div className="message-timestamp">
+                                {new Date(item.createdAt).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </List.Item>
-                    )}
+                        </List.Item>
+                      );
+                    }}
                   />
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Khu vực nhập tin nhắn */}
-                <div className="input-area">
+                <div className="input-area-message">
                   {/* Emoji Picker */}
                   <div className="emoji-picker">
                     <Tooltip title="Chọn biểu cảm">

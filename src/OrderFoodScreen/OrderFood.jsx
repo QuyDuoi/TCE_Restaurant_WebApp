@@ -21,12 +21,14 @@ import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
 import ChatBox from "./ChatBox.jsx";
 import ModalHoaDon from "./ModalHoaDon.jsx";
+import { lockOrientation, unlockOrientation } from 'screen-orientation';
 
 const { TabPane } = Tabs;
 
 const OrderFood = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [thongTinBan, setThongTinBan] = useState(null);
   const [orderList, setOrderList] = useState([]); // Danh sách món trong giỏ
   const [activeTab, setActiveTab] = useState("all"); // Tab hiện tại
   const [isCartModalVisible, setCartModalVisible] = useState(false); // Hiển thị giỏ hàng
@@ -38,26 +40,60 @@ const OrderFood = () => {
   const [passwordResult, setPasswordResult] = useState(null); // Lưu kết quả backend
   const socket = io("https://tce-restaurant-api.onrender.com");
   const [isResultModalVisible, setResultModalVisible] = useState(false); // Hiển thị modal kết quả
-  const id_nhaHang = "66fab50fa28ec489c7137537"; // ID nhà hàng
+  const id_nhaHang = thongTinBan?.id_nhaHang;
+  const id_ban = "6764420cf1d04c5be2fa5aeb";
 
+  useEffect(() => {
+    // Chặn việc xoay màn hình
+    lockOrientation('portrait');
+
+    return () => {
+      // Khôi phục khi component bị unmount
+      unlockOrientation();
+    };
+  }, []);
+  
   // Lấy danh sách thực đơn từ API
   useEffect(() => {
-    const layDanhSachThucDon = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${ipAddress}layDanhSachThucDon`, {
-          params: { id_nhaHang },
-        });
-        setListMonAn(response.data);
-        setFilteredMonAn(response.data); // Gán mặc định danh sách đã lọc
-      } catch (err) {
-        console.error("Lỗi khi gọi API:", err);
+        // 1. Gọi API để lấy thông tin bàn
+        const banResponse = await axios.get(
+          `${ipAddress}layThongTinBanVaHoaDon`,
+          {
+            params: { id_ban },
+          }
+        );
+        setThongTinBan(banResponse.data);
+
+        // 2. Lấy id_nhaHang từ phản hồi của API
+        const id_nhaHang = banResponse.data.id_nhaHang;
+
+        // Kiểm tra id_nhaHang có hợp lệ không
+        if (!id_nhaHang) {
+          throw new Error("Không tìm thấy id_nhaHang từ thông tin bàn.");
+        }
+
+        // 3. Gọi API để lấy danh sách thực đơn dựa trên id_nhaHang
+        const monAnResponse = await axios.get(
+          `${ipAddress}layDanhSachThucDon`,
+          {
+            params: { id_nhaHang },
+          }
+        );
+        setListMonAn(monAnResponse.data);
+        setFilteredMonAn(monAnResponse.data);
+      } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+        message.error("Có lỗi xảy ra khi lấy dữ liệu. Vui lòng thử lại sau!");
       } finally {
         setLoading(false);
       }
     };
-    layDanhSachThucDon();
-  }, []);
+
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     // Kết nối và join vào room với id_ban
@@ -256,9 +292,10 @@ const OrderFood = () => {
       <Col xs={24} sm={24} md={14} style={{ marginBottom: "10px" }}>
         <h3>Danh sách thực đơn</h3>
         <h4 style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ marginRight: "10px" }}>Khu vực:</span>
-          <span style={{marginRight: "10px"}}>Bàn: </span>
-          <ModalHoaDon id_ban={id} />
+          <span style={{ marginRight: "10px" }}>
+            Khu vực: {thongTinBan.tenKhuVuc} - Bàn: {thongTinBan.tenBan}
+          </span>
+          <ModalHoaDon id_ban={id} thongTinBan={thongTinBan} />
         </h4>
         <Row
           justify="space-between"
@@ -327,7 +364,7 @@ const OrderFood = () => {
       {/* Modal giỏ hàng */}
       <Modal
         title="Giỏ hàng của bạn"
-        visible={isCartModalVisible}
+        open={isCartModalVisible}
         onCancel={() => setCartModalVisible(false)}
         footer={[
           <Button key="close" onClick={() => setCartModalVisible(false)}>
@@ -381,7 +418,7 @@ const OrderFood = () => {
       {/* Modal nhập mật khẩu */}
       <Modal
         title="Nhập mật khẩu bàn"
-        visible={isPasswordModalVisible}
+        open={isPasswordModalVisible}
         onCancel={() => setPasswordModalVisible(false)}
         style={{ maxWidth: "80%" }}
         footer={[
@@ -403,7 +440,7 @@ const OrderFood = () => {
       </Modal>
       <Modal
         title={passwordResult ? "Thành công!" : "Thất bại!"}
-        visible={isResultModalVisible}
+        open={isResultModalVisible}
         onCancel={() => setResultModalVisible(false)}
         style={{ maxWidth: "70%" }}
         footer={[

@@ -4,7 +4,7 @@ import {
   SendOutlined,
   SmileOutlined,
 } from "@ant-design/icons";
-import { Modal, Input, Button, List, Tooltip } from "antd";
+import { Modal, Input, Button, List, Tooltip, Spin } from "antd";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ipAddress, ipIO } from "../services/api.ts";
@@ -14,11 +14,11 @@ import data from "@emoji-mart/data"; // Import emoji data
 const { TextArea } = Input;
 
 const ChatBox = ({ id_ban }) => {
-  // Ensure id_nhanVien is passed as a prop
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [trangThaiTinNhan, setTrangThaiTinNhan] = useState("");
   const [position, setPosition] = useState({
     x: window.innerWidth - 70,
     y: window.innerHeight - 100,
@@ -26,12 +26,16 @@ const ChatBox = ({ id_ban }) => {
   const isDragging = useRef(false);
   const touchStartPosition = useRef({ x: 0, y: 0 });
   const socketRef = useRef(null);
+  id_ban = "6764420cf1d04c5be2fa5aeb";
 
   // Emoji picker visibility
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Ref để cuộn xuống cuối cùng
   const messagesEndRef = useRef(null);
+
+  // Ref cho TextArea để quản lý focus
+  const inputRef = useRef(null);
 
   // Hàm để cuộn xuống cuối cùng
   const scrollToBottom = () => {
@@ -55,7 +59,17 @@ const ChatBox = ({ id_ban }) => {
           const response = await axios.get(
             `${ipAddress}layDsTinNhan?id_ban=${id_ban}`
           );
-          setMessages(response.data);
+          // Ensure messages are sorted by createdAt in ascending order
+          const sortedMessages = response.data.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+          setMessages(sortedMessages);
+          const tinNhanCuoi = sortedMessages.at(-1);
+          if (tinNhanCuoi.nguoiGui === true) {
+            setTrangThaiTinNhan("Đã đọc");
+          } else {
+            setTrangThaiTinNhan("Đã gửi");
+          }
         } catch (error) {
           console.error("Error fetching messages:", error);
         }
@@ -71,11 +85,23 @@ const ChatBox = ({ id_ban }) => {
     };
   }, [id_ban]);
 
+  useEffect(() => {
+    if (visible && messages.length > 0) {
+      // Adding a slight delay to ensure the modal has rendered
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [visible, messages]);
+
   // Listen for incoming messages
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("tinNhanMoiCuaNv", (messageData) => {
         setMessages((prev) => [...prev, messageData]);
+      });
+      socketRef.current.on("nhanVienDaDoc", () => {
+        setTrangThaiTinNhan("Đã đọc");
       });
     }
 
@@ -83,6 +109,7 @@ const ChatBox = ({ id_ban }) => {
     return () => {
       if (socketRef.current) {
         socketRef.current.off("tinNhanMoiCuaNv");
+        socketRef.current.off("nhanVienDaDoc");
       }
     };
   }, []);
@@ -109,13 +136,18 @@ const ChatBox = ({ id_ban }) => {
       socketRef.current.emit("khachGuiTin", messageData);
 
       setMessages((prev) => [...prev, messageData]);
-
       setMessage(""); // Clear message input
       setShowEmojiPicker(false); // Close emoji picker if open
+
+      // Refocus vào Input sau khi gửi
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
       setSending(false);
+      setTrangThaiTinNhan("Đã gửi");
     }
   };
 
@@ -153,6 +185,10 @@ const ChatBox = ({ id_ban }) => {
   // Handle emoji selection
   const addEmoji = (emoji) => {
     setMessage((prev) => prev + emoji.native);
+    // Refocus vào Input sau khi chọn emoji
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   // Add global event listeners for dragging
@@ -183,19 +219,6 @@ const ChatBox = ({ id_ban }) => {
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
-
-  // Determine whether to show timestamp
-  const shouldShowTimestamp = (currentIndex) => {
-    if (currentIndex === 0) return true;
-    const currentMessage = messages[currentIndex];
-    const previousMessage = messages[currentIndex - 1];
-    const currentTime = new Date(currentMessage.createdAt).getTime();
-    const previousTime = new Date(previousMessage.createdAt).getTime();
-    const timeDifference = currentTime - previousTime; // in milliseconds
-    const threshold = 5 * 60 * 1000; // 5 minutes
-
-    return timeDifference > threshold;
-  };
 
   return (
     <>
@@ -228,60 +251,124 @@ const ChatBox = ({ id_ban }) => {
 
       {/* Chat Modal */}
       <Modal
-        title="Nhắn tin đến nhân viên"
-        visible={visible}
+        title={
+          <div style={{ textAlign: "center", width: "100%" }}>
+            <h3>Nhắn tin đến nhân viên</h3>
+          </div>
+        }
+        open={visible}
+        closable={false}
         onCancel={handleCloseChat}
-        centered
         footer={null}
-        width={400}
-        bodyStyle={{
-          display: "flex",
-          flexDirection: "column",
-          height: "60vh",
-        }}
+        centered
+        width={350} // Điều chỉnh width cho mobile
         className="chat-modal"
+        style={{ padding: "10px" }}
       >
         {/* Messages Display */}
         <div className="messages-container">
-          <List
-            dataSource={messages}
-            locale={{ emptyText: "Hãy bắt đầu cuộc hội thoại!" }}
-            renderItem={(item, index) => (
-              <List.Item
-                key={item._id}
+          {messages.length === 0 ? (
+            <Spin spinning={true} tip="Đang tải tin nhắn...">
+              <div style={{ height: "100%" }}></div>
+            </Spin>
+          ) : (
+            <div>
+              <List
+                dataSource={messages}
+                locale={{ emptyText: "Hãy bắt đầu cuộc hội thoại!" }}
+                renderItem={(item, index) => {
+                  // Determine if the timestamp should be shown for this message
+                  const showTimestamp = () => {
+                    const thresholdMinutes = 5; // Define the time gap threshold
+                    const currentMessageTime = new Date(item.createdAt);
+                    const nextMessage = messages[index + 1];
+                    if (!nextMessage) {
+                      // If this is the last message, show timestamp
+                      return true;
+                    }
+                    const nextMessageTime = new Date(nextMessage.createdAt);
+                    const timeDiff =
+                      (nextMessageTime - currentMessageTime) / 1000 / 60; // Difference in minutes
+                    const differentSender =
+                      item.nguoiGui !== nextMessage.nguoiGui;
+                    return differentSender || timeDiff > thresholdMinutes;
+                  };
+
+                  return (
+                    <List.Item
+                      key={item._id || index} // Use index as key if _id is not available
+                      style={{
+                        justifyContent:
+                          item.nguoiGui === true ? "flex-end" : "flex-start",
+                        padding: "5px 0",
+                      }}
+                    >
+                      <div
+                        style={{
+                          backgroundColor:
+                            item.nguoiGui === true ? "#DBEBFF" : "#f0f0f0",
+                          color: "#000",
+                          padding: "8px 12px",
+                          borderRadius: "10px",
+                          maxWidth: "70%",
+                          wordBreak: "break-word",
+                          position: "relative",
+                        }}
+                      >
+                        {item.noiDung}
+                        {showTimestamp() && (
+                          <div className="message-timestamp">
+                            {new Date(item.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </List.Item>
+                  );
+                }}
+              />
+              <div
                 style={{
-                  justifyContent:
-                    item.nguoiGui === true ? "flex-end" : "flex-start",
-                  padding: "5px 0",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginTop: "5px",
                 }}
               >
-                <div
-                  style={{
-                    backgroundColor:
-                      item.nguoiGui === true ? "#DBEBFF" : "#f0f0f0",
-                    color: "#000",
-                    padding: "8px 12px",
-                    borderRadius: "10px",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                    position: "relative",
-                  }}
-                >
-                  {item.noiDung}
-                  {shouldShowTimestamp(index) && (
-                    <div className="message-timestamp">
-                      {new Date(item.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  )}
-                </div>
-              </List.Item>
-            )}
-          />
-          {/* Phần tử ẩn để cuộn xuống */}
-          <div ref={messagesEndRef} />
+                {trangThaiTinNhan === "Đã gửi" && (
+                  <Tooltip title="Đã gửi">
+                    <span
+                      style={{
+                        color: "#FDFDFD",
+                        fontSize: "12px",
+                        backgroundColor: "#BCBDC0",
+                        padding: "4px 6px",
+                        borderRadius: "12px",
+                      }}
+                    >
+                      &#10003; Đã gửi
+                    </span>
+                  </Tooltip>
+                )}
+                {trangThaiTinNhan === "Đã đọc" && (
+                  <Tooltip title="Đã đọc">
+                    <span
+                      style={{
+                        color: "#FDFDFD",
+                        fontSize: "12px",
+                        backgroundColor: "#BCBDC0",
+                        padding: "4px 6px",
+                        borderRadius: "12px",
+                      }}
+                    >
+                      &#10003;&#10003; Đã đọc
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Area */}
@@ -292,7 +379,12 @@ const ChatBox = ({ id_ban }) => {
               <Button
                 shape="circle"
                 icon={<SmileOutlined />}
-                onClick={() => setShowEmojiPicker((val) => !val)}
+                onClick={() => {
+                  setShowEmojiPicker((val) => !val);
+                  if (!showEmojiPicker && inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
                 style={{ marginRight: "8px" }}
               />
             </Tooltip>
@@ -305,6 +397,7 @@ const ChatBox = ({ id_ban }) => {
 
           {/* Message Input */}
           <TextArea
+            ref={inputRef}
             autoSize={{ minRows: 1, maxRows: 3 }}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -326,6 +419,8 @@ const ChatBox = ({ id_ban }) => {
                 onClick={sendMessage}
                 loading={sending}
                 className="send-button"
+                htmlType="button"
+                style={{ marginLeft: "8px" }}
               />
             </Tooltip>
           ) : null}

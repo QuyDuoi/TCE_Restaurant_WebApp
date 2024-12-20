@@ -3,49 +3,57 @@ import { Modal, Table, Typography, Button, Spin, Alert } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { ipAddress } from "../services/api.ts";
+import "./ModalHoaDon.css";
 
 const { Title, Text } = Typography;
 
-const ModalHoaDon = ({ id_ban }) => {
+const ModalHoaDon = ({ id_ban, thongTinBan }) => {
   const [visible, setVisible] = useState(false); // Hiển thị modal
-  const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
   const [thongTinHoaDon, setThongTinHoaDon] = useState(null); // Dữ liệu hóa đơn
+  const [dsChiTietHoaDon, setDsChiTietHoaDon] = useState([]); // Danh sách chi tiết hóa đơn
   const [error, setError] = useState(false); // Lỗi khi fetch API
 
   // Fetch hóa đơn khi mở modal
   useEffect(() => {
-    const fetchInvoice = async () => {
-      if (!visible || !id_ban) return;
-
-      setLoading(true);
-      setError(false);
-      try {
-        const response = await axios.get(`${ipAddress}layThongTinHoaDon`, {
-          params: { id_ban },
-        });
-
-        if (response.data) {
-          setThongTinHoaDon(response.data);
-        } else {
-          setThongTinHoaDon(null); // Không có hóa đơn
+    setThongTinHoaDon(thongTinBan.hoaDon);
+    if (visible && thongTinBan && thongTinBan.hoaDon) {
+      const fetchHoaDon = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+          const response = await axios.post(`${ipAddress}layDsChiTietHoaDon`, {
+            id_hoaDon: thongTinBan.hoaDon._id,
+          });
+          setDsChiTietHoaDon(response.data);
+          console.log(response.data);
+        } catch (error) {
+          console.error("Lỗi khi gọi API:", error);
+          setError(true);
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error("Lỗi tải hóa đơn:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInvoice();
-  }, [visible, id_ban]);
+      };
+      fetchHoaDon();
+    }
+  }, [visible, thongTinBan]);
 
   // Định nghĩa cột Table
   const columns = [
-    { title: "Món", dataIndex: "mon", key: "mon" },
-    { title: "SL", dataIndex: "soLuong", key: "soLuong", align: "center" },
     {
-      title: "TT", // Trạng thái món
+      title: "Món",
+      dataIndex: ["monAn", "tenMon"],
+      key: "mon",
+      render: (text, record) => <span>{record.monAn.tenMon}</span>,
+    },
+    {
+      title: "SL",
+      dataIndex: "soLuongMon",
+      key: "soLuongMon",
+      align: "center",
+    },
+    {
+      title: "TT",
       dataIndex: "trangThai",
       key: "trangThai",
       render: (trangThai) =>
@@ -56,7 +64,13 @@ const ModalHoaDon = ({ id_ban }) => {
         ),
       align: "center",
     },
-    { title: "Giá", dataIndex: "gia", key: "gia", align: "right" },
+    {
+      title: "Giá",
+      dataIndex: "giaTien",
+      key: "giaTien",
+      align: "right",
+      render: (giaTien) => giaTien.toLocaleString("vi-VN"),
+    },
   ];
 
   return (
@@ -75,9 +89,15 @@ const ModalHoaDon = ({ id_ban }) => {
 
       {/* Modal hóa đơn */}
       <Modal
-        title={<Title level={4} style={{ color: "red", margin: 0 }}>Thông tin hóa đơn</Title>}
-        visible={visible}
-        onCancel={() => setVisible(false)}
+        title={
+          <div style={{ textAlign: "center", width: "100%" }}>
+            <Title level={4} style={{ margin: 0, color: "red" }}>
+              Thông tin hóa đơn
+            </Title>
+          </div>
+        }
+        open={visible}
+        closable={false}
         footer={[
           <Button key="close" onClick={() => setVisible(false)}>
             Đóng
@@ -99,39 +119,39 @@ const ModalHoaDon = ({ id_ban }) => {
         ) : thongTinHoaDon ? (
           <>
             <Text strong>Bàn ăn: </Text>
-            <Text>{`Bàn: ${thongTinHoaDon.ban} | Tầng ${thongTinHoaDon.tang}`}</Text>
+            <Text>{`${thongTinBan.tenBan} | Khu vực ${thongTinBan.tenKhuVuc}`}</Text>
             <br />
             <Text strong>Thời gian vào: </Text>
-            <Text>{thongTinHoaDon.thoiGian}</Text>
+            <Text>
+              {new Date(thongTinBan.hoaDon.createdAt).toLocaleString("vi-VN")}
+            </Text>
             <br />
             <Text strong>Trạng thái: </Text>
-            <Text type="danger">Chưa Thanh Toán</Text>
+            <Text type="danger">{thongTinHoaDon.trangThai}</Text>
 
             {/* Danh sách order */}
-            <Title level={5} style={{ marginTop: 15 }}>Danh sách order:</Title>
+            <Title level={5} style={{ marginTop: 15 }}>
+              Danh sách order:
+            </Title>
             <Table
               columns={columns}
-              dataSource={thongTinHoaDon.items}
+              dataSource={dsChiTietHoaDon}
               pagination={false}
               rowKey={(record, index) => index}
               bordered
+              scroll={{ y: 300 }}
+              className="table-order"
             />
 
             {/* Tổng tiền */}
             <div style={{ marginTop: 20, textAlign: "right" }}>
-              <Text strong>Tổng bill: </Text>
-              <Text>{thongTinHoaDon.tongBill.toLocaleString()}</Text>
-              <br />
               <Title level={4} style={{ margin: "5px 0" }}>
-                Tổng tiền: <Text strong>{thongTinHoaDon.tongTien.toLocaleString()}</Text>
+                Tổng tiền: {thongTinHoaDon.tongGiaTri.toLocaleString("vi-VN")}đ
               </Title>
             </div>
           </>
         ) : (
-          <Alert
-            type="info"
-            message="Hiện tại chưa có hóa đơn nào được tạo."
-          />
+          <Alert type="info" message="Hiện tại chưa có hóa đơn nào được tạo." />
         )}
       </Modal>
     </>

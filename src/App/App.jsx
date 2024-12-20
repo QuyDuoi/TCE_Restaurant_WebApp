@@ -1,8 +1,7 @@
 // src/App.jsx
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import { Provider, useDispatch } from "react-redux";
-import { store } from "../store/store.ts";
+import { useDispatch } from "react-redux";
 import Home from "../Screen/HomScreen/Home";
 import QuanLyNhanVien from "../Screen/QuanLy/QuanLyNhanVien/QuanLyNhanVien";
 import QuanLyCa from "../Screen/QuanLy/QuanLyCa/QuanLyCa";

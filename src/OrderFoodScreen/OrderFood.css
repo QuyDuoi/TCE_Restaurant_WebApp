@@ -58,19 +58,11 @@
   padding: 0;
 }
 
-.messages-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
 .input-area {
   display: flex;
   align-items: center;
   position: relative;
+  padding: 0;
 }
 
 .input-area .emoji-picker {
@@ -195,11 +187,6 @@
     border-radius: 8px; /* Làm mềm góc cạnh */
   }
 
-  .messages-container {
-    max-height: 60vh; /* Điều chỉnh chiều cao vùng tin nhắn */
-    overflow-y: auto;
-  }
-
   .ant-input-textarea {
     font-size: 14px;
     border-radius: 8px;
@@ -301,13 +288,14 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: 0px;
   }
 
   /* Khu vực tin nhắn */
   .messages-container {
-    max-height: 60vh;
+    max-height: 70vh;
     overflow-y: auto;
+    padding: 5px;
   }
 
   /* Input tin nhắn */
@@ -373,4 +361,10 @@
 /* Optional: Adjust the message bubble to accommodate the timestamp */
 .messages-container .ant-list-item div {
   position: relative; /* To position the timestamp absolutely within */
+}
+
+.statusMess {
+  color: #1890ff;
+  font-size: 12px;
+  margin-left: 5px;
 }
