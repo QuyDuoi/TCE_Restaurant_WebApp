@@ -8,8 +8,8 @@ import { Modal, Input, Button, List, Tooltip, Spin } from "antd";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ipAddress, ipIO } from "../services/api.ts";
-import Picker from "@emoji-mart/react"; // Import Picker from @emoji-mart/react
-import data from "@emoji-mart/data"; // Import emoji data
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 const { TextArea } = Input;
 
@@ -114,11 +114,6 @@ const ChatBox = ({ id_ban }) => {
     };
   }, []);
 
-  // Cuộn xuống cuối cùng mỗi khi messages thay đổi
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   // Send message
   const sendMessage = () => {
     if (!message.trim()) return;
@@ -151,8 +146,14 @@ const ChatBox = ({ id_ban }) => {
     }
   };
 
-  // Open and close modal
-  const handleOpenChat = () => setVisible(true);
+  const handleOpenChat = () => {
+    setVisible(true);
+    // Focus the input when the chat modal opens
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   const handleCloseChat = () => setVisible(false);
 
   // Dragging handlers
@@ -189,6 +190,13 @@ const ChatBox = ({ id_ban }) => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+  };
+
+  const handleEmojiToggle = () => {
+    setShowEmojiPicker((prev) => !prev);
+
+    // Focus the input field if emoji picker is toggled and the input exists
+    inputRef.current.focus();
   };
 
   // Add global event listeners for dragging
@@ -261,9 +269,9 @@ const ChatBox = ({ id_ban }) => {
         onCancel={handleCloseChat}
         footer={null}
         centered
-        width={350} // Điều chỉnh width cho mobile
+        width={350} 
         className="chat-modal"
-        style={{ padding: "10px" }}
+        style={{ padding: "0px" }}
       >
         {/* Messages Display */}
         <div className="messages-container">
@@ -336,39 +344,45 @@ const ChatBox = ({ id_ban }) => {
                   marginTop: "5px",
                 }}
               >
-                {trangThaiTinNhan === "Đã gửi" && (
-                  <Tooltip title="Đã gửi">
-                    <span
-                      style={{
-                        color: "#FDFDFD",
-                        fontSize: "12px",
-                        backgroundColor: "#BCBDC0",
-                        padding: "4px 6px",
-                        borderRadius: "12px",
-                      }}
-                    >
-                      &#10003; Đã gửi
-                    </span>
-                  </Tooltip>
-                )}
-                {trangThaiTinNhan === "Đã đọc" && (
-                  <Tooltip title="Đã đọc">
-                    <span
-                      style={{
-                        color: "#FDFDFD",
-                        fontSize: "12px",
-                        backgroundColor: "#BCBDC0",
-                        padding: "4px 6px",
-                        borderRadius: "12px",
-                      }}
-                    >
-                      &#10003;&#10003; Đã đọc
-                    </span>
-                  </Tooltip>
-                )}
+                {messages.length > 0 &&
+                  messages[messages.length - 1].nguoiGui === true && (
+                    <>
+                      {trangThaiTinNhan === "Đã gửi" && (
+                        <Tooltip title="Đã gửi">
+                          <span
+                            style={{
+                              color: "#FDFDFD",
+                              fontSize: "12px",
+                              backgroundColor: "#BCBDC0",
+                              padding: "4px 6px",
+                              borderRadius: "12px",
+                            }}
+                          >
+                            &#10003; Đã gửi
+                          </span>
+                        </Tooltip>
+                      )}
+                      {trangThaiTinNhan === "Đã đọc" && (
+                        <Tooltip title="Đã đọc">
+                          <span
+                            style={{
+                              color: "#FDFDFD",
+                              fontSize: "12px",
+                              backgroundColor: "#BCBDC0",
+                              padding: "4px 6px",
+                              borderRadius: "12px",
+                            }}
+                          >
+                            &#10003;&#10003; Đã đọc
+                          </span>
+                        </Tooltip>
+                      )}
+                    </>
+                  )}
               </div>
             </div>
           )}
+          <div ref={messagesEndRef}></div>
         </div>
 
         {/* Input Area */}
@@ -379,12 +393,7 @@ const ChatBox = ({ id_ban }) => {
               <Button
                 shape="circle"
                 icon={<SmileOutlined />}
-                onClick={() => {
-                  setShowEmojiPicker((val) => !val);
-                  if (!showEmojiPicker && inputRef.current) {
-                    inputRef.current.focus();
-                  }
-                }}
+                onClick={handleEmojiToggle}
                 style={{ marginRight: "8px" }}
               />
             </Tooltip>
@@ -406,6 +415,10 @@ const ChatBox = ({ id_ban }) => {
             onPressEnter={(e) => {
               e.preventDefault();
               sendMessage();
+              // Refocus after sending the message
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
             }}
           />
 

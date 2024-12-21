@@ -91,7 +91,7 @@ const QuanLyTinNhan = () => {
     }
 
     const fetchMessages = async () => {
-      if (!selectedBan) return; // Ensure selectedBan is available
+      if (!selectedBan) return;
       setLoadingMessages(true);
       try {
         const response = await axios.get(
@@ -191,35 +191,60 @@ const QuanLyTinNhan = () => {
     <Layout style={{ height: "100vh" }}>
       {/* Sidebar chứa danh sách khu vực và bàn */}
       <Sider width={300} className="sider">
-        <h2 style={{ marginLeft: "30px" }}>Khu Vực</h2>
-        <Menu
-          mode="inline"
-          style={{ height: "100%", borderRight: 0 }}
-          defaultOpenKeys={khuVucList.map((khuVuc) => khuVuc._id)}
-          selectedKeys={selectedBan ? [selectedBan._id] : []}
-        >
-          {khuVucList.map((khuVuc) => (
-            <Menu.SubMenu
-              key={khuVuc._id}
-              icon={<TeamOutlined />}
-              title={khuVuc.tenKhuVuc}
-            >
-              {khuVuc.bans.map((ban) => (
-                <Menu.Item key={ban._id} onClick={() => setSelectedBan(ban)}>
-                  <span>Bàn: {ban.tenBan}</span>
-                  {unreadCounts[ban._id] > 0 && (
-                    <Badge
-                      count={unreadCounts[ban._id]}
-                      style={{ backgroundColor: "#f5222d", marginLeft: "10px" }}
-                    />
-                  )}
-                </Menu.Item>
-              ))}
-            </Menu.SubMenu>
-          ))}
-        </Menu>
-      </Sider>
+        <Header style={{ background: "#fff", padding: 0, height: "auto" }}>
+          <h2 style={{ marginLeft: "20px" }}>Khu Vực</h2>
+        </Header>
 
+        <TextArea
+          autoSize={{ minRows: 1, maxRows: 3 }}
+          value={messageInput}
+          onChange={(e) => setMessageInput(e.target.value)}
+          placeholder="Nhập tin nhắn..."
+          className="ant-input-textarea"
+          onPressEnter={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+        />
+        <div className="menuArea">
+          <Menu
+            mode="inline"
+            style={{ height: "100%", borderRight: 0 }}
+            defaultOpenKeys={khuVucList.map((khuVuc) => khuVuc._id)}
+            selectedKeys={selectedBan ? [selectedBan._id] : []}
+          >
+            {khuVucList.map((khuVuc) => (
+              <Menu.SubMenu
+                key={khuVuc._id}
+                icon={<TeamOutlined />}
+                title={khuVuc.tenKhuVuc}
+              >
+                {khuVuc.bans.map((ban) => (
+                  <Menu.Item key={ban._id} onClick={() => setSelectedBan(ban)}>
+                    <div>
+                      <span style={{ fontWeight: "bold" }}>
+                        Bàn: {ban.tenBan}
+                      </span>
+                      <span style={{ color: "green", marginLeft: "8px" }}>
+                        Đang sử dụng
+                      </span>
+                    </div>
+                    {unreadCounts[ban._id] > 0 && (
+                      <Badge
+                        count={unreadCounts[ban._id]}
+                        style={{
+                          backgroundColor: "#f5222d",
+                          marginLeft: "10px",
+                        }}
+                      />
+                    )}
+                  </Menu.Item>
+                ))}
+              </Menu.SubMenu>
+            ))}
+          </Menu>
+        </div>
+      </Sider>
       {/* Content chứa giao diện chat */}
       <Layout style={{ height: "100%" }}>
         <Header style={{ background: "#fff", padding: 0, height: "auto" }}>
@@ -236,7 +261,15 @@ const QuanLyTinNhan = () => {
               <div className="chat-container">
                 {/* Tiêu đề chat */}
                 <div className="chat-header">
-                  <h3>Bàn {selectedBan.tenBan}</h3>
+                  <h3>
+                    Khu vực:{" "}
+                    {selectedBan
+                      ? khuVucList.find((khuVuc) =>
+                          khuVuc.bans.some((ban) => ban._id === selectedBan._id)
+                        )?.tenKhuVuc
+                      : "-"}{" "}
+                    - Bàn {selectedBan ? selectedBan.tenBan : ""}
+                  </h3>
                   <Button onClick={() => setSelectedBan(null)}>Đóng</Button>
                 </div>
 

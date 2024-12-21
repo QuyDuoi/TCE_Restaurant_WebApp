@@ -1,20 +1,75 @@
 import React, { useState } from "react";
-import { List, Card, Row, Col, Button, Tag } from "antd";
+import { List, Card, Row, Col, Button, Tag, Modal } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
 
 const MenuList = ({ data, onAddItem }) => {
+  const [selectedItem, setSelectedItem] = useState(null); // Track the selected item for the modal
+
+  // Function to open the modal and set the selected item
+  const handleItemClick = (item) => {
+    setSelectedItem(item); // Set the selected item to be shown in the modal
+  };
+
+  // Function to close the modal
+  const handleCloseModal = () => {
+    setSelectedItem(null); // Close the modal by setting selected item to null
+  };
+
   return (
-    <List
-      dataSource={data}
-      locale={{ emptyText: "Không có món ăn nào trong danh mục này" }}
-      renderItem={(item) => <MenuItem item={item} onAddItem={onAddItem} />}
-    />
+    <>
+      <List
+        dataSource={data}
+        locale={{ emptyText: "Không có món ăn nào trong danh mục này" }}
+        renderItem={(item) => (
+          <MenuItem
+            item={item}
+            onAddItem={onAddItem}
+            onItemClick={handleItemClick} // Pass the click handler
+          />
+        )}
+      />
+
+      {/* Modal to display the detailed information */}
+      {selectedItem && (
+        <Modal
+          title={"Mô tả chi tiết món ăn"}
+          open={true}
+          onCancel={handleCloseModal}
+          footer={null}
+          width={500}
+          centered
+        >
+          <div style={{ textAlign: "left" }}>
+            <img
+              src={selectedItem.anhMonAn}
+              alt={selectedItem.tenMon}
+              style={{
+                width: "100%",
+                height: "auto",
+                borderRadius: "10px",
+                marginBottom: "10px",
+              }}
+            />
+            <h4 style={{ margin: 0 }}>
+              Tên món: <span>{selectedItem.tenMon}</span>
+            </h4>
+            <p>Giá món ăn: {selectedItem.giaMonAn}đ</p>
+            <p>Thông tin về món: {selectedItem.moTa}</p>
+            {selectedItem.trangThai === false && (
+              <Tag color="red" style={{ marginLeft: "5px" }}>
+                Ngưng phục vụ
+              </Tag>
+            )}
+          </div>
+        </Modal>
+      )}
+    </>
   );
 };
 
-const MenuItem = ({ item, onAddItem }) => {
-  const [soLuongMon, setsoLuongMon] = useState(0); // Quản lý số lượng
-  const [totalPrice, setTotalPrice] = useState(0); // Quản lý tổng giá
+const MenuItem = ({ item, onAddItem, onItemClick }) => {
+  const [soLuongMon, setsoLuongMon] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const handlesoLuongMonChange = (type) => {
     let newsoLuongMon = soLuongMon;
@@ -61,14 +116,7 @@ const MenuItem = ({ item, onAddItem }) => {
             >
               {item.giaMonAn}đ
             </p>
-            <p
-              style={{
-                wordBreak: "break-word",
-                paddingLeft: "5px",
-              }}
-            >
-              {item.moTa}
-            </p>
+            <Button onClick={() => onItemClick(item)}>Xem chi tiết</Button>
             {/* Hiển thị trạng thái món ăn */}
             {item.trangThai === false && (
               <Tag color="red" style={{ marginLeft: "5px" }}>
@@ -88,7 +136,7 @@ const MenuItem = ({ item, onAddItem }) => {
             >
               <Button
                 type="primary"
-                disabled={!item.trangThai} // Vô hiệu hóa nút nếu món không khả dụng
+                disabled={!item.trangThai} // Disable if item is not available
                 style={{
                   width: "30px",
                   height: "30px",

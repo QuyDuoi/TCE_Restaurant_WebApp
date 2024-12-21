@@ -3,7 +3,7 @@ import { Modal, Table, Typography, Button, Spin, Alert } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { ipAddress } from "../services/api.ts";
-import "./ModalHoaDon.css";
+import "./Style/ModalHoaDon.css";
 
 const { Title, Text } = Typography;
 
@@ -16,14 +16,14 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
 
   // Fetch hóa đơn khi mở modal
   useEffect(() => {
-    setThongTinHoaDon(thongTinBan.hoaDon);
-    if (visible && thongTinBan && thongTinBan.hoaDon) {
+    setThongTinHoaDon(thongTinBan?.hoaDon);
+    if (visible && thongTinBan && thongTinBan?.hoaDon) {
       const fetchHoaDon = async () => {
         setLoading(true);
         setError(false);
         try {
           const response = await axios.post(`${ipAddress}layDsChiTietHoaDon`, {
-            id_hoaDon: thongTinBan.hoaDon._id,
+            id_hoaDon: thongTinBan?.hoaDon._id,
           });
           setDsChiTietHoaDon(response.data);
           console.log(response.data);
@@ -119,15 +119,15 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
         ) : thongTinHoaDon ? (
           <>
             <Text strong>Bàn ăn: </Text>
-            <Text>{`${thongTinBan.tenBan} | Khu vực ${thongTinBan.tenKhuVuc}`}</Text>
+            <Text>{`${thongTinBan?.tenBan} | Khu vực ${thongTinBan?.tenKhuVuc}`}</Text>
             <br />
             <Text strong>Thời gian vào: </Text>
             <Text>
-              {new Date(thongTinBan.hoaDon.createdAt).toLocaleString("vi-VN")}
+              {new Date(thongTinBan?.hoaDon.createdAt).toLocaleString("vi-VN")}
             </Text>
             <br />
             <Text strong>Trạng thái: </Text>
-            <Text type="danger">{thongTinHoaDon.trangThai}</Text>
+            <Text type="danger">{thongTinHoaDon?.trangThai}</Text>
 
             {/* Danh sách order */}
             <Title level={5} style={{ marginTop: 15 }}>
@@ -146,7 +146,7 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
             {/* Tổng tiền */}
             <div style={{ marginTop: 20, textAlign: "right" }}>
               <Title level={4} style={{ margin: "5px 0" }}>
-                Tổng tiền: {thongTinHoaDon.tongGiaTri.toLocaleString("vi-VN")}đ
+                Tổng tiền: {thongTinHoaDon?.tongGiaTri.toLocaleString("vi-VN")}đ
               </Title>
             </div>
           </>
