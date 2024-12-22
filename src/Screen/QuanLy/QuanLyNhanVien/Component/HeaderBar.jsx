@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Input, Button, Row, Col, message, Spin } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import AddEmployeeModal from "../Modal/AddEmployeeModel"; // Import modal
 import axios from "axios";
 import { ipAddress } from "../../../../services/api.ts";

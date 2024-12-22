@@ -26,7 +26,6 @@ const ChatBox = ({ id_ban }) => {
   const isDragging = useRef(false);
   const touchStartPosition = useRef({ x: 0, y: 0 });
   const socketRef = useRef(null);
-  id_ban = "6764420cf1d04c5be2fa5aeb";
 
   // Emoji picker visibility
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
