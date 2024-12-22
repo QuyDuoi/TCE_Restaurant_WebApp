@@ -1,319 +1,325 @@
-import React, { useEffect, useState } from "react";
-import { Layout, Tabs, Empty, Spin, Modal, Image, Button } from "antd";
-import HeaderBar from "./Component/HeaderBar";
-import DishItemComponent from "./Component/DishItemComponent"; // Đường dẫn phụ thuộc cấu trúc thư mục của bạn
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Layout,
+  Spin,
+  Card,
+  Checkbox,
+  Row,
+  Col,
+  Button,
+  Alert,
+  Dropdown,
+  Menu,
+  message,
+} from "antd";
+import axios from "axios";
 import { ipAddress } from "../../../services/api.ts";
+import { useSelector } from "react-redux";
+import HeaderBar, { removeVietnameseTones } from "./HeaderBar";
+import "./style.css";
+import { io } from "socket.io-client";
+import { FilterOutlined } from "@ant-design/icons";
 
 const { Content } = Layout;
 
 const QuanLyLenMon = () => {
-  const [danhMucs, setDanhMucs] = useState([]);
+  const [data, setData] = useState({
+    chuaHoanThanh: [],
+    hoanThanh: [],
+    theoTenMon: {},
+  });
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredDishes, setFilteredDishes] = useState([]);
-  const [selectedDish, setSelectedDish] = useState(null); // Món ăn được chọn để hiển thị chi tiết
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("Chưa hoàn thành");
+  const [selectedFilter, setSelectedFilter] = useState("");
+  const [khuVucBanList, setKhuVucBanList] = useState([]);
+  const [selectedKhuVucBan, setSelectedKhuVucBan] = useState("");
+  const [tenMons, setTenMons] = useState([]);
+  const [search, setSearch] = useState("");
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang._id;
 
-  const id_nhaHang = "66fab50fa28ec489c7137537";
+  // Fetch data từ API
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.get(
+        `${ipAddress}layCthdTheoCaLam?id_nhaHang=${id_nhaHang}`
+      );
+      setData(response.data);
 
+      // Lấy danh sách tên món (Object.keys() sẽ trả về mảng tên món)
+      const uniqueTenMons = Object.keys(response.data?.theoTenMon || {});
+      setTenMons(uniqueTenMons);
+
+      console.log("tenMon", tenMons);
+
+      const khuVucBanSet = new Set();
+      response.data.chuaHoanThanh
+        .concat(response.data.hoanThanh)
+        .forEach((item) => {
+          const khuVucBan = `${item.khuVuc?.tenKhuVuc || "Không rõ"} - Bàn ${
+            item.ban?.tenBan || "Không rõ"
+          }`;
+          khuVucBanSet.add(khuVucBan);
+        });
+      setKhuVucBanList(Array.from(khuVucBanSet));
+      console.log("Khu vuc ban set ", khuVucBanSet);
+
+      console.log("Khu vuc ban list", khuVucBanList);
+    } catch (err) {
+      setError("Không thể tải dữ liệu. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update status (thay đổi trạng thái món)
+  const updateStatus = async (id) => {
+    try {
+      await axios.put(`${ipAddress}capNhatTrangThaiCthd/${id}`);
+      fetchData();
+    } catch (err) {
+      setError("Không thể cập nhật trạng thái.");
+      console.log(err);
+    }
+  };
+
+  // Lấy dữ liệu lần đầu
   useEffect(() => {
-    const fetchDanhMucs = async () => {
-      try {
-        const response = await fetch(
-          `${ipAddress}layDanhSach?id_nhaHang=${id_nhaHang}`
-        );
-        const data = await response.json();
-        setDanhMucs(data);
-      } catch (error) {
-        console.error("Lỗi khi tải danh mục:", error);
-      } finally {
-        setLoading(false);
-      }
+    fetchData();
+  }, []);
+
+  // Lắng nghe sự kiện từ socket
+  useEffect(() => {
+    const socket = io("https://tce-restaurant-api.onrender.com");
+    socket.on("lenMon", async () => {
+      await axios
+        .get(`${ipAddress}layCthdTheoCaLam?id_nhaHang=${id_nhaHang}`)
+        .then((response) => {
+          setData(response.data);
+          const uniqueTenMons = Object.keys(response.data?.theoTenMon || {});
+          setTenMons(uniqueTenMons);
+
+          const khuVucBanSet = new Set();
+          response.data.chuaHoanThanh
+            .concat(response.data.hoanThanh)
+            .forEach((item) => {
+              const khuVucBan = `${item.khuVuc?.tenKhuVuc || "Không rõ"} - ${
+                item.ban?.tenBan || "Không rõ"
+              }`;
+              khuVucBanSet.add(khuVucBan);
+            });
+          setKhuVucBanList(Array.from(khuVucBanSet));
+        })
+        .finally(() => message.success("Có order mới!"));
+    });
+
+    return () => {
+      socket.disconnect();
     };
-    fetchDanhMucs();
-  }, [id_nhaHang]);
+  }, []);
 
-  const removeDiacritics = (str) =>
-    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // Tính toán dữ liệu hiển thị theo filter + search
+  const filteredData = useMemo(() => {
+    let result = [];
 
-  useEffect(() => {
-    const allDishes = danhMucs.flatMap((danhMuc) => danhMuc.monAns || []);
-    const normalizedSearchTerm = removeDiacritics(searchTerm.trim());
-
-    if (normalizedSearchTerm === "") {
-      setFilteredDishes(allDishes);
+    // 1. Xử lý theo loại filter
+    if (filter === "Chưa hoàn thành") {
+      if (data.chuaHoanThanh.length === 0 && data.hoanThanh.length > 0) {
+        result = data.hoanThanh;
+        setSelectedFilter("");
+        setSelectedKhuVucBan("");
+      } else {
+        result = data.chuaHoanThanh;
+        setSelectedFilter("");
+        setSelectedKhuVucBan("");
+      }
+    } else if (filter === "Hoàn thành") {
+      result = data.hoanThanh;
+      setSelectedFilter("");
+      setSelectedKhuVucBan("");
     } else {
-      setFilteredDishes(
-        allDishes.filter((monAn) =>
-          removeDiacritics(monAn.tenMon).includes(normalizedSearchTerm)
+      result = data.theoTenMon[filter] || [];
+    }
+
+    const allData = [...data.chuaHoanThanh, ...data.hoanThanh];
+
+    if (selectedKhuVucBan) {
+      result = allData.filter((item) => {
+        const khuVucBan = `${item.khuVuc?.tenKhuVuc || "Không rõ"} - Bàn ${
+          item.ban?.tenBan || "Không rõ"
+        }`;
+        return khuVucBan === selectedKhuVucBan;
+      });
+    }
+
+    // 2. Áp dụng search (tìm theo tên món)
+    if (search) {
+      const normalizedSearch = removeVietnameseTones(search);
+      result = result.filter((item) =>
+        removeVietnameseTones(item.id_monAn?.tenMon || "").includes(
+          normalizedSearch
         )
       );
     }
-  }, [searchTerm, danhMucs]);
 
-  const renderTabContent = (data) => {
-    if (!data || !Array.isArray(data.monAns) || data.monAns.length === 0) {
-      return <Empty description="Không có món ăn nào" />;
-    }
+    return result;
+  }, [data, filter, search, selectedKhuVucBan]);
 
-    return (
-      <div>
-        {data.monAns.map((dish) => (
-          <DishItemComponent
-            key={dish._id}
-            dish={dish}
-            onSelect={() => setSelectedDish(dish)} // Chọn món ăn để hiển thị chi tiết
-          />
-        ))}
-      </div>
-    );
-  };
+  const menu = (
+    <Menu
+      onClick={(e) => {
+        setFilter(e.key);
+        setSelectedFilter(e.key);
+      }}
+    >
+      {tenMons.map((tenMon) => (
+        <Menu.Item key={tenMon}>{tenMon}</Menu.Item>
+      ))}
+    </Menu>
+  );
 
-  const styles = {
-    content: {
-      margin: "16px",
-      background: "#f0f2f5",
-      flex: 1,
-      overflowY: "auto",
-    },
-    tabs: {
-      background: "white",
-      marginBottom: "10px",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    },
-    tabPane: {
-      borderRadius: "8px",
-      padding: "16px",
-    },
-    tabBar: {
-      marginLeft: "25px",
-    },
-  };
+  const khuVucBanMenu = (
+    <Menu
+      onClick={(e) => {
+        setFilter(e.key);
+        setSelectedKhuVucBan(e.key);
+      }}
+    >
+      {khuVucBanList.map((khuVucBan) => (
+        <Menu.Item key={khuVucBan}>{khuVucBan}</Menu.Item>
+      ))}
+    </Menu>
+  );
 
   return (
     <Layout>
-      <HeaderBar onSearch={setSearchTerm} />
-      <Content style={styles.content}>
+      <Content style={{ padding: "10px" }}>
+        {/* HeaderBar: có ô search */}
+        <HeaderBar onSearch={(value) => setSearch(value)} />
+
+        {/* Loading + Error */}
         {loading ? (
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <Spin tip="Đang tải dữ liệu..." />
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <Spin size="large" />
+            <div>Đang lấy thông tin món...</div>
+          </div>
+        ) : error ? (
+          <Alert
+            message={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: "20px" }}
+            closable
+            onClose={() => setError("")}
+          />
+        ) : data.chuaHoanThanh.length === 0 && data.hoanThanh.length === 0 ? (
+          <div style={{ textAlign: "center" }}>
+            <p>Chưa có món ăn nào!</p>
           </div>
         ) : (
-          <Tabs defaultActiveKey="all" tabBarStyle={styles.tabBar} style={styles.tabs}>
-            <Tabs.TabPane tab="Tất cả" key="all" style={styles.tabPane}>
-              {renderTabContent({ monAns: filteredDishes })}
-            </Tabs.TabPane>
-            {danhMucs.map((danhMuc) => (
-              <Tabs.TabPane
-                tab={danhMuc.tenDanhMuc}
-                key={danhMuc._id}
-                style={styles.tabPane}
-              >
-                {renderTabContent(danhMuc)}
-              </Tabs.TabPane>
-            ))}
-          </Tabs>
+          <div>
+            <div
+              style={{
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Button.Group>
+                {["Chưa hoàn thành", "Hoàn thành"].map((item) => (
+                  <Button
+                    key={item}
+                    type={filter === item ? "primary" : "default"}
+                    onClick={() => setFilter(item)}
+                    style={{ display: "inline-block", marginRight: 5 }}
+                  >
+                    {item}
+                  </Button>
+                ))}
+              </Button.Group>
+              <Dropdown className="dropdown-filter" overlay={menu}>
+                <Button type="primary" icon={<FilterOutlined />}>
+                  {selectedFilter === "" ? "Lọc theo tên món" : selectedFilter}
+                </Button>
+              </Dropdown>
+              <Dropdown overlay={khuVucBanMenu} className="dropdown-filter">
+                <Button type="primary" icon={<FilterOutlined />}>
+                  {selectedKhuVucBan === ""
+                    ? "Lọc theo khu vực - bàn"
+                    : selectedKhuVucBan}
+                </Button>
+              </Dropdown>
+            </div>
+
+            {filter.length === 0 ? (
+              <div style={{ textAlign: "center" }}>
+                <p>Chưa có món ăn nào!</p>
+              </div>
+            ) : (
+              <>
+                {/* Danh sách món hiển thị */}
+                <Row className="dish-list-container" gutter={[16, 16]}>
+                  {filteredData.map((item) => (
+                    <Col
+                      className="dish-item"
+                      xs={24}
+                      sm={12}
+                      md={8}
+                      lg={8}
+                      key={item._id}
+                    >
+                      <div className="dish-card-wrapper">
+                        <Card className="dish-card" hoverable>
+                          <div className="dish-card-content">
+                            <div className="dish-image">
+                              <img
+                                src={
+                                  item.id_monAn?.anhMonAn || "/placeholder.png"
+                                }
+                                alt={item.id_monAn?.tenMon}
+                              />
+                            </div>
+                            <div className="dish-details">
+                              <div className="box1">
+                                <h5>{item.id_monAn?.tenMon}</h5>
+                                {item.trangThai === true ? (
+                                  <p style={{ color: "green", margin: 0 }}>
+                                    Hoàn thành
+                                  </p>
+                                ) : (
+                                  <Checkbox
+                                    style={{ fontSize: "0.8em" }}
+                                    checked={false}
+                                    onChange={() => updateStatus(item._id)}
+                                  >
+                                    Chưa hoàn thành
+                                  </Checkbox>
+                                )}
+                              </div>
+                              <p>
+                                Khu vực: {item.khuVuc?.tenKhuVuc}{" "}
+                                <span>- Bàn {item.ban?.tenBan}</span>
+                              </p>
+                              <p>Số lượng: {item.soLuongMon}</p>
+                              <p>Ghi chú: {item.ghiChu || "Không có"}</p>
+                            </div>
+                          </div>
+                        </Card>
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              </>
+            )}
+          </div>
         )}
       </Content>
-
-      {/* Modal hiển thị chi tiết món ăn */}
-      {selectedDish && (
-        <Modal
-          visible={!!selectedDish}
-          title="Chi tiết món ăn"
-          onCancel={() => setSelectedDish(null)}
-          footer={[
-            <Button key="close" onClick={() => setSelectedDish(null)}>
-              Đóng
-            </Button>,
-          ]}
-        >
-          <div style={{ textAlign: "center" }}>
-            <Image
-              src={selectedDish.anhMonAn}
-              alt={selectedDish.tenMon}
-              width={120}
-              height={120}
-              style={{ marginBottom: "10px", borderRadius: "8px" }}
-            />
-            <h3>{selectedDish.tenMon}</h3>
-            <p>Giá: {selectedDish.gia?.toLocaleString()} VND</p>
-            <p>Miêu tả: {selectedDish.moTa}</p>
-          </div>
-        </Modal>
-      )}
     </Layout>
   );
 };
 
 export default QuanLyLenMon;
-
-// import React, { useEffect, useState } from "react";
-// import { Layout, Tabs, Empty, Spin, Input, Modal, Image, Button } from "antd";
-// import HeaderBar from "./Component/HeaderBar";
-// import TabViewComponent from "./Component/DishItemComponent";
-// import { ipAddress } from "../../../services/api.ts";
-
-// const { Content } = Layout;
-
-// const QuanLyLenMon = () => {
-//   const [danhMucs, setDanhMucs] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [filteredDishes, setFilteredDishes] = useState([]);
-//   const [selectedDish, setSelectedDish] = useState(null); // Món ăn được chọn để hiển thị chi tiết
-
-//   const id_nhaHang = "66fab50fa28ec489c7137537";
-
-//   useEffect(() => {
-//     const fetchDanhMucs = async () => {
-//       try {
-//         const response = await fetch(
-//           `${ipAddress}layDanhSach?id_nhaHang=${id_nhaHang}`
-//         );
-//         const data = await response.json();
-//         setDanhMucs(data);
-//       } catch (error) {
-//         console.error("Lỗi khi tải danh mục:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchDanhMucs();
-//   }, [id_nhaHang]);
-
-//   const removeDiacritics = (str) =>
-//     str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-//   useEffect(() => {
-//     const allDishes = danhMucs.flatMap((danhMuc) => danhMuc.monAns || []);
-//     const normalizedSearchTerm = removeDiacritics(searchTerm.trim());
-
-//     if (normalizedSearchTerm === "") {
-//       setFilteredDishes(allDishes);
-//     } else {
-//       setFilteredDishes(
-//         allDishes.filter((monAn) =>
-//           removeDiacritics(monAn.tenMon).includes(normalizedSearchTerm)
-//         )
-//       );
-//     }
-//   }, [searchTerm, danhMucs]);
-
-//   const renderTabContent = (data) => {
-//     if (!data || !Array.isArray(data.monAns) || data.monAns.length === 0) {
-//       return <Empty description="Không có món ăn nào" />;
-//     }
-
-//     return (
-//       <div>
-//         {data.monAns.map((dish) => (
-//           <div
-//             key={dish._id}
-//             onClick={() => setSelectedDish(dish)}
-//             style={{
-//               padding: "10px",
-//               borderBottom: "1px solid #f0f0f0",
-//               cursor: "pointer",
-//             }}
-//           >
-//             <div style={{ display: "flex", alignItems: "center" }}>
-//               <Image
-//                 src={dish.anhMonAn}
-//                 alt={dish.tenMon}
-//                 width={50}
-//                 height={50}
-//                 style={{ marginRight: "10px", borderRadius: "8px" }}
-//               />
-//               <div>
-//                 <h4 style={{ margin: 0 }}>{dish.tenMon}</h4>
-//                 <p style={{ margin: 0, color: "#888" }}>
-//                   Giá: {dish.gia?.toLocaleString()} VND
-//                 </p>
-//               </div>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     );
-//   };
-
-//   const styles = {
-//     content: {
-//       margin: "16px",
-//       background: "#f0f2f5",
-//       flex: 1,
-//       overflowY: "auto",
-//     },
-//     tabs: {
-//       background: "white",
-//       marginBottom: "10px",
-//       borderRadius: "8px",
-//       boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-//     },
-//     tabPane: {
-//       borderRadius: "8px",
-//       padding: "16px",
-//     },
-//     tabBar: {
-//       marginLeft: "25px",
-//     },
-//   };
-
-//   return (
-//     <Layout>
-//       <HeaderBar onSearch={setSearchTerm} />
-//       <Content style={styles.content}>
-//         {loading ? (
-//           <div style={{ textAlign: "center", marginTop: "20px" }}>
-//             <Spin tip="Đang tải dữ liệu..." />
-//           </div>
-//         ) : (
-//           <Tabs defaultActiveKey="all" tabBarStyle={styles.tabBar} style={styles.tabs}>
-//             <Tabs.TabPane tab="Tất cả" key="all" style={styles.tabPane}>
-//               {renderTabContent({ monAns: filteredDishes })}
-//             </Tabs.TabPane>
-//             {danhMucs.map((danhMuc) => (
-//               <Tabs.TabPane
-//                 tab={danhMuc.tenDanhMuc}
-//                 key={danhMuc._id}
-//                 style={styles.tabPane}
-//               >
-//                 {renderTabContent(danhMuc)}
-//               </Tabs.TabPane>
-//             ))}
-//           </Tabs>
-//         )}
-//       </Content>
-
-//       {/* Modal hiển thị chi tiết món ăn */}
-//       {selectedDish && (
-//         <Modal
-//           visible={!!selectedDish}
-//           title="Chi tiết món ăn"
-//           onCancel={() => setSelectedDish(null)}
-//           footer={[
-//             <Button key="close" onClick={() => setSelectedDish(null)}>
-//               Đóng
-//             </Button>,
-//           ]}
-//         >
-//           <div style={{ textAlign: "center" }}>
-//             <Image
-//               src={selectedDish.anhMonAn}
-//               alt={selectedDish.tenMon}
-//               width={120}
-//               height={120}
-//               style={{ marginBottom: "10px", borderRadius: "8px" }}
-//             />
-//             <h3>{selectedDish.tenMon}</h3>
-//             <p>Giá: {selectedDish.gia?.toLocaleString()} VND</p>
-//             <p>Miêu tả: {selectedDish.moTa}</p>
-//           </div>
-//         </Modal>
-//       )}
-//     </Layout>
-//   );
-// };
-
-// export default QuanLyLenMon;

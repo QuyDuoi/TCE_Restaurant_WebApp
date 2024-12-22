@@ -20,7 +20,6 @@ const { TextArea } = Input;
 
 const QuanLyTinNhan = () => {
   const [khuVucList, setKhuVucList] = useState([]);
-  const [thongTinBan, setThongTinBan] = useState({});
   const [selectedBan, setSelectedBan] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
@@ -33,7 +32,6 @@ const QuanLyTinNhan = () => {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user);
   const id_nhaHang = user.id_nhaHang._id;
-  // const id_nhaHang = "66fab50fa28ec489c7137537";
 
   useEffect(() => {
     const fetchKhuVuc = async () => {
@@ -223,21 +221,27 @@ const QuanLyTinNhan = () => {
                   <Menu.Item key={ban._id} onClick={() => setSelectedBan(ban)}>
                     <div>
                       <span style={{ fontWeight: "bold" }}>
-                        Bàn: {ban.tenBan}
+                        Bàn: {ban.tenBan} -{" "}
                       </span>
-                      <span style={{ color: "green", marginLeft: "8px" }}>
-                        Đang sử dụng
-                      </span>
-                    </div>
-                    {unreadCounts[ban._id] > 0 && (
-                      <Badge
-                        count={unreadCounts[ban._id]}
+                      <span
                         style={{
-                          backgroundColor: "#f5222d",
-                          marginLeft: "10px",
+                          marginLeft: "2px",
+                          color:
+                            ban.trangThai === "Đang sử dụng" ? "green" : "gray",
                         }}
-                      />
-                    )}
+                      >
+                        {ban.trangThai}
+                      </span>
+                      {unreadCounts[ban._id] > 0 && (
+                        <Badge
+                          count={unreadCounts[ban._id]}
+                          style={{
+                            backgroundColor: "#f5222d",
+                            marginLeft: "10px",
+                          }}
+                        />
+                      )}
+                    </div>
                   </Menu.Item>
                 ))}
               </Menu.SubMenu>

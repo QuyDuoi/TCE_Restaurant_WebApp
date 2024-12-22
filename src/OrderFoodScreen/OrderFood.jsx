@@ -182,15 +182,16 @@ const OrderFood = () => {
 
   const guiThongTinMonAn = async () => {
     try {
-      const response = await axios.post(`${ipAddress}datMonAn`, {
-        id: id,
-        danhSachMon: orderList,
-        id_nhaHang: id_nhaHang,
-      });
-
-      if (response.data) {
-        message.success(response.data.msg);
-      }
+      await axios
+        .post(`${ipAddress}datMonAn`, {
+          id: id,
+          danhSachMon: orderList,
+          id_nhaHang: id_nhaHang,
+        })
+        .then((response) => {
+          message.success(response.data.msg);
+          setOrderList([]); // Xóa giỏ hàng sau khi gửi thông tin thành công
+        });
     } catch (error) {
       if (error.response) {
         // Lỗi trả về từ server (status code không phải 2xx)
@@ -218,9 +219,9 @@ const OrderFood = () => {
     if (orderList.length === 0) {
       message.error("Giỏ hàng đang trống, thêm món trước khi xác nhận!");
       return; // Dừng xử lý nếu giỏ hàng trống
+    } else {
+      guiThongTinMonAn();
     }
-    setPassword(""); // Reset mật khẩu
-    setPasswordModalVisible(true); // Hiển thị modal nhập mật khẩu
   };
 
   const startLockoutTimer = () => {
@@ -352,7 +353,9 @@ const OrderFood = () => {
             onClick={handlePasswordSubmit}
             disabled={isLocked}
           >
-            {isLocked ? `Bạn đã bị khóa. Thử lại sau ${formatTime(lockoutTime)}` : "Xác nhận"}
+            {isLocked
+              ? `Bạn đã bị khóa. Thử lại sau ${formatTime(lockoutTime)}`
+              : "Xác nhận"}
           </Button>
         </div>
       </Modal>
