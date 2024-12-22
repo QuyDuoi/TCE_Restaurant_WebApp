@@ -6,7 +6,6 @@ import {
   thongKeNguonDoanhThu,
   thongKeTop5,
 } from "../CallApiThongKe.ts";
-import moment from 'moment';
 
 export const fetchData = async (filter) => {
   try {

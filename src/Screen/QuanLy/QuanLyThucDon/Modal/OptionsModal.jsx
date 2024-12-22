@@ -1,298 +1,332 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, Button, Select, List, Row, Col } from 'antd';
-import { Upload, message } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchDanhMucVaMonAn } from '../../../../store/Thunks/danhMucThunks.ts';
+import React, { useState } from "react";
+import { Modal, Form, Input, Button, Select, List, Row, Col } from "antd";
+import { Upload, message } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDanhMucVaMonAn } from "../../../../store/Thunks/danhMucThunks.ts";
+import { ipAddress } from "../../../../services/api.ts";
 
 const { Option } = Select;
 
 const OptionsModal = ({ visible, onClose }) => {
-    const [form] = Form.useForm();
-    const [activeOption, setActiveOption] = useState('addDish');
-    const [editingCategory, setEditingCategory] = useState(null);
-    const [uploadedImage, setUploadedImage] = useState(null);
-    const [modalState, setModalState] = useState({});
-    const id_nhaHang = "66fab50fa28ec489c7137537";
-    const dsDanhMuc = useSelector((state) => state.danhMuc.danhMucs);
-    const dispatch = useDispatch();
+  const [form] = Form.useForm();
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [modalState, setModalState] = useState({});
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang._id;
+  const dsDanhMuc = useSelector((state) => state.danhMuc.danhMucs);
+  const dispatch = useDispatch();
 
-    const handleSaveDish = async (values) => {
-        try {
-            const newDish = {
-                ...values,
-                hinhAnh: modalState.uploadedImage,
-            };
-            // Gửi yêu cầu tới API
-            await axios.post('https://tce-restaurant-api.onrender.com/api/themMonAn', newDish);
-            message.success('Thêm món ăn thành công!');
-            form.resetFields();
-            onClose(); // Đóng modal
-        } catch (error) {
-            message.error('Thêm món ăn thất bại, vui lòng thử lại.');
-        }
-    };
-    
+  const handleImageChange = (info) => {
+    if (info.file.status === "removed") {
+      message.error(`Chọn ảnh không thành công.`);
+    } else {
+      message.success(`Chọn ảnh thành công!`);
+    }
+  };
 
-    const handleSaveCategory = async (values) => {
-        try {
-            await axios.post('https://tce-restaurant-api.onrender.com/api/themDanhMuc', values);
-            message.success('Thêm danh mục thành công!');
-            form.resetFields();
-            onClose();
-        } catch (error) {
-            message.error('Thêm danh mục thất bại, vui lòng thử lại.');
-        }
-    };
-    
+  const handleSaveDish = async (values) => {
+    try {
+      const formData = new FormData();
 
-    const handleEditCategory = async (id, newName) => {
-        try {
-            await axios.put(`https://tce-restaurant-api.onrender.com/api/capNhatDanhMuc/${id}`, { tenDanhMuc: newName , id_nhaHang: id_nhaHang});
-            dispatch(fetchDanhMucVaMonAn(id_nhaHang));
-            message.success('Cập nhật danh mục thành công!');
-            setEditingCategory(null);
-        } catch (error) {
-            if (error.response) {
-            // Backend trả về lỗi
-            message.error(`Lỗi: ${error.response.data.msg}`);
-            } else if (error.request) {
-            // Không nhận được phản hồi từ server
-            message.error('Không thể kết nối đến server!');
-            } else {
-            // Lỗi khác (ví dụ cấu hình axios sai)
-            message.error(`Lỗi: ${error.message}`);
-            }
-        }
-    };
+      // Thêm các trường thông tin nhân viên vào formData
+      formData.append("tenMon", values.tenMon);
+      formData.append("giaMonAn", values.giaMonAn);
+      formData.append("moTa", values.moTa);
+      formData.append("id_danhMuc", values.danhMuc); // ID nhà hàng cố định
 
-    const renderAddDishForm = () => (
-        <div style={{ overflowY: 'auto', maxHeight: '100%' }}>
-            <Form form={form} layout="vertical" onFinish={handleSaveDish}>
-                <Row gutter={16}>
-                    {/* Cột bên trái: Tải hình ảnh */}
-                    <Col span={8}>
-                        <Form.Item
-                            name="hinhAnh"
-                            label="Hình ảnh"
-                            rules={[{ required: true, message: 'Vui lòng tải hình ảnh lên!' }]}
-                        >
-                            <Upload
-                                listType="picture-card"
-                                maxCount={1}
-                                showUploadList={{ showRemoveIcon: true }}
-                                beforeUpload={(file) => {
-                                    const isImage =
-                                        file.type === 'image/jpeg' || file.type === 'image/png';
-                                    if (!isImage) {
-                                        message.error('Chỉ chấp nhận định dạng JPG/PNG!');
-                                    }
-                                    return isImage || Upload.LIST_IGNORE;
-                                }}
-                                onChange={(info) => {
-                                    if (info.file.status === 'done' || info.file.originFileObj) {
-                                        const file = info.file.originFileObj || info.file;
-                                        const reader = new FileReader();
-                                        reader.onload = (e) => setUploadedImage(e.target.result);
-                                        reader.readAsDataURL(file);
-                                    } else {
-                                        setUploadedImage(null);
-                                    }
-                                }}
-                            >
-                                {uploadedImage ? (
-                                    <img
-                                        src={uploadedImage}
-                                        alt="Hình ảnh tải lên"
-                                        style={{ width: '100%' }}
-                                    />
-                                ) : (
-                                    <div>
-                                        <InboxOutlined style={{ fontSize: 24 }} />
-                                        <p>Tải hình ảnh lên</p>
-                                    </div>
-                                )}
-                            </Upload>
-                        </Form.Item>
-                    </Col>
+      // Thêm file ảnh vào formData
+      if (values.anhMonAn && values.anhMonAn.file) {
+        formData.append("anhMonAn", values.anhMonAn.fileList[0].originFileObj);
+      } else {
+        message.error("Vui lòng chọn hình ảnh hợp lệ!");
+        return;
+      }
+      // Gửi yêu cầu tới API
+      await axios.post(`${ipAddress}themMonAn`, formData);
+      message.success("Thêm món ăn thành công!");
+      dispatch(fetchDanhMucVaMonAn(id_nhaHang));
+      form.resetFields();
+      onClose();
+    } catch (error) {
+      message.error("Thêm món ăn thất bại, vui lòng thử lại.");
+    }
+  };
 
-                    {/* Cột bên phải: Các trường nhập liệu */}
-                    <Col span={16}>
-                        <Form.Item
-                            name="danhMuc"
-                            label="Danh mục"
-                            rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
-                        >
-                            <Select placeholder="Chọn danh mục">
-                                {dsDanhMuc.map((danhMuc) => (
-                                    <Option key={danhMuc._id} value={danhMuc.tenDanhMuc}>
-                                        {danhMuc.tenDanhMuc}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            name="tenMon"
-                            label="Tên món"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên món!' }]}
-                        >
-                            <Input placeholder="VD: Khoai lang nướng" />
-                        </Form.Item>
-                        <Form.Item
-                            name="giaMon"
-                            label="Giá món (VNĐ)"
-                            rules={[{ required: true, message: 'Vui lòng nhập giá món!' }]}
-                        >
-                            <Input placeholder="Nhập giá món" type="number" />
-                        </Form.Item>
-                        <Form.Item name="moTa" label="Mô tả">
-                            <Input.TextArea placeholder="VD: Tương cà + Tương ớt" />
-                        </Form.Item>
-                        <Button type="primary" htmlType="submit" style={{ marginTop: '16px' }}>
-                            Lưu
-                        </Button>
-                    </Col>
-                </Row>
-            </Form>
-        </div>
-    );
+  const handleSaveCategory = async (values) => {
+    try {
+      await axios.post(`${ipAddress}themDanhMuc`, {
+        tenDanhMuc: values.tenDanhMuc,
+        id_nhaHang: id_nhaHang,
+      });
+      message.success("Thêm danh mục mới thành công!");
+      dispatch(fetchDanhMucVaMonAn(id_nhaHang));
+      form.resetFields();
+      onClose();
+    } catch (error) {
+      message.error("Thêm danh mục thất bại, vui lòng thử lại.");
+    }
+  };
 
-    const renderAddCategoryForm = () => (
-        <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '100%',
-                        }}
-                    >
-                        <Form form={form} layout="vertical" onFinish={handleSaveCategory}>
-                            <Form.Item
-                                name="tenDanhMuc"
-                                label="Tên danh mục"
-                                rules={[
-                                    { required: true, message: 'Vui lòng nhập tên danh mục!' },
-                                ]}
-                            >
-                                <Input placeholder="VD: Tráng miệng" />
-                            </Form.Item>
-                            <Button type="primary" htmlType="submit">
-                                Lưu
-                            </Button>
-                        </Form>
-                    </div>
-    );
+  const capNhatDanhMuc = async (id, newName) => {
+    try {
+      await axios.put(`${ipAddress}capNhatDanhMuc/${id}`, {
+        tenDanhMuc: newName,
+        id_nhaHang: id_nhaHang,
+      });
+      dispatch(fetchDanhMucVaMonAn(id_nhaHang));
+      message.success("Cập nhật danh mục thành công!");
+      setEditingCategory(null);
+    } catch (error) {
+      if (error.response) {
+        // Backend trả về lỗi
+        message.error(`Lỗi: ${error.response.data.msg}`);
+      } else if (error.request) {
+        // Không nhận được phản hồi từ server
+        message.error("Không thể kết nối đến server!");
+      } else {
+        // Lỗi khác (ví dụ cấu hình axios sai)
+        message.error(`Lỗi: ${error.message}`);
+      }
+    }
+  };
 
-    const renderEditCategoryList = () => (
-        <List
-            dataSource={dsDanhMuc}
-            renderItem={(item) => (
-                <List.Item
-                    actions={[
-                        <Button
-                            type="link"
-                            onClick={() => setEditingCategory(item._id)} // Chuyển sang chế độ sửa
-                        >
-                            Sửa
-                        </Button>,
-                    ]}
-                >
-                    {editingCategory === item._id ? (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Input
-                                defaultValue={item.tenDanhMuc}
-                                onChange={(e) => {
-                                    // Cập nhật tên danh mục trong lúc nhập
-                                    setModalState({ ...modalState, newCategoryName: e.target.value });
-                                }}
-                            />
-                            <Button
-                                type="primary"
-                                onClick={() => handleEditCategory(item._id, modalState.newCategoryName)} // Cập nhật danh mục
-                                style={{ marginLeft: '10px' }}
-                            >
-                                Cập nhật
-                            </Button>
-                        </div>
-                    ) : (
-                        item.tenDanhMuc
-                    )}
-                </List.Item>
-            )}
-        />
-    );
+  const xoaDanhMuc = async (id) => {
+    try {
+      console.log(id);
+      
+      // Gửi yêu cầu xóa danh mục từ API
+      await axios.delete(`${ipAddress}xoaDanhMuc/${id}`, {
+        id_nhaHang: id_nhaHang,
+      });
 
-    const renderContent = () => {
-        switch (modalState.activeOption) {
-            case 'addDish':
-                return renderAddDishForm();
-            case 'addCategory':
-                return renderAddCategoryForm();
-            case 'editCategory':
-                return renderEditCategoryList();
-            default:
-                return null;
-        }
-    };
-    
-    return (
-        <Modal
-            title="Quản lý thực đơn"
-            visible={visible}
-            onCancel={onClose}
-            footer={null}
-            centered
-            width="50vw"
-            bodyStyle={{
-                minHeight: '60vh',
-                maxHeight: '80vh',
-                padding: '24px',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-            }}
+      // Sau khi xóa thành công, fetch lại danh mục
+      dispatch(fetchDanhMucVaMonAn(id_nhaHang)); // Cập nhật lại danh mục
+      message.success("Xóa danh mục thành công!");
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      message.error("Xóa danh mục thất bại!");
+    }
+  };
+
+  const renderAddDishForm = () => (
+    <div style={{ overflowY: "auto", maxHeight: "100%" }}>
+      <Form form={form} layout="vertical" onFinish={handleSaveDish}>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name="anhMonAn"
+              label="Hình Ảnh"
+              rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
+            >
+              <Upload
+                name="file"
+                maxCount={1}
+                listType="picture"
+                beforeUpload={() => false}
+                onChange={handleImageChange}
+              >
+                <Button icon={<UploadOutlined />}>Chọn Hình Ảnh</Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+
+          {/* Cột bên phải: Các trường nhập liệu */}
+          <Col span={16}>
+            <Form.Item
+              name="danhMuc"
+              label="Danh mục"
+              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+            >
+              <Select placeholder="Chọn danh mục">
+                {dsDanhMuc.map((danhMuc) => (
+                  <Option key={danhMuc._id} value={danhMuc._id}>
+                    {danhMuc.tenDanhMuc}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="tenMon"
+              label="Tên món"
+              rules={[{ required: true, message: "Vui lòng nhập tên món!" }]}
+            >
+              <Input placeholder="VD: Khoai lang nướng" />
+            </Form.Item>
+            <Form.Item
+              name="giaMonAn"
+              label="Giá món (VNĐ)"
+              rules={[{ required: true, message: "Vui lòng nhập giá món!" }]}
+            >
+              <Input placeholder="Nhập giá món" type="number" />
+            </Form.Item>
+            <Form.Item name="moTa" label="Mô tả">
+              <Input.TextArea placeholder="VD: Tương cà + Tương ớt" />
+            </Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ marginTop: "16px" }}
+            >
+              Lưu thông tin
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  );
+
+  const renderAddCategoryForm = () => (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Form form={form} layout="vertical" onFinish={handleSaveCategory}>
+        <Form.Item
+          name="tenDanhMuc"
+          label="Tên danh mục"
+          rules={[{ required: true, message: "Vui lòng nhập tên danh mục!" }]}
         >
-            <Row gutter={16} style={{ flexGrow: 1 }}>
-                <Col
-                    span={8}
-                    style={{
-                        borderRight: '1px solid #ddd',
-                        paddingRight: '16px',
-                    }}
-                >
-                    <Button
-                        type={modalState.activeOption === 'addDish' ? 'primary' : 'default'}
-                        block
-                        style={{ marginBottom: '8px' }}
-                        onClick={() => setModalState({ ...modalState, activeOption: 'addDish' })}
-                    >
-                        Thêm món
-                    </Button>
-                    <Button
-                        type={modalState.activeOption === 'addCategory' ? 'primary' : 'default'}
-                        block
-                        style={{ marginBottom: '8px' }}
-                        onClick={() => setModalState({ ...modalState, activeOption: 'addCategory' })}
-                    >
-                        Thêm danh mục
-                    </Button>
-                    <Button
-                        type={modalState.activeOption === 'editCategory' ? 'primary' : 'default'}
-                        block
-                        style={{ marginBottom: '8px' }}
-                        onClick={() => setModalState({ ...modalState, activeOption: 'editCategory' })}
-                    >
-                        Cập nhật danh mục
-                    </Button>
-                </Col>
+          <Input placeholder="VD: Tráng miệng" />
+        </Form.Item>
+        <Button type="primary" htmlType="submit">
+          Lưu thông tin
+        </Button>
+      </Form>
+    </div>
+  );
 
-                <Col span={16} style={{ paddingLeft: '16px', overflowY: 'auto' }}>
-                    {renderContent()}
-                </Col>
-            </Row>
-        </Modal>
-    );
+  const renderEditCategoryList = () => (
+    <List
+      dataSource={dsDanhMuc}
+      style={{ overflowY: "auto", maxHeight: "420px" }}
+      renderItem={(item) => (
+        <List.Item
+          actions={[
+            // Nút "Sửa"
+            <Button
+              type="link"
+              style={{padding: "0", color: "blue"}} 
+              onClick={() => setEditingCategory(item._id)} 
+            >
+              Sửa
+            </Button>,
+
+            <span style={{ margin: "0" }}>|</span>,
+
+            <Button
+              type="link"
+              style={{ color: "red", padding: 0 }} 
+              onClick={() => xoaDanhMuc(item._id)} 
+            >
+              Xóa
+            </Button>,
+          ]}
+        >
+          {editingCategory === item._id ? (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Input
+                defaultValue={item.tenDanhMuc}
+                onChange={(e) => {
+                  // Cập nhật tên danh mục trong lúc nhập
+                  setModalState({
+                    ...modalState,
+                    newCategoryName: e.target.value,
+                  });
+                }}
+              />
+              <Button
+                type="primary"
+                onClick={() =>
+                  capNhatDanhMuc(item._id, modalState.newCategoryName)
+                } // Cập nhật danh mục
+                style={{ marginLeft: "10px" }}
+              >
+                Cập nhật
+              </Button>
+            </div>
+          ) : (
+            item.tenDanhMuc
+          )}
+        </List.Item>
+      )}
+    />
+  );
+
+  const renderContent = () => {
+    switch (modalState.activeOption) {
+      case "addDish":
+        return renderAddDishForm();
+      case "addCategory":
+        return renderAddCategoryForm();
+      case "editCategory":
+        return renderEditCategoryList();
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Modal
+      title="Lựa chọn chức năng"
+      open={visible}
+      onCancel={onClose}
+      footer={null}
+      centered
+      width="65vw"
+      style={{
+        padding: "16px",
+        maxHeight: "80vh",
+      }}
+    >
+      <Row gutter={16} style={{ minHeight: "65vh" }}>
+        <Col span={8}>
+          <Button
+            type={modalState.activeOption === "addDish" ? "primary" : "default"}
+            block
+            style={{ marginBottom: "8px" }}
+            onClick={() =>
+              setModalState({ ...modalState, activeOption: "addDish" })
+            }
+          >
+            Thêm món
+          </Button>
+          <Button
+            type={
+              modalState.activeOption === "addCategory" ? "primary" : "default"
+            }
+            block
+            style={{ marginBottom: "8px" }}
+            onClick={() =>
+              setModalState({ ...modalState, activeOption: "addCategory" })
+            }
+          >
+            Thêm danh mục
+          </Button>
+          <Button
+            type={
+              modalState.activeOption === "editCategory" ? "primary" : "default"
+            }
+            block
+            style={{ marginBottom: "8px" }}
+            onClick={() =>
+              setModalState({ ...modalState, activeOption: "editCategory" })
+            }
+          >
+            Cập nhật danh mục
+          </Button>
+        </Col>
+
+        <Col span={16} style={{ paddingLeft: "16px", overflowY: "auto" }}>
+          {renderContent()}
+        </Col>
+      </Row>
+    </Modal>
+  );
 };
 
 export default OptionsModal;

@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 const StatisticsCard = ({ title, items }) => {
   return (
-    <Container>
+    <Container style={{margin: 10}}>
       <Title>{title}</Title>
       {items.map((item, index) => (
         <Item key={index}>
@@ -22,7 +22,7 @@ const StatisticsCard = ({ title, items }) => {
           </CircleWrapper>
           <Details>
             <Label>{item.label}</Label>
-            <Value>{item.value} đ</Value>
+            <Value>{(item.value).toLocaleString("vi-VN")} đ</Value>
           </Details>
         </Item>
       ))}

@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -25,9 +24,7 @@ const App = () => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       // Parse the saved user data and dispatch it to Redux
-      dispatch(setUser(JSON.parse(savedUser)));
-      console.log("da vao day");
-      
+      dispatch(setUser(JSON.parse(savedUser)));      
     }
   }, [dispatch]);
   return (

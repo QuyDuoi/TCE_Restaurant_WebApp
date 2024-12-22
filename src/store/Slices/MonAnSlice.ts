@@ -37,6 +37,9 @@ const monAnSlice = createSlice({
     setMonAns: (state, action: PayloadAction<MonAn[]>) => {
       state.monAns = action.payload;
     },
+    xoaMonAn: (state, action) => {
+      state.monAns = state.monAns.filter(monAn => monAn._id !== action.payload);
+    }
   },
   extraReducers: builder => {
     builder
@@ -111,5 +114,5 @@ const monAnSlice = createSlice({
 });
 
 // Export reducer để sử dụng trong store
-export const { setMonAns } = monAnSlice.actions;
+export const { setMonAns, xoaMonAn } = monAnSlice.actions;
 export default monAnSlice.reducer;

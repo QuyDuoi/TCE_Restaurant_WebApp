@@ -68,7 +68,7 @@ const HeaderBar = ({ onFilter }) => {
                 background: '#fff',
                 padding: '16px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                marginBottom: '16px',
+                marginBottom: '0px',
             }}
         >
             <Row justify="space-between" align="middle">

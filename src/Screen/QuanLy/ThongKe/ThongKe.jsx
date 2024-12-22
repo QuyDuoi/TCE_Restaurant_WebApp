@@ -6,8 +6,6 @@ import StatisticsCard from "./Component/RevenueStatistics";
 import TopProducts from "./Component/TopProduct";
 import { fetchData } from "./Data/ThongKeData";
 
-const { Sider, Content } = Layout;
-
 const ThongKe = () => {
   const [filterData, setFilterData] = useState({ type: "today", date: null, startDate: null, endDate: null });
   const [thongKeData, setThongKeData] = useState([]); // Dữ liệu thống kê
@@ -43,11 +41,9 @@ const ThongKe = () => {
       <Spin spinning={loading} tip="Đang tải dữ liệu..."> {/* Hiển thị loading */}
         <div
           style={{
-            marginLeft: "20px",
             display: "flex",
             justifyContent: "space-around",
-            width: "95%",
-            paddingLeft: "10px",
+            width: "100%",
           }}
         >
           {!loading &&
@@ -57,8 +53,6 @@ const ThongKe = () => {
         </div>
         <div
           style={{
-            paddingLeft: "20px",
-            marginTop: "-20px",
             display: "flex",
             justifyContent: "center",
           }}

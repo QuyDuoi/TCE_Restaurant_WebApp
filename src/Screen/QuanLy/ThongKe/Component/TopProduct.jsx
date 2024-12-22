@@ -24,7 +24,7 @@ const TopProducts = ({ data }) => {
   }, []);
 
   return (
-    <Container id="scrollable-container" isScrolling={isScrolling}>
+    <Container id="scrollable-container" style={{margin: 10}} isScrolling={isScrolling}>
       <Title>{data.title}</Title>
       {data.items.map((item, index) => (
         <ProductItem key={index}>
@@ -57,7 +57,7 @@ const Container = styled.div`
   padding-right: 25px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 92%;
-  max-height: 350px; /* Fix chiều cao tối đa */
+  max-height: 300px; /* Fix chiều cao tối đa */
   overflow-y: auto; /* Thêm thanh cuộn nếu nội dung vượt quá */
   scrollbar-width: ${(props) => (props.isScrolling ? "thin" : "none")}; 
   &::-webkit-scrollbar {
@@ -75,7 +75,7 @@ const Container = styled.div`
 const Title = styled.h3`
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin: 10px;
   color: #333;
 `;
 
