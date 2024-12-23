@@ -21,7 +21,7 @@ const NavigationTab = ({ activeTab, onTabChange }) => {
             backgroundColor: activeTab === tab.id ? "#1890ff" : "#f0f0f0",
             color: activeTab === tab.id ? "#fff" : "#000",
             cursor: "pointer",
-
+            transition: "background-color 0.3s, color 0.3s",
           }}
           onClick={() => onTabChange(tab.id)}
         >

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
 const ItemTable = ({ ban, id_khuVuc, khuVucs, onClick }) => {
-
-const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg"; // Ảnh mặc định nếu trạng thái không hợp lệ
+  const urlImgDefault =
+    "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuong-danh-cho-nha-hang.jpg"; // Ảnh mặc định nếu trạng thái không hợp lệ
 
   const khuVuc = khuVucs.filter((item) => item._id === id_khuVuc);
-  
+
   // Style nội tuyến
   const styles = {
     container: {
@@ -49,15 +49,11 @@ const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuo
       color: "#fff",
       borderRadius: "4px",
       fontSize: "12px",
-      width:100,
-      marginLeft: "auto", // Đẩy trạng thái sang bên phải
+      width: 100,
       textTransform: "capitalize",
+      margin: "5px 10px",
       backgroundColor:
-        status === "Trống"
-          ? "green"
-          : status === "Đã đặt"
-          ? "orange"
-          : "red",
+        status === "Trống" ? "green" : status === "Đã đặt" ? "orange" : "red",
     }),
   };
 
@@ -76,32 +72,36 @@ const urlImgDefault = "https://noithatminhkhoi.com/upload/images/ban-an-hinh-vuo
     >
       <div style={styles.imageContainer}>
         <img
-          src={ban.maQRCode == null ?  urlImgDefault : ban.maQRCode} // Hình ảnh tương ứng trạng thái
+          src={ban.maQRCode == null ? urlImgDefault : ban.maQRCode} // Hình ảnh tương ứng trạng thái
           alt={`Hình ảnh của ${ban.tenBan}`}
           style={styles.image}
         />
       </div>
-      <div style={styles.info}>
-        <p style={styles.title}>
-          Khu vực: <strong>{khuVuc[0].tenKhuVuc}</strong>
-        </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between", // Tách tên bàn và trạng thái sang 2 phía
-            width: "100%",
-          }}
-        >
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <div style={styles.info}>
+          <p style={styles.title}>
+            Khu vực: <strong>{khuVuc[0].tenKhuVuc}</strong>
+          </p>
           <p style={styles.title}>Bàn: {ban.tenBan}</p>
-          <span style={styles.status(ban.trangThai)}>
-            {ban.trangThai === "Trống"
-              ? "Bàn trống"
-              : ban.trangThai === "Đã đặt"
-              ? "Bàn đặt"
-              : "Đang sử dụng"}
-          </span>
+          <p style={styles.title}>
+            Mật khẩu: <strong>{ban.matKhau}</strong>
+          </p>
         </div>
+        <span style={styles.status(ban.trangThai)}>
+          {ban.trangThai === "Trống"
+            ? "Bàn trống"
+            : ban.trangThai === "Đã đặt"
+            ? "Bàn đặt"
+            : "Đang sử dụng"}
+        </span>
       </div>
     </div>
   );

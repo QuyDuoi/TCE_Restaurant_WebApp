@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Modal, Table, Typography, Button, Spin, Alert } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { ipAddress } from "../services/api.ts";
+import { ipAddress, ipIO } from "../services/api.ts";
 import "./Style/ModalHoaDon.css";
+import { io } from "socket.io-client";
 
 const { Title, Text } = Typography;
 
@@ -14,34 +15,53 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
   const [dsChiTietHoaDon, setDsChiTietHoaDon] = useState([]); // Danh sách chi tiết hóa đơn
   const [error, setError] = useState(false); // Lỗi khi fetch API
 
+  // Define fetchHoaDon using useCallback to memoize the function
+  const fetchHoaDon = useCallback(async () => {
+    if (thongTinBan?.hoaDon) {
+      setLoading(true);
+      setError(false);
+      try {
+        const response = await axios.post(`${ipAddress}layDsChiTietHoaDon`, {
+          id_hoaDon: thongTinBan.hoaDon._id,
+        });
+        setDsChiTietHoaDon(response.data);
+        console.log("Fetched HoaDon Data:", response.data);
+      } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [thongTinBan]);
+
   // Fetch hóa đơn khi mở modal
   useEffect(() => {
     setThongTinHoaDon(thongTinBan?.hoaDon);
 
-    if (visible && thongTinBan && thongTinBan?.hoaDon) {
-      console.log("Fetch hóa đơn");
-
-      const fetchHoaDon = async () => {
-        setLoading(true);
-        setError(false);
-        try {
-          const response = await axios.post(`${ipAddress}layDsChiTietHoaDon`, {
-            id_hoaDon: thongTinBan?.hoaDon._id,
-          });
-          setDsChiTietHoaDon(response.data);
-          console.log(response.data);
-        } catch (error) {
-          console.error("Lỗi khi gọi API:", error);
-          setError(true);
-        } finally {
-          setLoading(false);
-        }
-      };
+    if (visible && thongTinBan && thongTinBan.hoaDon) {
+      console.log("Fetching hóa đơn");
       fetchHoaDon();
     } else {
       setLoading(false);
     }
-  }, [visible, thongTinBan]);
+  }, [visible, thongTinBan, fetchHoaDon]);
+
+  // Setup socket connection and listener
+  useEffect(() => {
+    // Initialize socket connection
+    const socket = io(ipIO);
+
+    socket.on("hoanThanhMon", (data) => {
+      fetchHoaDon();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   // Định nghĩa cột Table
   const columns = [
@@ -80,7 +100,6 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
 
   return (
     <>
-      {/* Button hóa đơn */}
       <div>
         <Button
           type="primary"
@@ -92,7 +111,6 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
         />
       </div>
 
-      {/* Modal hóa đơn */}
       <Modal
         title={
           <div style={{ textAlign: "center", width: "100%" }}>
@@ -134,7 +152,6 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
             <Text strong>Trạng thái: </Text>
             <Text type="danger">{thongTinHoaDon?.trangThai}</Text>
 
-            {/* Danh sách order */}
             <Title level={5} style={{ marginTop: 15 }}>
               Danh sách order:
             </Title>
@@ -142,13 +159,12 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
               columns={columns}
               dataSource={dsChiTietHoaDon}
               pagination={false}
-              rowKey={(record, index) => index}
+              rowKey={(record) => record._id || Math.random()}
               bordered
               scroll={{ y: 300 }}
               className="table-order"
             />
 
-            {/* Tổng tiền */}
             <div style={{ marginTop: 20, textAlign: "right" }}>
               <Title level={4} style={{ margin: "5px 0" }}>
                 Tổng tiền: {thongTinHoaDon?.tongGiaTri.toLocaleString("vi-VN")}đ

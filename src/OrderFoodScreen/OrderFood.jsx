@@ -87,8 +87,10 @@ const OrderFood = () => {
   useEffect(() => {
     // Kết nối và join vào room với id_ban
     if (id) {
-      socket.emit("joinRoom", id);
-      console.log(`Joined room: ${id}`);
+      socket.emit("NhanDien", {
+        id_ban: id,
+        role: "KhachHang",
+      });
     }
 
     // Cleanup: ngắt kết nối khi component unmount
@@ -106,14 +108,20 @@ const OrderFood = () => {
       }
     });
 
-    socket.on("xacNhanOrder", (data) => {
+    socket.on("xacNhanOrder", async (data) => {
       message.success(data.msg);
-      setOrderList([]); // Xóa giỏ hàng khi có thông báo hủy món
+      const banResponse = await axios.get(
+        `${ipAddress}layThongTinBanVaHoaDon`,
+        {
+          params: { id_ban: id },
+        }
+      );
+      setThongTinBan(banResponse.data);
     });
 
-    // Cleanup: hủy lắng nghe sự kiện khi component unmount
     return () => {
       socket.off("huyDatMon");
+      socket.off("xacNhanOrder");
     };
   }, []);
 

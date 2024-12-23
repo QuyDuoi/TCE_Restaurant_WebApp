@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Row, Col, Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchKhuVucVaBan } from '../../../store/Thunks/khuVucThunks.ts';
+import { fetchKhuVucVaBan } from "../../../store/Thunks/khuVucThunks.ts";
 import HeaderBar from "./Component/HeaderBar";
 import NavigationTab from "./Component/NavigationTab";
 import ItemTable from "./Component/ItemTable"; // Import component bàn
 import TableModal from "./Modal/TableModal"; // Import modal
-import chiTietHoaDon from "./Data/chiTietHoaDon";
 import { fetchHoaDonTheoNhaHang } from "../../../store/Thunks/hoaDonThunks.ts";
-import { resetStatus, searchBanThunk } from "../../../store/Slices/BanSlice.ts";
+import { searchBanThunk } from "../../../store/Slices/BanSlice.ts";
 
 const { Content } = Layout;
 
@@ -23,46 +22,53 @@ const QuanLyKhuVuc = () => {
   const [loading, setLoading] = useState(true); // Trạng thái loading
   const [loading2, setLoading2] = useState(false); // Trạng thái loading
 
-  const id_nhaHang = '66fab50fa28ec489c7137537';
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang._id;
 
   const handleLoading = async () => {
     setLoading2(true); // Bắt đầu loading
     await dispatch(fetchKhuVucVaBan(id_nhaHang));
     await dispatch(fetchHoaDonTheoNhaHang(id_nhaHang));
-    setLoading2(false)
-  }
+    setLoading2(false);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true); // Bắt đầu loading
       await dispatch(fetchKhuVucVaBan(id_nhaHang));
       await dispatch(fetchHoaDonTheoNhaHang(id_nhaHang));
-      setLoading(false)
+      setLoading(false);
     };
     fetchData();
-  }, [dispatch]);
-
+  }, [dispatch, id_nhaHang]);
 
   useEffect(() => {
-    if (status === 'succeeded' && khuVucs) { // Kiểm tra xem khuVuc có tồn tại
-      const allTables = khuVucs.flatMap(khuVuc => khuVuc.bans || []
-      );
-
+    if (status === "succeeded" && khuVucs) {
+      // Kiểm tra xem khuVuc có tồn tại
+      const allTables = khuVucs.flatMap((khuVuc) => khuVuc.bans || []);
+      console.log(`Tổng số bàn khi fetch data: ${allTables.length}`);
       setFilteredTables(allTables);
     }
   }, [khuVucs, status]);
 
-
   // Xử lý khi chọn tab (lọc dữ liệu theo trạng thái)
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    console.log(`Đã chọn tab: ${tab}`);
+
     if (tab === "all") {
-      setFilteredTables(khuVucs.flatMap(khuVuc => khuVuc.bans || []));
+      const allTables = khuVucs.flatMap((khuVuc) => khuVuc.bans || []);
+      console.log(`Tổng số bàn: ${allTables.length}`);
+      setFilteredTables(allTables);
     } else {
-      setFilteredTables(
-        khuVucs.flatMap(khuVuc => khuVuc.bans || []).filter(ban => ban.trangThai === tab)
-      );
+      const filtered = khuVucs
+        .flatMap((khuVuc) => khuVuc.bans || [])
+        .filter((ban) => ban.trangThai === tab);
+      console.log(`Số bàn sau khi lọc (${tab}): ${filtered.length}`);
+      setFilteredTables(filtered);
     }
   };
+
   const handleUpdateStatus = (tableId, newStatus) => {
     setFilteredTables((prevTables) =>
       prevTables.map((table) =>
@@ -70,15 +76,17 @@ const QuanLyKhuVuc = () => {
       )
     );
   };
+
   // Hiển thị trạng thái đang tải
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
+      <div style={{ textAlign: "center", padding: "20px" }}>
         <Spin size="large" />
         <div>Đang tải dữ liệu...</div>
       </div>
     );
   }
+
   // Xử lý khi nhấn vào bàn
   const handleItemClick = (table) => {
     setSelectedTable(table);
@@ -89,26 +97,37 @@ const QuanLyKhuVuc = () => {
   const handleSearch = async (searchValue) => {
     if (!searchValue) {
       // Hiển thị tất cả bàn nếu không có tìm kiếm
-      const allTables = khuVucs.flatMap((khuVuc) => khuVuc.bans || []);
-      setFilteredTables(allTables);
+      handleTabChange(activeTab);
       return;
     }
 
     // Gọi API tìm kiếm qua Redux thunk
     const result = await dispatch(searchBanThunk(searchValue));
-    
-    // Cập nhật danh sách bàn dựa trên kết quả
-    if (result.payload) {
-      setFilteredTables(result.payload); // Hiển thị kết quả tìm kiếm 
 
+    // Cập nhật danh sách bàn dựa trên kết quả và tab hiện tại
+    if (result.payload) {
+      const searchedTables = result.payload;
+      if (activeTab === "all") {
+        setFilteredTables(searchedTables);
+      } else {
+        const filtered = searchedTables.filter(
+          (ban) => ban.trangThai === activeTab
+        );
+        setFilteredTables(filtered);
+      }
+      console.log(
+        `Kết quả tìm kiếm (${searchValue}): ${searchedTables.length}`
+      );
     } else {
       setFilteredTables([]); // Nếu không tìm thấy bàn
+      console.log("Không tìm thấy bàn với từ khóa:", searchValue);
     }
   };
 
   return (
-    <Layout style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Thanh header với tìm kiếm */}
+    <Layout
+      style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+    >
       <HeaderBar onSearch={handleSearch} />
 
       {/* Tabs Nằm Ngang */}
@@ -118,7 +137,7 @@ const QuanLyKhuVuc = () => {
           alignItems: "center",
           padding: "10px 0",
           backgroundColor: "#fff",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
           height: 50,
           marginLeft: "2%",
           marginRight: "2%",
@@ -128,7 +147,6 @@ const QuanLyKhuVuc = () => {
         <NavigationTab activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
 
-      {/* Nội dung danh sách bàn */}
       <Content
         style={{
           flex: 1, // Chiếm toàn bộ chiều cao còn lại
@@ -141,37 +159,47 @@ const QuanLyKhuVuc = () => {
         }}
       >
         {loading2 ? (
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>Đang tải dữ liệu...</div>
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <Spin size="large" />
+            <div>Đang tải dữ liệu...</div>
+          </div>
         ) : (
           <Row gutter={[16, 16]} justify="start">
-            {filteredTables.map((table) => (
-              <Col
-                key={table.id}
-                xs={12} // Chiếm toàn bộ chiều ngang ở màn hình nhỏ
-                sm={24} // Chia đôi ở màn hình vừa
-                md={12}  // Chia ba ở màn hình lớn hơn
-                lg={8}  // Chia bốn ở màn hình lớn
+            {filteredTables.length > 0 ? (
+              filteredTables.map((table) => (
+                <Col
+                  key={table.id} // Đảm bảo table.id là duy nhất
+                  xs={12} // Chiếm toàn bộ chiều ngang ở màn hình nhỏ
+                  sm={24} // Chia đôi ở màn hình vừa
+                  md={12} // Chia ba ở màn hình lớn hơn
+                  lg={8} // Chia bốn ở màn hình lớn
+                  style={{
+                    display: "flex",
+                    justifyContent: "center", // Căn giữa item
+                  }}
+                >
+                  <ItemTable
+                    ban={table}
+                    id_khuVuc={table.id_khuVuc}
+                    khuVucs={khuVucs}
+                    onClick={() => handleItemClick(table)}
+                  />
+                </Col>
+              ))
+            ) : (
+              <div
                 style={{
-                  display: "flex",
-                  justifyContent: "center", // Căn giữa item
+                  width: "100%",
+                  textAlign: "center",
+                  marginTop: "20px",
                 }}
               >
-                <ItemTable
-                  ban={table}
-                  id_khuVuc={table.id_khuVuc}
-                  khuVucs={khuVucs}
-                  onClick={() => {
-                    setSelectedTable(table);
-                    setIsModalVisible(true);
-                  }}
-                />
-              </Col>
-            ))}
+                Không tìm thấy bàn nào theo tiêu chí đã chọn.
+              </div>
+            )}
           </Row>
         )}
-
       </Content>
-
 
       {/* Modal */}
       {selectedTable && (
