@@ -17,7 +17,10 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
   // Fetch hóa đơn khi mở modal
   useEffect(() => {
     setThongTinHoaDon(thongTinBan?.hoaDon);
+
     if (visible && thongTinBan && thongTinBan?.hoaDon) {
+      console.log("Fetch hóa đơn");
+
       const fetchHoaDon = async () => {
         setLoading(true);
         setError(false);
@@ -35,6 +38,8 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
         }
       };
       fetchHoaDon();
+    } else {
+      setLoading(false);
     }
   }, [visible, thongTinBan]);
 

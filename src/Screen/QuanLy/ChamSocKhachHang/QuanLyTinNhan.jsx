@@ -67,17 +67,34 @@ const QuanLyTinNhan = () => {
   useEffect(() => {
     socketRef.current = io(ipIO);
 
+    socketRef.current.emit("NhanDien", {
+      role: "NhanVien",
+    });
+
+    socketRef.current.on("tinNhanMoiCuaKhach", (messageData) => {
+      if (selectedBan && messageData.id_ban === selectedBan._id) {
+        setMessages((prev) => [...prev, messageData]);
+        socketRef.current.emit("docTinNhan", {
+          id_ban: selectedBan._id,
+          id_nhanVien: user._id,
+        });
+      } else {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [messageData.id_ban]: prev[messageData.id_ban]
+            ? prev[messageData.id_ban] + 1
+            : 1,
+        }));
+        console.log(unreadCounts);
+      }
+    });
+
     // Join the room when the selected table changes
     if (selectedBan) {
       setUnreadCounts((prev) => {
         const newCounts = { ...prev };
         delete newCounts[selectedBan._id];
         return newCounts;
-      });
-
-      socketRef.current.emit("NhanDien", {
-        role: "NhanVien",
-        id_ban: selectedBan._id,
       });
 
       socketRef.current.emit("docTinNhan", {
@@ -116,36 +133,6 @@ const QuanLyTinNhan = () => {
       }
     };
   }, [selectedBan, user._id]);
-
-  // Listen for incoming messages
-  useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on("tinNhanMoiCuaKhach", (messageData) => {
-        if (selectedBan && messageData.id_ban === selectedBan._id) {
-          setMessages((prev) => [...prev, messageData]);
-          socketRef.current.emit("docTinNhan", {
-            id_ban: selectedBan._id,
-            id_nhanVien: user._id,
-          });
-        } else {
-          // Increase unread count for the specific table
-          setUnreadCounts((prev) => ({
-            ...prev,
-            [messageData.id_ban]: prev[messageData.id_ban]
-              ? prev[messageData.id_ban] + 1
-              : 1,
-          }));
-          console.log(unreadCounts);
-        }
-      });
-    }
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off("tinNhanMoiCuaKhach");
-      }
-    };
-  }, [selectedBan]);
 
   const sendMessage = () => {
     if (!messageInput.trim() || !selectedBan) return;

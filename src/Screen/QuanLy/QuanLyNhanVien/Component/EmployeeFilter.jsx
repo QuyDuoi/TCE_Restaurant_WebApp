@@ -95,7 +95,7 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
         <Option value="all">Tất cả</Option>
         <Option value="Nhân viên phục vụ">Nhân viên phục vụ</Option>
         <Option value="Nhân viên thu ngân">Nhân viên thu ngân</Option>
-        <Option value="Chủ quán">Chủ quán</Option>
+        <Option value="Đầu bếp">Đầu bếp</Option>
         <Option value="Quản lý">Quản lý</Option>
       </Select>
 
@@ -142,7 +142,7 @@ const EmployeeFilter = ({ employees, setFilteredEmployees }) => {
           >
             <Checkbox value="Nhân viên phục vụ">Nhân viên phục vụ</Checkbox>
             <Checkbox value="Nhân viên thu ngân">Nhân viên quầy</Checkbox>
-            <Checkbox value="Chủ quán">Chủ quán</Checkbox>
+            <Checkbox value="Đầu bếp">Đầu bếp</Checkbox>
             <Checkbox value="Quản lý">Quản lý</Checkbox>
           </Checkbox.Group>
         </div>

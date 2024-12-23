@@ -18,6 +18,7 @@ const ChatBox = ({ id_ban }) => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
   const [trangThaiTinNhan, setTrangThaiTinNhan] = useState("");
   const [position, setPosition] = useState({
     x: window.innerWidth - 70,
@@ -55,6 +56,7 @@ const ChatBox = ({ id_ban }) => {
       // Fetch initial messages
       const fetchMessages = async () => {
         try {
+          setLoadingMessages(true);
           const response = await axios.get(
             `${ipAddress}layDsTinNhan?id_ban=${id_ban}`
           );
@@ -71,6 +73,8 @@ const ChatBox = ({ id_ban }) => {
           }
         } catch (error) {
           console.error("Error fetching messages:", error);
+        } finally {
+          setLoadingMessages(false);
         }
       };
       fetchMessages();
@@ -264,17 +268,16 @@ const ChatBox = ({ id_ban }) => {
           </div>
         }
         open={visible}
-        closable={false}
         onCancel={handleCloseChat}
         footer={null}
         centered
-        width={350} 
+        width={350}
         className="chat-modal"
         style={{ padding: "0px" }}
       >
         {/* Messages Display */}
         <div className="messages-container">
-          {messages.length === 0 ? (
+          {loadingMessages ? (
             <Spin spinning={true} tip="Đang tải tin nhắn...">
               <div style={{ height: "100%" }}></div>
             </Spin>
