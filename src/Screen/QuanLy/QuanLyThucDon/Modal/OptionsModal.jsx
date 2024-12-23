@@ -1,6 +1,17 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, Button, Select, List, Row, Col } from "antd";
-import { Upload, message } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Select,
+  List,
+  Row,
+  Col,
+  Upload,
+  message,
+  Popconfirm,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,26 +41,32 @@ const OptionsModal = ({ visible, onClose }) => {
     try {
       const formData = new FormData();
 
-      // Thêm các trường thông tin nhân viên vào formData
+      // Thêm các trường thông tin món ăn vào formData
       formData.append("tenMon", values.tenMon);
       formData.append("giaMonAn", values.giaMonAn);
       formData.append("moTa", values.moTa);
-      formData.append("id_danhMuc", values.danhMuc); // ID nhà hàng cố định
+      formData.append("id_danhMuc", values.danhMuc);
 
       // Thêm file ảnh vào formData
-      if (values.anhMonAn && values.anhMonAn.file) {
-        formData.append("anhMonAn", values.anhMonAn.fileList[0].originFileObj);
+      if (values.anhMonAn && values.anhMonAn.length > 0) {
+        formData.append("anhMonAn", values.anhMonAn[0].originFileObj);
       } else {
         message.error("Vui lòng chọn hình ảnh hợp lệ!");
         return;
       }
+
       // Gửi yêu cầu tới API
-      await axios.post(`${ipAddress}themMonAn`, formData);
+      await axios.post(`${ipAddress}themMonAn`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       message.success("Thêm món ăn thành công!");
       dispatch(fetchDanhMucVaMonAn(id_nhaHang));
       form.resetFields();
       onClose();
     } catch (error) {
+      console.error("Error adding dish:", error);
       message.error("Thêm món ăn thất bại, vui lòng thử lại.");
     }
   };
@@ -65,6 +82,7 @@ const OptionsModal = ({ visible, onClose }) => {
       form.resetFields();
       onClose();
     } catch (error) {
+      console.error("Error adding category:", error);
       message.error("Thêm danh mục thất bại, vui lòng thử lại.");
     }
   };
@@ -94,19 +112,20 @@ const OptionsModal = ({ visible, onClose }) => {
 
   const xoaDanhMuc = async (id) => {
     try {
-      console.log(id);
-      
-      // Gửi yêu cầu xóa danh mục từ API
       await axios.delete(`${ipAddress}xoaDanhMuc/${id}`, {
-        id_nhaHang: id_nhaHang,
+        data: { id_nhaHang: id_nhaHang },
       });
 
-      // Sau khi xóa thành công, fetch lại danh mục
-      dispatch(fetchDanhMucVaMonAn(id_nhaHang)); // Cập nhật lại danh mục
+      dispatch(fetchDanhMucVaMonAn(id_nhaHang));
       message.success("Xóa danh mục thành công!");
     } catch (error) {
       console.error("Error deleting category:", error);
-      message.error("Xóa danh mục thất bại!");
+
+      if (error.response && error.response.data && error.response.data.msg) {
+        message.error(`Xóa danh mục thất bại: ${error.response.data.msg}`);
+      } else {
+        message.error("Xóa danh mục thất bại!");
+      }
     }
   };
 
@@ -132,7 +151,6 @@ const OptionsModal = ({ visible, onClose }) => {
             </Form.Item>
           </Col>
 
-          {/* Cột bên phải: Các trường nhập liệu */}
           <Col span={16}>
             <Form.Item
               name="danhMuc"
@@ -210,21 +228,25 @@ const OptionsModal = ({ visible, onClose }) => {
             // Nút "Sửa"
             <Button
               type="link"
-              style={{padding: "0", color: "blue"}} 
-              onClick={() => setEditingCategory(item._id)} 
+              style={{ padding: "0", color: "blue" }}
+              onClick={() => setEditingCategory(item._id)}
             >
               Sửa
             </Button>,
 
-            <span style={{ margin: "0" }}>|</span>,
+            <span style={{ margin: "0 8px" }}>|</span>, // Thêm khoảng cách giữa các nút
 
-            <Button
-              type="link"
-              style={{ color: "red", padding: 0 }} 
-              onClick={() => xoaDanhMuc(item._id)} 
+            // Nút "Xóa" với Popconfirm
+            <Popconfirm
+              title="Bạn có chắc chắn muốn xóa danh mục này không?"
+              onConfirm={() => xoaDanhMuc(item._id)}
+              okText="Đồng ý"
+              cancelText="Hủy"
             >
-              Xóa
-            </Button>,
+              <Button type="link" style={{ color: "red", padding: 0 }}>
+                Xóa
+              </Button>
+            </Popconfirm>,
           ]}
         >
           {editingCategory === item._id ? (

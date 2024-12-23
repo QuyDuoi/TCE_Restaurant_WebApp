@@ -1,106 +1,249 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Select, Switch, Spin } from 'antd';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Upload,
+  message,
+  Select,
+  Switch,
+  Spin,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { ipAddress } from "../../../../services/api.ts";
+import { useSelector } from "react-redux";
+import "./EditEmployeeModal.css"; // Ensure this path is correct
 
 const { Option } = Select;
 
-const EditModal = ({ visible, onClose, employee, onSave }) => {
-    const [form] = Form.useForm();
-    const [loading,setLoading] = useState(false);
-    const handleFinish = async (values) => {
-        setLoading(true);
-        try {
-            // Gửi PUT request để cập nhật thông tin nhân viên
-            await axios.put(`https://tce-restaurant-api.onrender.com/api/capNhatNhanVien/${employee._id}`, values);
-            onSave(); // Gọi hàm onSave để cập nhật danh sách nhân viên
-            form.resetFields(); // Đặt lại form
-        } catch (error) {
-            console.error('Không thể cập nhật nhân viên:', error);
-        }finally{
-            setLoading(false);
-        }
-    };
+const EditEmployeeModal = ({ visible, onClose, employee, onSave }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-    // Cập nhật giá trị của form khi employee thay đổi
-    useEffect(() => {
-        if (employee) {
-            form.setFieldsValue({
-                ...employee,
-                trangThai: employee?.trangThai || false, // Đảm bảo trạng thái có giá trị mặc định
-            });      
-        }
-    }, [employee, form]);
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang._id;
 
-    return (
-       <> {loading && (
-        <div style={{
+  const normFile = (e) => {
+    console.log("Upload event:", e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
+
+  const handleFinish = async (values) => {
+    setLoading(true);
+    const formData = new FormData();
+
+    // Append employee information to formData
+    formData.append("hoTen", values.hoTen);
+    formData.append("soDienThoai", values.soDienThoai);
+    formData.append("cccd", values.cccd);
+    formData.append("vaiTro", values.vaiTro);
+    formData.append("trangThai", values.trangThai);
+    formData.append("id_nhaHang", id_nhaHang);
+
+    // Append image file if provided
+    if (values.hinhAnh && values.hinhAnh.length > 0) {
+      formData.append("hinhAnh", values.hinhAnh[0].originFileObj);
+    }
+
+    try {
+      // Send PUT request to update employee
+      const response = await axios.put(
+        `${ipAddress}capNhatNhanVien/${employee._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 204) {
+        message.success("Cập nhật nhân viên thành công!");
+        form.resetFields();
+        onSave(); // Refresh employee list in parent component
+        onClose(); // Close the modal
+      } else {
+        message.error("Đã xảy ra lỗi khi cập nhật nhân viên!");
+      }
+    } catch (error) {
+      console.error("Không thể cập nhật nhân viên:", error);
+      message.error("Không thể cập nhật nhân viên, vui lòng thử lại!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageChange = (info) => {
+    if (info.file.status === "removed") {
+      message.info("Đã xóa ảnh.");
+    } else if (info.file.status === "done" || info.file.status === "uploading") {
+      message.success("Chọn ảnh thành công!");
+    }
+  };
+
+  useEffect(() => {
+    if (employee) {
+      form.setFieldsValue({
+        hoTen: employee.hoTen,
+        soDienThoai: employee.soDienThoai,
+        cccd: employee.cccd,
+        vaiTro: employee.vaiTro,
+        trangThai: employee.trangThai,
+        hinhAnh: employee.hinhAnh
+          ? [
+              {
+                uid: "-1",
+                name: "image.png",
+                status: "done",
+                url: employee.hinhAnh, // Assuming hinhAnh contains the URL
+              },
+            ]
+          : [],
+      });
+    }
+  }, [employee, form]);
+
+  return (
+    <>
+      {loading && (
+        <div
+          style={{
             position: "fixed",
-            top: "0",
-            left: "0",
-            right: "0",
-            bottom: "0",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             zIndex: "9999",
-        }}>
-            <Spin size="large" style={{ color: 'white' }} />
-        </div>
-    )}
-       
-       <Modal
-            title="Chỉnh sửa nhân viên"
-            width={350}
-            visible={visible}
-            onCancel={() => {
-                onClose();
-            }}
-            footer={null}
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
         >
-            <Form
-                form={form}
-                onFinish={handleFinish}
+          <Spin size="large" style={{ color: "white" }} />
+        </div>
+      )}
+      <Modal
+        title="Cập nhật thông tin nhân viên"
+        visible={visible}
+        onCancel={onClose}
+        footer={null}
+        centered
+        destroyOnClose
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          validateMessages={{
+            required: "${label} là bắt buộc!",
+          }}
+          className="edit-employee-form" // Apply custom class
+        >
+          {/* Họ Tên */}
+          <Form.Item
+            name="hoTen"
+            label="Họ Tên"
+            rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+          >
+            <Input placeholder="Nhập họ tên" />
+          </Form.Item>
+
+          {/* Số Điện Thoại */}
+          <Form.Item
+            name="soDienThoai"
+            label="Số Điện Thoại"
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+              {
+                pattern: /^(03|05|07|08|09)\d{8}$/,
+                message:
+                  "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam)!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập số điện thoại" />
+          </Form.Item>
+
+          {/* Số CCCD */}
+          <Form.Item
+            name="cccd"
+            label="Số CCCD"
+            rules={[
+              { required: true, message: "Vui lòng nhập số CCCD!" },
+              {
+                pattern: /^[0-9]{12}$/,
+                message: "Số CCCD phải có 12 chữ số!",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập số CCCD" />
+          </Form.Item>
+
+          {/* Vai Trò */}
+          <Form.Item
+            name="vaiTro"
+            label="Vai Trò"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+          >
+            <Select placeholder="Chọn vai trò">
+              <Option value="Quản lý">Quản lý</Option>
+              <Option value="Nhân viên thu ngân">Nhân viên thu ngân</Option>
+              <Option value="Nhân viên phục vụ">Nhân viên phục vụ</Option>
+              <Option value="Đầu bếp">Đầu bếp</Option>
+            </Select>
+          </Form.Item>
+
+          {/* Hình Ảnh */}
+          <Form.Item
+            name="hinhAnh"
+            label="Hình Ảnh"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+            rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
+          >
+            <Upload
+              name="file"
+              maxCount={1}
+              listType="picture"
+              accept=".png,.jpg,.jpeg"
+              beforeUpload={() => false}
+              onChange={handleImageChange}
+              onRemove={() => message.info("Đã xóa ảnh.")}
             >
-                <Form.Item 
-                    style={{marginTop:20}}
-                    name="hoTen" 
-                    label="Họ tên" 
-                    rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
-                >
-                    <Input />
-                </Form.Item>
-                <Form.Item 
-                    name="vaiTro" 
-                    label="Chức vụ" 
-                    rules={[{ required: true, message: 'Vui lòng chọn chức vụ!' }]}
-                >
-                    <Select placeholder="Chọn chức vụ">
-                        <Option value="Quản lý">Quản lý</Option>
-                        <Option value="Nhân viên thu ngân">Nhân viên thu ngân</Option>
-                        <Option value="Nhân viên phục vụ">Nhân viên phục vụ</Option>
-                        <Option value="Đầu bếp">Đầu bếp</Option>
-                    </Select>
-                </Form.Item>
-                <Form.Item 
-                    name="trangThai" 
-                    label="Trạng thái"
-                    valuePropName="checked"
-                >
-                    <Switch 
-                        checkedChildren="Hoạt động" 
-                        unCheckedChildren="Ngừng hoạt động" 
-                    />
-                </Form.Item>
-               <div style={{display:'flex',justifyContent:'center'}}>
-               <Form.Item>
-                    <Button type="primary" htmlType="submit">Lưu</Button>
-                </Form.Item>
-               </div>
-            </Form>
-        </Modal>
-        </>
-    );
+              <Button icon={<UploadOutlined />}>Chọn Hình Ảnh</Button>
+            </Upload>
+          </Form.Item>
+
+          {/* Trạng Thái */}
+          <Form.Item
+            name="trangThai"
+            label="Trạng Thái"
+            valuePropName="checked"
+          >
+            <Switch
+              checkedChildren="Hoạt động"
+              unCheckedChildren="Ngừng hoạt động"
+            />
+          </Form.Item>
+
+          {/* Submit Button */}
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Lưu thông tin
+              </Button>
+            </Form.Item>
+          </div>
+        </Form>
+      </Modal>
+    </>
+  );
 };
 
-export default EditModal;
+export default EditEmployeeModal;

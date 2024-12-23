@@ -1,0 +1,19 @@
+.edit-employee-form .ant-form-item {
+    margin-bottom: 8px; /* Reduce spacing between form items */
+  }
+  
+  /* Optionally, remove margin for the last Form.Item */
+  .edit-employee-form .ant-form-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Optional: Adjust labels' width or other styles */
+  .edit-employee-form .ant-form-item-label > label {
+    font-weight: 600; /* Make labels bold */
+  }
+  
+  /* Optional: Adjust input sizes */
+  .edit-employee-form .ant-input,
+  .edit-employee-form .ant-select-selector {
+    height: 40px; /* Increase input height */
+  }

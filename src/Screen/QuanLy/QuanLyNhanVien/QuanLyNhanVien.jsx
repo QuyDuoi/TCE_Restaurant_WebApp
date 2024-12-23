@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Layout, Row, Col, Card, Dropdown, Menu, Button, Spin } from "antd";
+import {
+  Layout,
+  Row,
+  Col,
+  Card,
+  Dropdown,
+  Menu,
+  Button,
+  Spin,
+  message,
+} from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import HeaderBar from "./Component/HeaderBar";
 import EmployeeCard from "./Component/EmployeeCard";
@@ -8,7 +18,6 @@ import EmployeeFilter from "./Component/EmployeeFilter";
 import DeleteEmployeeModal from "./Modal/DeleteEmployeeModal";
 import DetailEmployeeModal from "./Modal/DetailEmployeeModal";
 import EditEmployeeModal from "./Modal/EditEmployeeModal";
-import NotificationModal from "./Modal/NotificationModal";
 import { ipAddress } from "../../../services/api.ts";
 import { useSelector } from "react-redux";
 
@@ -17,48 +26,44 @@ const { Content } = Layout;
 const QuanLyNhanVien = () => {
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [nhanVien, setNhanVien] = useState([]);
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [loading2, setLoading2] = useState(false);
-  const [loading3, setLoading3] = useState(false);
+  const [loading, setLoading] = useState(true); // Manages initial data fetch loading
   const [selectedEmployee, setSelectedEmployee] = useState({});
   const [isDetailModalVisible, setDetailModalVisible] = useState(false);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [notificationVisible, setNotificationVisible] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
+
   const user = useSelector((state) => state.user);
   const id_nhaHang = user.id_nhaHang._id;
 
-  const fetchEmployees = async () => {
-    setLoading2(true);
+  const fetchEmployees = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const response = await axios.get(
         `${ipAddress}layDsNhanVien?id_nhaHang=${id_nhaHang}`
       );
       setNhanVien(response.data);
-      setFilteredEmployees(response.data); // Khởi tạo danh sách nhân viên đã lọc
+      setFilteredEmployees(response.data); // Initialize filtered employees
     } catch (error) {
       console.error("Không thể lấy dữ liệu nhân viên:", error);
+      message.error("Không thể lấy dữ liệu nhân viên!");
     } finally {
-      setLoading(false); // Kết thúc trạng thái tải
-      setLoading2(false); // Kết thúc trạng thái tải
+      if (showLoading) setLoading(false);
     }
   };
-  // Lấy dữ liệu nhân viên từ API
+
+  // Fetch employees on component mount
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  //hàm xử lý bỏ dấu
   const removeDiacritics = (str) => {
     return str
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Loại bỏ dấu
-      .replace(/đ/g, "d") // Thay thế chữ "đ" thành "d"
-      .replace(/Đ/g, "D"); // Thay thế chữ "Đ" thành "D"
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/đ/g, "d") // Replace 'đ' with 'd'
+      .replace(/Đ/g, "D"); // Replace 'Đ' with 'D'
   };
 
-  //hàm search nhân viên không dấu
   const handleSearch = (value) => {
     const normalizedSearch = removeDiacritics(value.trim().toLowerCase());
     if (normalizedSearch) {
@@ -84,41 +89,31 @@ const QuanLyNhanVien = () => {
   };
 
   const handleDelete = async () => {
-    setLoading2(true);
-    setLoading3(true);
     if (!selectedEmployee) {
-      console.error("Không có nhân viên nào được chọn để xóa");
+      message.error("Không có nhân viên nào được chọn để xóa!");
       return;
     }
     try {
       await axios.delete(`${ipAddress}xoaNhanVien/${selectedEmployee._id}`);
-      fetchEmployees(); // Refresh danh sách nhân viên
+      await fetchEmployees(false); // Refresh employee list without showing loading
       setDeleteModalVisible(false);
-      // Hiển thị thông báo xóa thành công
-      setNotificationMessage("Xóa nhân viên thành công!");
-      setNotificationVisible(true);
-      setLoading2(false);
+      message.success("Xóa nhân viên thành công!");
     } catch (error) {
       console.error("Không thể xóa nhân viên:", error);
-    } finally {
-      setLoading2(false);
-      setLoading3(false);
+      message.error("Không thể xóa nhân viên, vui lòng thử lại!");
     }
   };
-  const handleEdit = () => {
-    setLoading2(true);
+
+  const handleEdit = async () => {
     try {
-      fetchEmployees();
+      await fetchEmployees(false);
       setEditModalVisible(false);
-      setNotificationMessage("Sửa nhân viên thành công!");
-      setNotificationVisible(true);
-      setLoading2(false);
     } catch (error) {
       console.error("Không thể sửa nhân viên:", error);
-    } finally {
-      setLoading2(false);
+      message.error("Không thể sửa nhân viên, vui lòng thử lại!");
     }
   };
+
   const menu = (employee) => (
     <Menu onClick={({ key }) => handleMenuClick(key, employee)}>
       <Menu.Item key="1">Chi tiết</Menu.Item>
@@ -127,7 +122,6 @@ const QuanLyNhanVien = () => {
     </Menu>
   );
 
-  // Hiển thị trạng thái đang tải
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "20px" }}>
@@ -139,7 +133,12 @@ const QuanLyNhanVien = () => {
 
   return (
     <Layout style={{ flex: 1 }}>
-      <HeaderBar onSearch={handleSearch} onRefresh={fetchEmployees} />
+
+      <HeaderBar
+        onSearch={handleSearch}
+        onRefresh={() => fetchEmployees(false)}
+      />
+
       <Content
         style={{
           padding: "16px",
@@ -149,12 +148,14 @@ const QuanLyNhanVien = () => {
           overflowY: "auto",
         }}
       >
+
         <Card style={{ marginBottom: "16px", padding: "0px" }}>
           <EmployeeFilter
             employees={nhanVien}
             setFilteredEmployees={setFilteredEmployees}
           />
         </Card>
+
         <div
           style={{
             maxHeight: "100vh",
@@ -162,45 +163,39 @@ const QuanLyNhanVien = () => {
             overflowX: "hidden",
           }}
         >
-          {loading2 ? (
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              Đang tải dữ liệu...
-            </div>
-          ) : (
-            <Row gutter={[16, 16]} justify="start" style={{ height: "75vh" }}>
-              {filteredEmployees.map((nv, index) => (
-                <Col key={index} xs={24} sm={12} md={8} lg={6}>
-                  <div
-                    style={{
-                      position: "relative",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                      padding: "0px",
-                      margin: "0px",
-                    }}
-                  >
-                    <EmployeeCard
-                      hoTen={nv.hoTen}
-                      vaiTro={nv.vaiTro}
-                      trangThai={nv.trangThai}
-                      hinhAnh={nv.hinhAnh}
+          <Row gutter={[16, 16]} justify="start">
+            {filteredEmployees.map((nv) => (
+              <Col key={nv._id} xs={24} sm={12} md={8} lg={6}>
+                <div
+                  style={{
+                    position: "relative",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    padding: "0px",
+                    margin: "0px",
+                  }}
+                >
+                  <EmployeeCard
+                    hoTen={nv.hoTen}
+                    vaiTro={nv.vaiTro}
+                    trangThai={nv.trangThai}
+                    hinhAnh={nv.hinhAnh}
+                  />
+                  <Dropdown overlay={menu(nv)} trigger={["click"]}>
+                    <Button
+                      icon={<SettingOutlined />}
+                      style={{
+                        position: "absolute",
+                        bottom: "8px",
+                        right: "8px",
+                        border: "none",
+                        background: "transparent",
+                      }}
                     />
-                    <Dropdown overlay={menu(nv)} trigger={["click"]}>
-                      <Button
-                        icon={<SettingOutlined />}
-                        style={{
-                          position: "absolute",
-                          bottom: "8px",
-                          right: "8px",
-                          border: "none",
-                          background: "transparent",
-                        }}
-                      />
-                    </Dropdown>
-                  </div>
-                </Col>
-              ))}
-            </Row>
-          )}
+                  </Dropdown>
+                </div>
+              </Col>
+            ))}
+          </Row>
         </div>
       </Content>
 
@@ -212,20 +207,15 @@ const QuanLyNhanVien = () => {
 
       <EditEmployeeModal
         visible={isEditModalVisible}
-        onClose={() => setEditModalVisible(false)} // Giữ selectedEmployee không thay đổi
-        employee={selectedEmployee} // Đảm bảo truyền selectedEmployee vào
-        onSave={() => handleEdit()}
+        onClose={() => setEditModalVisible(false)}
+        employee={selectedEmployee}
+        onSave={handleEdit}
       />
+
       <DeleteEmployeeModal
         visible={isDeleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
-        onLoading={loading3}
         onDelete={handleDelete}
-      />
-      <NotificationModal
-        notificationMessage={notificationMessage}
-        notificationVisible={notificationVisible}
-        setNotificationVisible={() => setNotificationVisible()}
       />
     </Layout>
   );

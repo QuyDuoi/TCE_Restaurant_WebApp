@@ -7,7 +7,6 @@ import {
   Upload,
   message,
   Select,
-  Switch,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { Option } from "antd/es/mentions";
