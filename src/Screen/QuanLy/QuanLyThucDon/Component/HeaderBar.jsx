@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Input, Button, Row, Col } from "antd";
 import OptionsModal from "../Modal/OptionsModal";
+import { SearchOutlined } from "@ant-design/icons";
 
 const HeaderBar = ({ onSearch }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -45,8 +46,9 @@ const HeaderBar = ({ onSearch }) => {
             value={searchTerm} // Set value to controlled component
             placeholder="Tìm kiếm món ăn"
             style={{ width: "60%", marginRight: "16px" }}
-            onChange={handleSearchChange} 
+            onChange={handleSearchChange}
             allowClear
+            prefix={<SearchOutlined style={{ color: "rgba(0,0,0,.25)" }} />} // Added Search Icon
           />
           <Button
             type="primary"

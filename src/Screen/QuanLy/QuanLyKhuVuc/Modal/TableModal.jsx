@@ -13,58 +13,100 @@ import InvoiceDetails from "./InvoiceDetails";
 import BookedTableDetails from "./BookedTableDetails";
 import CancelBookingForm from "./CancelBookingForm";
 
-const TableModal = ({ table,area, isVisible, onClose,onLoading, onUpdateStatus, hoaDonData}) => {
-  const [activeOption, setActiveOption] = useState("Đặt bàn"); // Lựa chọn hiện tại
+const TableModal = ({
+  table,
+  area,
+  isVisible,
+  onClose,
+  onLoading,
+  onUpdateStatus,
+  thongTinHoaDons,
+}) => {
+  const [activeOption, setActiveOption] = useState("Đặt bàn"); // Current selection
+  const [hoaDonData, setHoaDonData] = useState({}); // Manage hoaDonData state
 
-  // Reset trạng thái khi `table` thay đổi hoặc khi modal được mở
-useEffect(() => {
-  if (table) {
-    if (table.trangThai === "Trống") {
-      setActiveOption("Đặt bàn");
-    } else if (table.trangThai === "Đã đặt") {
-      setActiveOption("Tạo hóa đơn");
-    } else if (table.trangThai === "Đang sử dụng") {
-      setActiveOption("Xem thông tin hóa đơn");
+  // Reset state when `table` changes or modal is opened
+  useEffect(() => {
+    if (table) {
+      if (table.trangThai === "Trống") {
+        setActiveOption("Đặt bàn");
+      } else if (table.trangThai === "Đã đặt") {
+        setActiveOption("Tạo hóa đơn");
+      } else if (table.trangThai === "Đang sử dụng") {
+        setActiveOption("Xem thông tin hóa đơn");
+      }
     }
-  }
-}, [table, isVisible]);
+    const hoaDonBan = Array.isArray(thongTinHoaDons)
+      ? thongTinHoaDons.find((hoaDon) => hoaDon.id_ban === table._id)
+      : undefined;
+    setHoaDonData(hoaDonBan);
+  }, [table, isVisible, thongTinHoaDons]);
 
-
-  // Kiểm tra trạng thái bàn và vô hiệu hóa các nút
+  // Disable buttons based on table status
   const isButtonDisabled = (action) => {
     if (table.trangThai === "Trống") {
-      // Nếu bàn trống
-      return ["Xem thông tin hóa đơn", "Xem thông tin bàn đặt", "Hủy đặt bàn"].includes(action);
+      return [
+        "Xem thông tin hóa đơn",
+        "Xem thông tin bàn đặt",
+        "Hủy đặt bàn",
+      ].includes(action);
     } else if (table.trangThai === "Đã đặt") {
-      // Nếu bàn đã đặt
       return ["Đặt bàn", "Xem thông tin hóa đơn"].includes(action);
     } else if (table.trangThai === "Đang sử dụng") {
-      // Nếu bàn đang sử dụng
-      return ["Đặt bàn", "Tạo hóa đơn", "Xem thông tin bàn đặt", "Hủy đặt bàn"].includes(action);
+      return [
+        "Đặt bàn",
+        "Tạo hóa đơn",
+        "Xem thông tin bàn đặt",
+        "Hủy đặt bàn",
+      ].includes(action);
     }
-    return false; // Mặc định không vô hiệu hóa
+    return false; // Default not disabled
+  };
+
+  // Handler to receive new hoaDonData and switch to InvoiceDetails
+  const handleCreateInvoice = (newHoaDonData) => {
+    setHoaDonData(newHoaDonData);
+    setActiveOption("Xem thông tin hóa đơn");
   };
 
   const renderContent = () => {
+    if (!table) return null; // Avoid errors if no table data
 
-    if (!table) return null; // Tránh lỗi nếu không có dữ liệu bàn
-    if (activeOption === "Đặt bàn") {
-        return <BookingForm table={table} area={area} onSave={onClose} onLoading={onLoading} onUpdateStatus={onUpdateStatus} />;
-    } else if (activeOption === "Tạo hóa đơn") {
-        return <InvoiceForm table={table} area={area} onSave={onClose} onLoading={onLoading} onUpdateStatus={onUpdateStatus} />;
-    } else if (activeOption === "Xem thông tin hóa đơn") {
+    switch (activeOption) {
+      case "Đặt bàn":
         return (
-            <InvoiceDetails
+          <BookingForm
+            table={table}
+            area={area}
+            onSave={onClose}
+            onLoading={onLoading}
+            onUpdateStatus={onUpdateStatus}
+          />
+        );
+      case "Tạo hóa đơn":
+        return (
+          <InvoiceForm
+            table={table}
+            area={area}
+            onCreateInvoice={handleCreateInvoice}
+            onLoading={onLoading}
+            onUpdateStatus={onUpdateStatus}
+          />
+        );
+      case "Xem thông tin hóa đơn":
+        return (
+          <InvoiceDetails
             table={table}
             area={area}
             hoaDonData={hoaDonData}
             onClose={onClose}
           />
         );
-    } else if (activeOption === "Xem thông tin bàn đặt") {
-        return <BookedTableDetails table={table} area={area} onClose={onClose} />;
-      }
-      else if (activeOption === "Hủy đặt bàn") {
+      case "Xem thông tin bàn đặt":
+        return (
+          <BookedTableDetails table={table} area={area} onClose={onClose} />
+        );
+      case "Hủy đặt bàn":
         return (
           <CancelBookingForm
             table={table}
@@ -74,13 +116,14 @@ useEffect(() => {
             onUpdateStatus={onUpdateStatus}
           />
         );
+      default:
+        return null;
     }
-    return null;
   };
 
   return (
     <Modal
-      visible={isVisible}
+      open={isVisible}
       onCancel={onClose}
       footer={null}
       width="70%"
@@ -97,7 +140,7 @@ useEffect(() => {
         padding: "6px",
       }}
     >
-      {/* Lựa chọn bên trái */}
+      {/* Left Options */}
       <div
         style={{
           width: "30%",
@@ -144,7 +187,9 @@ useEffect(() => {
         </Button>
         <Button
           block
-          type={activeOption === "Xem thông tin hóa đơn" ? "primary" : "default"}
+          type={
+            activeOption === "Xem thông tin hóa đơn" ? "primary" : "default"
+          }
           icon={<FileSearchOutlined />}
           onClick={() => setActiveOption("Xem thông tin hóa đơn")}
           disabled={isButtonDisabled("Xem thông tin hóa đơn")}
@@ -160,7 +205,9 @@ useEffect(() => {
         </Button>
         <Button
           block
-          type={activeOption === "Xem thông tin bàn đặt" ? "primary" : "default"}
+          type={
+            activeOption === "Xem thông tin bàn đặt" ? "primary" : "default"
+          }
           icon={<InfoCircleOutlined />}
           onClick={() => setActiveOption("Xem thông tin bàn đặt")}
           disabled={isButtonDisabled("Xem thông tin bàn đặt")}
@@ -192,7 +239,7 @@ useEffect(() => {
         </Button>
       </div>
 
-      {/* Nội dung bên phải */}
+      {/* Right Content */}
       <div
         style={{
           width: "70%",

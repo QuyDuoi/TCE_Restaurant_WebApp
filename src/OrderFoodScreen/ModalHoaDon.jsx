@@ -94,7 +94,7 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
       dataIndex: "giaTien",
       key: "giaTien",
       align: "right",
-      render: (giaTien) => giaTien.toLocaleString("vi-VN"),
+      render: (giaTien) => `${giaTien.toLocaleString("vi-VN")} đ`,
     },
   ];
 

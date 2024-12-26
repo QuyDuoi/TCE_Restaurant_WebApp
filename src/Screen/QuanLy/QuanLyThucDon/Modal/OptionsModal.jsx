@@ -48,8 +48,8 @@ const OptionsModal = ({ visible, onClose }) => {
       formData.append("id_danhMuc", values.danhMuc);
 
       // Thêm file ảnh vào formData
-      if (values.anhMonAn && values.anhMonAn.length > 0) {
-        formData.append("anhMonAn", values.anhMonAn[0].originFileObj);
+      if (values.anhMonAn && values.anhMonAn.file) {
+        formData.append("anhMonAn", values.anhMonAn.fileList[0].originFileObj);
       } else {
         message.error("Vui lòng chọn hình ảnh hợp lệ!");
         return;
@@ -67,7 +67,7 @@ const OptionsModal = ({ visible, onClose }) => {
       onClose();
     } catch (error) {
       console.error("Error adding dish:", error);
-      message.error("Thêm món ăn thất bại, vui lòng thử lại.");
+      message.error(error.response.data.msg);
     }
   };
 

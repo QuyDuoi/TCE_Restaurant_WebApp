@@ -1,83 +1,105 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Form, DatePicker, TimePicker, message, Spin } from "antd";
-import moment from "moment"; // Thư viện để xử lý thời gian
+import {
+  Button,
+  Input,
+  Form,
+  DatePicker,
+  TimePicker,
+  message,
+  Spin,
+} from "antd";
+import moment from "moment"; // Library for handling time
 import { useDispatch, useSelector } from "react-redux";
 import { themHoaDonMoi } from "../../../../store/Thunks/hoaDonThunks.ts";
 import { resetStatus } from "../../../../store/Slices/BanSlice.ts";
 
-const InvoiceForm = ({ table, area, onSave, onLoading, onUpdateStatus }) => {
-
+const InvoiceForm = ({
+  table,
+  area,
+  onCreateInvoice,
+  onLoading,
+  onUpdateStatus,
+}) => {
   const dispatch = useDispatch();
-  const [form] = Form.useForm(); // Sử dụng form của Ant Design
+  const [form] = Form.useForm(); // Use Ant Design form
   const selectedArea = area.filter((item) => item._id === table.id_khuVuc);
-  const [loading, setLoading] = useState(false); // Thêm trạng thái loading
+  const [loading, setLoading] = useState(false); // Add loading state
   const status = useSelector((state) => state.hoaDon.status);
-  // State cho ngày giờ hiện tại
-  const [currentDate, setCurrentDate] = useState(moment()); // Ngày giờ hiện tại
-
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang?._id;
+  const id_nhanVien = user._id;
 
   useEffect(() => {
-    // Cập nhật ngày giờ hiện tại khi form mở
-    setCurrentDate(moment());
+    // Update current date and time when form opens
     form.resetFields();
     form.setFieldsValue({
-      ngayDat: moment(),
-      gioDat: moment(),
+      ngayTao: moment(),
+      gioTao: moment(),
     });
   }, [table, form]);
 
-  //id fix cung:
-  const id_nhanVien = '67060ef797bc70ba1d9222ab'
-  const id_nhaHang = '66fab50fa28ec489c7137537'
   const handleFinish = async (values) => {
     setLoading(true);
-    // Chuẩn bị dữ liệu gửi đi
+    // Prepare data to post
     const dataToPost = {
-      thoiGianVao: moment(values.ngayDat.format("DD/MM/YYYY") + ' ' + values.gioDat.format("HH:mm")).toISOString(),
+      thoiGianVao: new Date(),
       id_ban: table._id,
       id_nhaHang: id_nhaHang,
       id_nhanVien: id_nhanVien,
     };
 
-    // Gửi dữ liệu lên Redux
-    await dispatch(themHoaDonMoi(dataToPost));
+    try {
+      const response = await dispatch(themHoaDonMoi(dataToPost)).unwrap();
 
-    setLoading(false);
-
-    // Kiểm tra trạng thái và hiển thị thông báo
-    if (status === "succeeded") {
+      setLoading(false);
       message.success("Thêm hóa đơn thành công!");
       dispatch(resetStatus());
       form.resetFields();
-      // Đóng modal sau khi thành công
-      onSave();
+
+      // Gửi dữ liệu về Modal bàn để truyền vào thông tin hóa đơn
+      onCreateInvoice(response);
+
+      // Optionally handle loading state
       onLoading();
-    } else if (status === "failed") {
-      message.error("Có lỗi xảy ra, vui lòng thử lại.");
+    } catch (error) {
+      message.error(error);
+      setLoading(false);
     }
   };
-
 
   return (
     <>
       {loading && (
-        <div style={{
-          position: "fixed",
-          top: "0",
-          left: "0",
-          right: "0",
-          bottom: "0",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: "9999",
-        }}>
-          <Spin size="large" style={{ color: 'white' }} />
+        <div
+          style={{
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            bottom: "0",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: "9999",
+          }}
+        >
+          <Spin size="large" style={{ color: "white" }} />
         </div>
       )}
-      <div style={{ padding: "16px" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "24px" }}>Tạo hóa đơn</h2>
+      <div
+        style={{
+          padding: "16px",
+          maxWidth: "500px", // Limit form width
+          margin: "0 auto", // Center
+          backgroundColor: "#fff", // White background for prominence
+          borderRadius: "8px", // Rounded corners
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)", // Add shadow effect
+        }}
+      >
+        <h2 style={{ textAlign: "center", marginBottom: "24px" }}>
+          Tạo hóa đơn
+        </h2>
         <Form
           form={form}
           layout="vertical"
@@ -88,7 +110,7 @@ const InvoiceForm = ({ table, area, onSave, onLoading, onUpdateStatus }) => {
             gioDat: moment(),
           }}
         >
-          {/* Vị trí bàn */}
+          {/* Table Position */}
           <Form.Item
             label="Vị trí bàn"
             name="viTriBan"
@@ -97,43 +119,46 @@ const InvoiceForm = ({ table, area, onSave, onLoading, onUpdateStatus }) => {
             <Input disabled />
           </Form.Item>
 
-          {/* Ngày đặt bàn */}
+          {/* Creation Date */}
           <Form.Item
-            label="Ngày đặt bàn"
-            name="ngayDat"
+            label="Ngày tạo"
+            name="ngayTao"
             rules={[{ required: true, message: "Vui lòng chọn ngày đặt!" }]}
           >
-            <DatePicker disabled style={{ width: "100%" }} format="DD/MM/YYYY" />
+            <DatePicker
+              disabled
+              style={{ width: "100%" }}
+              format="DD/MM/YYYY"
+            />
           </Form.Item>
 
-          {/* Giờ đặt bàn */}
+          {/* Creation Time */}
           <Form.Item
-            label="Giờ đặt bàn"
-            name="gioDat"
+            label="Thời gian tạo"
+            name="gioTao"
             rules={[{ required: true, message: "Vui lòng chọn giờ đặt!" }]}
           >
             <TimePicker disabled style={{ width: "100%" }} format="HH:mm" />
           </Form.Item>
 
-          {/* Nút Lưu */}
+          {/* Save Button */}
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               style={{
-                width: "100%",
+                width: "100%", // Full width
                 marginTop: "16px",
                 backgroundColor: "#4CAF50",
                 borderColor: "#4CAF50",
               }}
             >
-              Lưu
+              Lưu thông tin
             </Button>
           </Form.Item>
         </Form>
       </div>
     </>
-
   );
 };
 

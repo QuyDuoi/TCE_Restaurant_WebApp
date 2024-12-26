@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import {
     getListHoaDonTheoCaLam,
-    getListHoaDonTheoNhaHang,
     thanhToanHoaDon,
 } from '../../services/CallApi/CallApiHoaDon.ts';
-import { themHoaDonMoi } from '../Thunks/hoaDonThunks.ts';
+import { fetchHoaDonTheoNhaHang, themHoaDonMoi } from '../Thunks/hoaDonThunks.ts';
 // Interface định nghĩa cho HoaDon
 export interface HoaDon {
     _id?: string;
@@ -45,20 +44,6 @@ export const fetchHoaDonTheoCaLam = createAsyncThunk(
             return [];
         }
     }
-);
-
-//chua toi uu
-export const fetchHoaDonTheoNhaHang = createAsyncThunk(
-    'hoaDon/fetchHoaDonTheoNhaHang',
-    async (id_nhaHang: string) => {
-        try {
-            const hoaDonsData = await getListHoaDonTheoNhaHang(id_nhaHang);
-            return hoaDonsData;
-        } catch (error) {
-            console.log('Lỗi lấy danh sách hoa đơn:', error);
-            return [];
-        }
-    },
 );
 
 // chua toi uu
@@ -139,7 +124,7 @@ const hoaDonSlice = createSlice({
             })
             .addCase(
                 fetchHoaDonTheoNhaHang.fulfilled,
-                (state, action: PayloadAction<HoaDon[]>) => {
+                (state, action: PayloadAction<HoaDon[]>) => {                    
                     state.status = 'succeeded';
                     state.hoaDons = action.payload;
                 }

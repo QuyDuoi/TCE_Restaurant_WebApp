@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Input, Row, Col } from "antd";
+import { Input, Row, Col, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { useDispatch } from "react-redux";
-import { searchBanThunk } from "../../../../store/Slices/BanSlice.ts";
+import ModalOption from "../Modal/ModalOption/ModalOption";
 
-const HeaderBar = ({onSearch}) => {
+const HeaderBar = ({ onSearch }) => {
   const [searchValue, setSearchValue] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -37,8 +37,19 @@ const HeaderBar = ({onSearch}) => {
             style={{ width: 300 }}
             onChange={(e) => setSearchValue(e.target.value)} // Kích hoạt tìm kiếm khi nhập
           />
+          <Button
+            type="primary"
+            onClick={() => setIsModalVisible(true)}
+            style={{ marginLeft: "10px", width: "100px" }}
+          >
+            Tùy chọn
+          </Button>
         </Col>
       </Row>
+      <ModalOption
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
     </div>
   );
 };

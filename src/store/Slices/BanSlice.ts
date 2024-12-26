@@ -92,17 +92,6 @@ const banSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      // .addCase(fetchBans.pending, state => {
-      //   state.status = 'loading';
-      // })
-      // .addCase(fetchBans.fulfilled, (state, action: PayloadAction<Ban[]>) => {
-      //   state.status = 'succeeded';
-      //   state.bans = action.payload; // Cập nhật danh sách bàn khi fetch thành công
-      // })
-      // .addCase(fetchBans.rejected, (state, action) => {
-      //   state.status = 'failed';
-      //   state.error = action.error.message || 'Could not fetch bàn'; // Lỗi khi fetch thất bại
-      // })
       .addCase(addNewBan.fulfilled, (state, action: PayloadAction<Ban>) => {
         state.bans.unshift(action.payload);
         state.status = 'succeeded';

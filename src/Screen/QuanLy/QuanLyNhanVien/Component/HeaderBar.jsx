@@ -15,7 +15,7 @@ const HeaderBar = ({ onSearch, onRefresh }) => {
     try {
       const response = await axios.post(`${ipAddress}themNhanVien`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -30,7 +30,7 @@ const HeaderBar = ({ onSearch, onRefresh }) => {
       }
     } catch (error) {
       console.error("Error adding employee:", error.message);
-      message.error("Không thể thêm nhân viên, vui lòng thử lại!");
+      message.error(error.response.data.msg);
       setloading(false);
     }
   };
@@ -69,11 +69,11 @@ const HeaderBar = ({ onSearch, onRefresh }) => {
             <h2 style={{ margin: 0, fontSize: "2vw" }}>Quản lý nhân viên</h2>
           </Col>
           <Col style={{ width: "50%" }}>
-          <Input
+            <Input
               placeholder="Tìm kiếm nhân viên"
               style={{ width: "60%", marginRight: "16px" }}
               onChange={(e) => onSearch(e.target.value)}
-              prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} // Added Search Icon
+              prefix={<SearchOutlined style={{ color: "rgba(0,0,0,.25)" }} />} // Added Search Icon
             />
             <Button
               type="primary"

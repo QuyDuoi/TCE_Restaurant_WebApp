@@ -30,8 +30,10 @@ export const addHoaDonMoi = async (formData: HoaDon): Promise<HoaDon> => {
         });
 
         if (!response.ok) {
-            throw new Error('Lỗi khi thêm mới HoaDon');
-        }
+            const error = await response.json();
+            console.log(error.msg);
+            throw new Error(error.msg);
+          }
         const data = await response.json();
         console.log('hoadonAPI',data);
         return data;
@@ -50,6 +52,8 @@ export const getListHoaDonTheoNhaHang = async (
             `${ipAddress}layDsHoaDonTheoNhaHang?id_nhaHang=${id_nhaHang}`,
         );
         const data = await response.json();
+        console.log("Thong tin hoa don", data);
+        
         return data;
     } catch (error) {
         console.log('Lỗi khi lấy danh sách Hóa Đơn: ', error);

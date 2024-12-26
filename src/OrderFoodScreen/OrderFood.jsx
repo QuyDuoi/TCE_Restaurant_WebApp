@@ -119,6 +119,16 @@ const OrderFood = () => {
       setThongTinBan(banResponse.data);
     });
 
+    socket.on("hoanThanhMon", async (data) => {
+      const banResponse = await axios.get(
+        `${ipAddress}layThongTinBanVaHoaDon`,
+        {
+          params: { id_ban: id },
+        }
+      );
+      setThongTinBan(banResponse.data);
+    });
+
     return () => {
       socket.off("huyDatMon");
       socket.off("xacNhanOrder");
