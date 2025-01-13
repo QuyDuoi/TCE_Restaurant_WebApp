@@ -2,9 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Modal, Table, Typography, Button, Spin, Alert } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { ipAddress, ipIO } from "../services/api.ts";
+import { ipAddress } from "../services/api.ts";
 import "./Style/ModalHoaDon.css";
-import { io } from "socket.io-client";
 
 const { Title, Text } = Typography;
 
@@ -48,20 +47,6 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
       setLoading(false);
     }
   }, [visible, thongTinBan, fetchHoaDon]);
-
-  // Setup socket connection and listener
-  useEffect(() => {
-    // Initialize socket connection
-    const socket = io(ipIO);
-
-    socket.on("hoanThanhMon", (data) => {
-      fetchHoaDon();
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   // Định nghĩa cột Table
   const columns = [

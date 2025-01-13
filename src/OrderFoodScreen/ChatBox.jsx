@@ -2,14 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   MessageOutlined,
   SendOutlined,
-  SmileOutlined,
 } from "@ant-design/icons";
 import { Modal, Input, Button, List, Tooltip, Spin } from "antd";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { ipAddress, ipIO } from "../services/api.ts";
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
 
 const { TextArea } = Input;
 
@@ -27,9 +24,6 @@ const ChatBox = ({ id_ban }) => {
   const isDragging = useRef(false);
   const touchStartPosition = useRef({ x: 0, y: 0 });
   const socketRef = useRef(null);
-
-  // Emoji picker visibility
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Ref để cuộn xuống cuối cùng
   const messagesEndRef = useRef(null);
@@ -135,7 +129,6 @@ const ChatBox = ({ id_ban }) => {
 
       setMessages((prev) => [...prev, messageData]);
       setMessage(""); // Clear message input
-      setShowEmojiPicker(false); // Close emoji picker if open
 
       // Refocus vào Input sau khi gửi
       if (inputRef.current) {
@@ -184,22 +177,6 @@ const ChatBox = ({ id_ban }) => {
 
   const handleTouchEnd = () => {
     isDragging.current = false;
-  };
-
-  // Handle emoji selection
-  const addEmoji = (emoji) => {
-    setMessage((prev) => prev + emoji.native);
-    // Refocus vào Input sau khi chọn emoji
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleEmojiToggle = () => {
-    setShowEmojiPicker((prev) => !prev);
-
-    // Focus the input field if emoji picker is toggled and the input exists
-    inputRef.current.focus();
   };
 
   // Add global event listeners for dragging
@@ -389,22 +366,6 @@ const ChatBox = ({ id_ban }) => {
 
         {/* Input Area */}
         <div className="input-area">
-          {/* Emoji Picker */}
-          <div className="emoji-picker">
-            <Tooltip title="Chọn biểu cảm">
-              <Button
-                shape="circle"
-                icon={<SmileOutlined />}
-                onClick={handleEmojiToggle}
-                style={{ marginRight: "8px" }}
-              />
-            </Tooltip>
-            {showEmojiPicker && (
-              <div className="emoji-picker-wrapper">
-                <Picker data={data} onEmojiSelect={addEmoji} theme="light" />
-              </div>
-            )}
-          </div>
 
           {/* Message Input */}
           <TextArea

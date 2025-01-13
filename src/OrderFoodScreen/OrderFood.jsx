@@ -127,6 +127,7 @@ const OrderFood = () => {
         }
       );
       setThongTinBan(banResponse.data);
+      message.success(data.msg);
     });
 
     return () => {

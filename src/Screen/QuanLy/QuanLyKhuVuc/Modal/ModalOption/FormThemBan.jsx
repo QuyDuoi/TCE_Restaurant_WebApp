@@ -30,6 +30,7 @@ const FormThemban = ({ onClose }) => {
         tenBan: values.tenBan,
         sucChua: values.sucChua,
         id_khuVuc: values.id_khuVuc,
+        ghiChu: "",
       });
       message.success("Thêm bàn thành công!");
       dispatch(fetchKhuVucVaBan(id_nhaHang));

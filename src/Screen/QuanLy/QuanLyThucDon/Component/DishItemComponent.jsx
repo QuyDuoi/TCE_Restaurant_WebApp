@@ -50,7 +50,7 @@ const DishItemComponent = ({ dish }) => {
           </p>
           <p>
             <strong>Giá: </strong>
-            {dish.giaMonAn.toLocaleString()} đ
+            {dish.giaMonAn.toLocaleString("vi-VN")} đ
           </p>
           <p>
             <strong>Trạng thái: </strong>
@@ -224,7 +224,7 @@ const DishItemComponent = ({ dish }) => {
             color: "green",
           }}
         >
-          {dish.giaMonAn.toLocaleString()} đ
+          {dish.giaMonAn.toLocaleString("vi-VN")} đ
         </div>
       </div>
 

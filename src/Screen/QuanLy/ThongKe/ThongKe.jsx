@@ -5,12 +5,21 @@ import HeaderBar from "./Component/HeaderBar";
 import StatisticsCard from "./Component/RevenueStatistics";
 import TopProducts from "./Component/TopProduct";
 import { fetchData } from "./Data/ThongKeData";
+import { useSelector } from "react-redux";
 
 const ThongKe = () => {
-  const [filterData, setFilterData] = useState({ type: "today", date: null, startDate: null, endDate: null });
   const [thongKeData, setThongKeData] = useState([]); // Dữ liệu thống kê
   const [dataTop5, setDataTop5] = useState([]); // Dữ liệu top 5 sản phẩm
   const [loading, setLoading] = useState(false); // Trạng thái loading
+  const user = useSelector((state) => state.user);
+  const id_nhaHang = user.id_nhaHang?._id;
+  const [filterData, setFilterData] = useState({
+    type: "today",
+    date: null,
+    startDate: null,
+    endDate: null,
+    id_nhaHang: id_nhaHang,
+  });
 
   useEffect(() => {
     // Fetch dữ liệu khi filterData thay đổi
@@ -38,7 +47,9 @@ const ThongKe = () => {
   return (
     <Layout>
       <HeaderBar onFilter={handleFilter} />
-      <Spin spinning={loading} tip="Đang tải dữ liệu..."> {/* Hiển thị loading */}
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        {" "}
+        {/* Hiển thị loading */}
         <div
           style={{
             display: "flex",
@@ -48,7 +59,11 @@ const ThongKe = () => {
         >
           {!loading &&
             thongKeData.map((section, index) => (
-              <StatisticsCard key={index} title={section.title} items={section.items} />
+              <StatisticsCard
+                key={index}
+                title={section.title}
+                items={section.items}
+              />
             ))}
         </div>
         <div
@@ -57,7 +72,9 @@ const ThongKe = () => {
             justifyContent: "center",
           }}
         >
-          {!loading && dataTop5.length > 0 && <TopProducts data={dataTop5[0]} />}
+          {!loading && dataTop5.length > 0 && (
+            <TopProducts data={dataTop5[0]} />
+          )}
         </div>
       </Spin>
     </Layout>

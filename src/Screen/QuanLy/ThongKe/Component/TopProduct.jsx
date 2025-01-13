@@ -30,7 +30,10 @@ const TopProducts = ({ data }) => {
         <ProductItem key={index}>
           <Rank>{item.rank}</Rank>
           <ProductInfo>
-            <ProductImage src={item.image} alt={item.label} />
+          <ProductImage
+              src={item.image ? item.image : "/images/no-image.png"}
+              alt={item.label}
+            />
             <Details>
               <ProductName>{item.label}</ProductName>
               <Quantity>Số lượng: {item.quantity}</Quantity>

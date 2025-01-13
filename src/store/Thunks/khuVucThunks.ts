@@ -9,7 +9,6 @@ export const fetchKhuVucVaBan = createAsyncThunk(
     async (id_nhaHang: string, thunkAPI) => {
       try {
         const data = await getListKhuVuc(id_nhaHang); // Gọi API để lấy danh sách khu vực
-  
         
         const bansData = data.flatMap(item => item.bans);
         if (bansData.length > 0) {

@@ -9,10 +9,10 @@ import {
 
 export const fetchData = async (filter) => {
   try {
-    const { type, date, startDate, endDate } = filter;
+    const { type, date, startDate, endDate, id_nhaHang } = filter;
     let choiseDay = null;
 
-    if (type === 'custom') {
+    if (type === "custom") {
       choiseDay = null;
       // Sử dụng startDate và endDate cho khoảng ngày tùy chỉnh
     } else {
@@ -20,11 +20,37 @@ export const fetchData = async (filter) => {
     }
 
     // Gọi các API với type và thời gian
-    console.log(`Fetching data for type: ${type}, date: ${date}, startDate: ${startDate}, endDate: ${endDate}`);
-    const doanhThu = await thongKeDoanhThu(type, startDate, endDate, choiseDay);
-    const hinhThucTT = await thongKeHinhThucThanhToan(type, startDate, endDate, choiseDay);
-    const nguonDoanhThu = await thongKeNguonDoanhThu(type, startDate, endDate, choiseDay);
-    const top5 = await thongKeTop5(type, startDate, endDate, choiseDay);
+    console.log(
+      `Fetching data for type: ${type}, date: ${date}, startDate: ${startDate}, endDate: ${endDate}`
+    );
+    const doanhThu = await thongKeDoanhThu(
+      type,
+      startDate,
+      endDate,
+      choiseDay,
+      id_nhaHang
+    );
+    const hinhThucTT = await thongKeHinhThucThanhToan(
+      type,
+      startDate,
+      endDate,
+      choiseDay,
+      id_nhaHang
+    );
+    const nguonDoanhThu = await thongKeNguonDoanhThu(
+      type,
+      startDate,
+      endDate,
+      choiseDay,
+      id_nhaHang
+    );
+    const top5 = await thongKeTop5(
+      type,
+      startDate,
+      endDate,
+      choiseDay,
+      id_nhaHang
+    );
 
     const doanhThuPt = tinhPhanTram(
       doanhThu.tongKhuyenMai,
@@ -46,27 +72,57 @@ export const fetchData = async (filter) => {
       value,
       color,
     });
-    
+
     const ThongKeData = [
       {
         title: "Thống kê doanh thu",
         items: [
-          createThongKeItem("Khuyến mại", doanhThuPt.phanTramA, doanhThu.tongKhuyenMai, "#FFA07A"),
-          createThongKeItem("Doanh thu", doanhThuPt.phanTramB, doanhThu.tongDoanhThu, "#4CAF50"),
+          createThongKeItem(
+            "Khuyến mại",
+            doanhThuPt.phanTramA,
+            doanhThu.tongKhuyenMai,
+            "#FFA07A"
+          ),
+          createThongKeItem(
+            "Doanh thu",
+            doanhThuPt.phanTramB,
+            doanhThu.tongDoanhThu,
+            "#4CAF50"
+          ),
         ],
       },
       {
         title: "Nguồn doanh thu",
         items: [
-          createThongKeItem("Bán mang đi", nguonDoanhThuPt.phanTramA, nguonDoanhThu.banMangDi, "#FFD700"),
-          createThongKeItem("Tại nhà hàng", nguonDoanhThuPt.phanTramB, nguonDoanhThu.banTaiCho, "#FF8C00"),
+          createThongKeItem(
+            "Bán mang đi",
+            nguonDoanhThuPt.phanTramA,
+            nguonDoanhThu.banMangDi,
+            "#FFD700"
+          ),
+          createThongKeItem(
+            "Tại nhà hàng",
+            nguonDoanhThuPt.phanTramB,
+            nguonDoanhThu.banTaiCho,
+            "#FF8C00"
+          ),
         ],
       },
       {
         title: "Phương thức thanh toán",
         items: [
-          createThongKeItem("Tiền mặt", hinhThucTtPt.phanTramA, hinhThucTT.tongTienMat, "#4CAF50"),
-          createThongKeItem("Chuyển khoản", hinhThucTtPt.phanTramB, hinhThucTT.tongChuyenKhoan, "#1E90FF"),
+          createThongKeItem(
+            "Tiền mặt",
+            hinhThucTtPt.phanTramA,
+            hinhThucTT.tongTienMat,
+            "#4CAF50"
+          ),
+          createThongKeItem(
+            "Chuyển khoản",
+            hinhThucTtPt.phanTramB,
+            hinhThucTT.tongChuyenKhoan,
+            "#1E90FF"
+          ),
         ],
       },
     ];
