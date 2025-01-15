@@ -1,3 +1,5 @@
+// OrderFood.jsx
+
 import React, { useEffect, useState } from "react";
 import {
   Row,
@@ -133,8 +135,9 @@ const OrderFood = () => {
     return () => {
       socket.off("huyDatMon");
       socket.off("xacNhanOrder");
+      socket.off("hoanThanhMon");
     };
-  }, []);
+  }, [socket, id]);
 
   // Tìm kiếm món ăn (Debounce 1 giây)
   useEffect(() => {
@@ -148,7 +151,7 @@ const OrderFood = () => {
     }, 1000);
 
     return () => clearTimeout(timeoutId); // Clear timeout khi nhập mới
-  }, [searchText, listMonAn]);
+  }, [searchText, listMonAn, id_nhaHang]);
 
   // Thêm món vào giỏ hàng
   const handleAddItem = (item) => {
@@ -201,16 +204,13 @@ const OrderFood = () => {
 
   const guiThongTinMonAn = async () => {
     try {
-      await axios
-        .post(`${ipAddress}datMonAn`, {
-          id: id,
-          danhSachMon: orderList,
-          id_nhaHang: id_nhaHang,
-        })
-        .then((response) => {
-          message.success(response.data.msg);
-          setOrderList([]); // Xóa giỏ hàng sau khi gửi thông tin thành công
-        });
+      const response = await axios.post(`${ipAddress}datMonAn`, {
+        id: id,
+        danhSachMon: orderList,
+        id_nhaHang: id_nhaHang,
+      });
+      message.success(response.data.msg);
+      setOrderList([]); // Xóa giỏ hàng sau khi gửi thông tin thành công
     } catch (error) {
       if (error.response) {
         // Lỗi trả về từ server (status code không phải 2xx)
@@ -319,9 +319,22 @@ const OrderFood = () => {
     }
   };
 
+  // State to handle window width for responsive modal
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Determine modal width based on window width
+  const modalWidth = windowWidth < 480 ? "90%" : "400px";
+
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
+      <div className="loading-container">
         <Spin size="large" />
         <div>Đang lấy thông tin bàn...</div>
       </div>
@@ -330,45 +343,33 @@ const OrderFood = () => {
 
   return (
     <div>
+      {/* Modal nhập mật khẩu */}
       <Modal
         title="Liên hệ nhân viên để nhận được mật khẩu"
-        open={isPasswordModalVisible}
+        visible={isPasswordModalVisible}
         closable={false}
         footer={null}
         centered
-        style={{ padding: "0px", textAlign: "center" }}
+        bodyStyle={{ padding: "20px", textAlign: "center" }}
+        width={modalWidth}
+        className="password-modal"
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <div className="otp-input-container">
           <OtpInput
             value={password}
             onChange={setPassword}
             numInputs={4}
             renderInput={(props) => <input {...props} />}
-            separator={<span>-</span>}
+            separator={<span className="otp-separator"></span>}
             isInputNum={true}
             shouldAutoFocus
-            inputStyle={{
-              width: "3rem",
-              height: "3rem",
-              margin: "0 0.5rem",
-              fontSize: "2rem",
-              textAlign: "center",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              marginTop: "10px",
-            }}
+            inputType="number"
+            inputStyle="otp-input" // Use CSS class
           />
           <Button
             type="primary"
             size="large"
-            style={{ marginTop: "20px" }}
+            className="otp-submit-button"
             onClick={handlePasswordSubmit}
             disabled={isLocked}
           >
@@ -378,16 +379,18 @@ const OrderFood = () => {
           </Button>
         </div>
       </Modal>
+
+      {/* Nội dung chính khi đã xác thực */}
       {!isPasswordModalVisible && (
         <Row
           gutter={16}
-          style={{ padding: "10px", height: "calc(100vh - 10px)" }}
+          className="main-content"
         >
           {/* Danh sách món ăn */}
-          <Col xs={24} sm={24} md={14} style={{ marginBottom: "10px" }}>
+          <Col xs={24} sm={24} md={14} className="menu-section">
             <h3>Danh sách thực đơn</h3>
-            <h4 style={{ display: "flex", alignItems: "center" }}>
-              <span style={{ marginRight: "10px" }}>
+            <h4 className="table-info">
+              <span>
                 Khu vực: {thongTinBan?.tenKhuVuc} - Bàn: {thongTinBan?.tenBan}
               </span>
               <ModalHoaDon id_ban={id} thongTinBan={thongTinBan} />
@@ -395,7 +398,7 @@ const OrderFood = () => {
             <Row
               justify="space-between"
               align="middle"
-              style={{ marginBottom: "10px" }}
+              className="search-cart-row"
             >
               <Col flex="1">
                 <Input.Search
@@ -403,17 +406,13 @@ const OrderFood = () => {
                   allowClear
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
+                  className="search-input"
                 />
               </Col>
-              <Col style={{ marginLeft: "10px" }}>
+              <Col className="cart-icon-col">
                 <Badge count={orderList.length} offset={[5, 0]}>
                   <ShoppingCartOutlined
                     className="cart-icon"
-                    style={{
-                      fontSize: "24px",
-                      cursor: "pointer",
-                      color: "#1890ff",
-                    }}
                     onClick={() => setCartModalVisible(true)}
                   />
                 </Badge>
@@ -423,6 +422,7 @@ const OrderFood = () => {
               activeKey={activeTab}
               onChange={(key) => setActiveTab(key)}
               type="card"
+              className="menu-tabs"
             >
               <TabPane tab="Tất cả" key="all">
                 <div className="menu-list-container">
@@ -433,7 +433,7 @@ const OrderFood = () => {
                 </div>
               </TabPane>
               {filteredMonAn.map((category) => (
-                <TabPane tab={category?.tenDanhMuc} key={category._id}>
+                <TabPane tab={category?.tenDanhMuc} key={category._id} key={category._id}>
                   <div className="menu-list-container">
                     <MenuList
                       data={category?.monAns}
@@ -454,18 +454,20 @@ const OrderFood = () => {
               onIncreasesoLuongMon={handleIncreasesoLuongMon}
               onDecreasesoLuongMon={handleDecreasesoLuongMon}
             />
-            <Row justify="space-between" style={{ marginTop: "20px" }}>
+            <Row justify="space-between" className="order-buttons-row">
               <Button danger onClick={() => setOrderList([])}>
                 Hủy thông tin
               </Button>
-              <Button type="primary">Xác nhận gọi món</Button>
+              <Button type="primary" onClick={handleConfirmOrder}>
+                Xác nhận gọi món
+              </Button>
             </Row>
           </Col>
 
           {/* Modal giỏ hàng */}
           <Modal
             title="Giỏ hàng của bạn"
-            open={isCartModalVisible}
+            visible={isCartModalVisible}
             onCancel={() => setCartModalVisible(false)}
             footer={[
               <Button key="close" onClick={() => setCartModalVisible(false)}>
@@ -475,6 +477,9 @@ const OrderFood = () => {
                 Xác nhận gọi món
               </Button>,
             ]}
+            className="cart-modal"
+            centered
+            width={modalWidth}
           >
             {orderList.length > 0 ? (
               <List
@@ -516,7 +521,8 @@ const OrderFood = () => {
               <p>Giỏ hàng trống</p>
             )}
           </Modal>
-          {/* Modal nhập mật khẩu */}
+
+          {/* ChatBox Component */}
           <ChatBox id_ban={id} />
         </Row>
       )}

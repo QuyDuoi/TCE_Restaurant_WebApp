@@ -93,14 +93,18 @@ const QuanLyNhanVien = () => {
       message.error("Không có nhân viên nào được chọn để xóa!");
       return;
     }
-    try {
-      await axios.delete(`${ipAddress}xoaNhanVien/${selectedEmployee._id}`);
-      await fetchEmployees(false); // Refresh employee list without showing loading
-      setDeleteModalVisible(false);
-      message.success("Xóa nhân viên thành công!");
-    } catch (error) {
-      console.error("Không thể xóa nhân viên:", error);
-      message.error("Không thể xóa nhân viên, vui lòng thử lại!");
+    if (selectedEmployee.soDienThoai === "0363244466") {
+      message.error("Không thể xóa tài khoản đăng ký nhà hàng!");
+    } else {
+      try {
+        await axios.delete(`${ipAddress}xoaNhanVien/${selectedEmployee._id}`);
+        await fetchEmployees(false); // Refresh employee list without showing loading
+        setDeleteModalVisible(false);
+        message.success("Xóa nhân viên thành công!");
+      } catch (error) {
+        console.error("Không thể xóa nhân viên:", error);
+        message.error("Không thể xóa nhân viên, vui lòng thử lại!");
+      }
     }
   };
 
@@ -133,7 +137,6 @@ const QuanLyNhanVien = () => {
 
   return (
     <Layout style={{ flex: 1 }}>
-
       <HeaderBar
         onSearch={handleSearch}
         onRefresh={() => fetchEmployees(false)}
@@ -148,7 +151,6 @@ const QuanLyNhanVien = () => {
           overflowY: "auto",
         }}
       >
-
         <Card style={{ marginBottom: "16px", padding: "0px" }}>
           <EmployeeFilter
             employees={nhanVien}

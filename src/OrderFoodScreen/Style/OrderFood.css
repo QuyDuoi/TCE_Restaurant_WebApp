@@ -1,5 +1,30 @@
 /* ChatBox.css */
+.password-modal .otp-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
+.otp-input-container .otp-input {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 0.5rem;
+  font-size: 2rem;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.otp-input-container .otp-separator {
+  width: 8px;
+}
+
+.otp-submit-button {
+  margin-top: 20px;
+  width: 100%;
+}
 /* ---------------------------
    1. Các Kiểu Dáng Cơ Bản
    --------------------------- */

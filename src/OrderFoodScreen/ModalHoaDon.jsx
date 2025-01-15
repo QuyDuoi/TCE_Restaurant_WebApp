@@ -115,10 +115,17 @@ const ModalHoaDon = ({ id_ban, thongTinBan }) => {
         width={600}
       >
         {loading ? (
-          <Spin
-            tip="Đang tải thông tin hóa đơn..."
-            style={{ display: "block", textAlign: "center", margin: "20px 0" }}
-          />
+          <div>
+            <Spin
+              tip="Đang tải thông tin hóa đơn..."
+              style={{
+                display: "block",
+                textAlign: "center",
+                margin: "20px 0",
+              }}
+            />
+            <Text>Đang tải thông tin hóa đơn ...</Text>
+          </div>
         ) : error ? (
           <Alert
             type="error"

@@ -16,7 +16,7 @@ const HeaderBar = () => {
         >
             <Row justify="space-between" align="middle">
                 <Col>
-                    <h2 style={{ margin: 0, fontSize: '2vw' }}>Quản Lý ca</h2>
+                    <h2 style={{ margin: 0, fontSize: '2vw' }}>Quản Lý Ca</h2>
                 </Col>
             </Row>
         </div>

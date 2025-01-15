@@ -69,7 +69,7 @@ const QuanLyLenMon = () => {
 
       console.log("Khu vuc ban list", khuVucBanList);
     } catch (err) {
-      setError("Không thể tải dữ liệu. Vui lòng thử lại.");
+      setError("Vui lòng mở ca!");
     } finally {
       setLoading(false);
     }
@@ -79,6 +79,7 @@ const QuanLyLenMon = () => {
   const updateStatus = async (id) => {
     try {
       await axios.put(`${ipAddress}capNhatTrangThaiCthd/${id}`);
+      message.success("Hoàn thành món ăn!");
       fetchData();
     } catch (err) {
       setError("Không thể cập nhật trạng thái.");
